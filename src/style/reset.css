@@ -1,0 +1,86 @@
+/* ========== 基础字体与布局 ========== */
+:root {
+    font-family: "Inter", "Segoe UI", "Helvetica Neue", sans-serif;
+    line-height: 1.6;
+    font-weight: 400;
+
+    color: #2c3e50;
+    background-color: #ffffff;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========== 全局 Reset ========== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body, #app {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+
+/* ========== 按钮样式 ========== */
+button {
+    background-color: #ffffff;
+    color: #2c3e50;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+button:hover {
+    background-color: #f2f6fc;
+    border-color: #409eff;
+}
+button:focus {
+    outline: 3px auto rgba(64, 158, 255, 0.4);
+}
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ========== 输入框样式 ========== */
+input,
+textarea {
+    padding: 0.5rem 0.75rem;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    outline: none;
+    background: #fff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+input:focus,
+textarea:focus {
+    border-color: #409eff;
+    box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.15);
+}
+
+/* ========== 滚动条美化 ========== */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.2);
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}

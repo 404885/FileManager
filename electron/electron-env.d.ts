@@ -23,5 +23,14 @@ declare namespace NodeJS {
 
 // Used in Renderer process, expose in `preload.ts`
 interface Window {
-  ipcRenderer: import('electron').IpcRenderer
+  ipcRenderer: import('electron').IpcRenderer,
+  electronAPI: {
+    openFileDialog: () => Promise<{ canceled: boolean, filePath?: string, content?: string }>
+    windowControls: {
+      minimize: () => void;
+      maximize: () => void;
+      close: () => void;
+      pinned: (isPinned: boolean) => void;
+    },
+  }
 }

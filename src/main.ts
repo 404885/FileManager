@@ -1,14 +1,15 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-import '@/style.css'
 import ElementPlus from 'element-plus'
-import router from '@/router.ts'
 import {createPinia} from "pinia";
 import 'element-plus/dist/index.css'
 import VxeUITable from 'vxe-table'
 import 'vxe-table/lib/style.css'
 import VxeUIAll from 'vxe-pc-ui'
 import 'vxe-pc-ui/lib/style.css'
+import './style/base.css'
+import router from './router'
+
 
 const pinia = createPinia()
 

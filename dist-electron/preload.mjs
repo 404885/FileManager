@@ -1,22 +1,13 @@
 "use strict";
 const electron = require("electron");
-electron.contextBridge.exposeInMainWorld("ipcRenderer", {
-  on(...args) {
-    const [channel, listener] = args;
-    return electron.ipcRenderer.on(channel, (event, ...args2) => listener(event, ...args2));
-  },
-  off(...args) {
-    const [channel, ...omit] = args;
-    return electron.ipcRenderer.off(channel, ...omit);
-  },
-  send(...args) {
-    const [channel, ...omit] = args;
-    return electron.ipcRenderer.send(channel, ...omit);
-  },
-  invoke(...args) {
-    const [channel, ...omit] = args;
-    return electron.ipcRenderer.invoke(channel, ...omit);
+electron.contextBridge.exposeInMainWorld("electronAPI", {
+  // 这种方式能只暴露指定的api方法
+  // 从渲染进程中接受参数，通过通道传递至主进程的处理器（ipcMain.handle）中进行处理
+  openFileDialog: () => electron.ipcRenderer.invoke("open-file-dialog"),
+  windowControls: {
+    minimize: () => electron.ipcRenderer.send("window-minimize"),
+    maximize: () => electron.ipcRenderer.send("window-maximize"),
+    close: () => electron.ipcRenderer.send("window-close"),
+    pinned: (isPinned) => electron.ipcRenderer.send("window-pinned", isPinned)
   }
-  // You can expose other APTs you need here.
-  // ...
 });
