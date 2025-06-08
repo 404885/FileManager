@@ -43,5 +43,67 @@ export default defineComponent({
 </template>
 
 <style scoped>
+/* ========== side-bar ========== */
+.window-sidebar{
+  display: flex;
+  flex-direction: row;
+}
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  width: 50px;
+  justify-content: space-between; /* 上下两端对齐，留出中间空白 */
+  border-right: 1px solid #d9e2ec; /* 浅灰蓝边框 */
+  background-color: #f9fbfd; /* 非常浅的蓝白色背景 */
+}
+.menu-top, .menu-bottom {
+  padding: 10px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.menu-divider {
+  width: 60%; /* 或100%，看你需求 */
+  height: 1px;
+  border: none;
+  margin: -5px;
+  background-color: #e0e6ed; /* 浅灰分割线 */
+}
+
+.menu-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /*border: 1px solid #ddd;*/
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+}
+.menu-icon:hover {
+  background-color: rgba(200, 215, 235, 0.4); /* 浅蓝背景，轻微加深 */
+  transform: scale(1.05);
+}
+.router-link-active {
+  background-color: rgba(160, 185, 215, 0.5); /* 激活状态稍深的浅蓝背景 */
+}
+
+.menu-icon svg {
+  width: 24px;
+  height: 24px;
+  fill: #9aa8c9; /* 常规状态浅蓝灰 */
+  transition: fill 0.2s ease;
+  pointer-events: none;
+}
+.menu-icon:hover svg {
+  fill: #a0b5d7; /* hover时稍深的蓝色 */
+}
+.router-link-active svg {
+  fill: #738bbf; /* 激活状态深蓝灰，但依然浅色系 */
+}
 
 </style>

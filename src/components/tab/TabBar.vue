@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import {ArrowDownBold, Close, Plus, Search} from "@element-plus/icons-vue";
-import Tab from "@/components/Tab.vue";
+import Tab from "@/components/tab/Tab.vue";
 import {computed, markRaw, reactive, ref, watch} from "vue";
 import Index from "@/view/index.vue";
 
