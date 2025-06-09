@@ -9,16 +9,20 @@ interface RowVO {
   id: number
   name: string
   createTime: number
-  browseTime: number
-  image:string
+  browseTime?: number
+  image?:string
+  filePath?: string
 }
 
 const timeFormatter: VxeColumnPropTypes.Formatter = ({ cellValue }) => {
   return typeof cellValue === 'number' ? formatter.timeFormatter(cellValue) : '';
 }
 
-const tableData = reactive<Partial<RowVO>[]>([
-  { id: 10001, name: '《实验指导手册》实验10.Ansible源码编译安装(综合5)', createTime: Date.now() - 31 * 24 * 60 * 60 * 1000, browseTime: Date.now()},
+const filePath: string = ref('')
+const fileContent: string = ref('')
+
+const tableData = reactive<RowVO[]>([
+  { id: 10001, name: '《实验指导手册》实验10.Ansible源码编译安装(综合5)', createTime: Date.now() - 31 * 24 * 60 * 60 * 1000, browseTime: Date.now(), filePath},
   { id: 10002, name: 'Test2', createTime: Date.now(), browseTime:Date.now() - 31 * 24 * 60 * 60 * 1000},
   { id: 10003, name: 'Test3', createTime: Date.now()},
   { id: 10004, name: 'Test4', createTime: Date.now()}
