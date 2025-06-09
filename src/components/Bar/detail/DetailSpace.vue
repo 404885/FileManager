@@ -2,13 +2,14 @@
 import {defineComponent} from 'vue'
 
 export default defineComponent({
-  name: "DetailHome"
+  name: "DetailSpace"
 })
 </script>
 
 <template>
   <div class="window-detail">
     home
+    space
   </div>
 </template>
 

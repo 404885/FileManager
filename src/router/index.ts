@@ -7,9 +7,12 @@ const routers = createRouter({
     history: createWebHashHistory(),
     routes: [
         {
-            path: '/',
-            name: 'index',
+            path: '/space',
+            name: 'space',
             component: import('../view/index.vue'),
+            meta: {
+                DetailBar: 'space',
+            }
         },
         {
             path: '/user',
@@ -20,9 +23,7 @@ const routers = createRouter({
             path: '/main',
             name: 'main',
             component: import('../view/MainView.vue'),
-            meta: {
-                DetailBar: 'home',
-            }
+
         },
         {
             path: '/recent',
