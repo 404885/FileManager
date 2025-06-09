@@ -6,13 +6,13 @@ import {computed, markRaw, reactive, ref, watch} from "vue";
 import Index from "@/view/index.vue";
 
 const active = ref(0)
-const props = defineProps<{ tabs: Array<any> }>()
-const tabs = reactive([...props.tabs]);
+
+const tabs = reactive([{ id: crypto.randomUUID(), title: '首页', icon: markRaw(Search), component:markRaw(Index)}]);
 const currentComponent = computed(() => tabs[active.value]?.component)
 
 watch(tabs, (newVal) => {
   if (newVal.length === 0){
-    newVal.push({ id: crypto.randomUUID(), title: '首页', icon: markRaw(Search), component:Index})
+    newVal.push({ id: crypto.randomUUID(), title: '首页', icon: markRaw(Search), component:markRaw(Index)})
     active.value = 0
   }
 })
@@ -27,7 +27,7 @@ const handleTabClose = (index: number) => {
 }
 
 const handleAddTab = () => {
-  tabs.push({ id: crypto.randomUUID(), title: '2', icon: Search })
+  tabs.push({ id: crypto.randomUUID(), title: '首页', icon: markRaw(Search), component:markRaw(Index)})
 };
 
 </script>
@@ -143,7 +143,7 @@ const handleAddTab = () => {
 }
 .tab-close-button{
   position: absolute;
-  top: 8px;
+  top: 10px;
   right: 6px;
   padding: 1px;
   border: 1px;
@@ -171,7 +171,7 @@ const handleAddTab = () => {
 }
 .tab-add-button{
   position: absolute;
-  top: 8px;
+  top: 10px;
   right: 8px;
   padding: 1px;
   border: 1px;

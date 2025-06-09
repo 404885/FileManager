@@ -30,7 +30,7 @@ const { text, icon }=defineProps<{
 }
 .tab-icon{
   position: absolute;
-  top: 7px;
+  top: 10px;
   left: 6px;
 }
 .tab-text{
