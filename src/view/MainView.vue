@@ -3,8 +3,10 @@ import { openDialog } from "@/utils/Dialog.ts";
 
  function open() {
    openDialog({
-     type: "openFile",
+     type: "addFile",
      modalProps:{
+     },
+     props:{
        title: "创建实体"
      }
    })

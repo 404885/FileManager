@@ -1,15 +1,15 @@
 // utils/Dialog.ts
 import { createApp, h} from 'vue'
 import ModalDialog from '../components/Dialog/ModalDialog.vue'
-import FileOpenDialog from "../components/Dialog/child/FileOpenDialog.vue";
-import FileAddDialog from "@/components/Dialog/child/FileAddDialog.vue";
+import FileAddDialog from "../components/Dialog/child/FileAddDialog.vue";
+import FileEditDialog from "@/components/Dialog/child/FileEditDialog.vue";
 import SettingDialog from "../components/Dialog/child/SettingDialog.vue";
 import UserDialog from "../components/Dialog/child/UserDialog.vue";
 
 
 let DialogMap = {
-    openFile: FileOpenDialog,
     addFile: FileAddDialog,
+    editFile: FileEditDialog,
     setting: SettingDialog,
     user: UserDialog,
 }
@@ -26,17 +26,16 @@ export function openDialog({ type, props = {}, modalProps = {} }: DialogOptions)
     document.body.appendChild(container)
 
     const app = createApp({
-        render() {
+        render(){
             return h(ModalDialog,
                 {
-                    ...modalProps, // 展开 modalProps 对象
-                    onClose: () => {
-                        app.unmount()
-                        container.remove()
-                    }
-                },
-                {
-                    default: () => h(DialogMap[type], props) // 渲染具体的子组件
+                ...modalProps,
+                onClose: () => {
+                    app.unmount()
+                    container.remove()
+                }
+            },{
+                default: () => h(DialogMap[type], props)
             })
         }
     })

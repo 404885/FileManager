@@ -86,7 +86,7 @@ export default defineComponent({
 }
 .menu-icon:hover {
   background-color: rgba(200, 215, 235, 0.4); /* 浅蓝背景，轻微加深 */
-  transform: scale(1.05);
+  transform: translateY(-2px);
 }
 .router-link-active {
   background-color: rgba(160, 185, 215, 0.5); /* 激活状态稍深的浅蓝背景 */
@@ -95,7 +95,7 @@ export default defineComponent({
 .menu-icon svg {
   width: 24px;
   height: 24px;
-  fill: #9aa8c9; /* 常规状态浅蓝灰 */
+  fill: #747474; /* 常规状态浅蓝灰 */
   transition: fill 0.2s ease;
   pointer-events: none;
 }
