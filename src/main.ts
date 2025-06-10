@@ -9,6 +9,8 @@ import VxeUIAll from 'vxe-pc-ui'
 import 'vxe-pc-ui/lib/style.css'
 import './style/base.css'
 import router from './router'
+import resizable from '@/utils/resizeable'
+import resizableV from '@/utils/resizeable-vertical.ts'
 
 
 const pinia = createPinia()
@@ -19,6 +21,8 @@ createApp(App)
     .use(pinia)
     .use(VxeUIAll)
     .use(VxeUITable)
+    .directive('resizable', resizable)
+    .directive('resizeable-vertical',resizableV)
     .mount('#app').$nextTick(() => {
   // Use contextBridge
   window.ipcRenderer.on('main-process-message', (_event, message) => {

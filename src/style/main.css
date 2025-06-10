@@ -27,11 +27,11 @@
 }
 
 /* ========== middle-bar ========== */
-.window-detail{
-    min-width: 200px;
-    border-right: 1px solid #d9e2ec; /* 浅灰蓝边框 */
-    background-color: #f9fbfd; /* 非常浅的蓝白色背景 */
-}
+/*.window-detail{*/
+/*    min-width: 200px;*/
+/*    border-right: 1px solid #d9e2ec; !* 浅灰蓝边框 *!*/
+/*    background-color: #f9fbfd; !* 非常浅的蓝白色背景 *!*/
+/*}*/
 
 /* ========== content ========== */
 .window-content{

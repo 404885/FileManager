@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import {computed} from 'vue'
 import { RouterView, useRoute } from 'vue-router'
 import TitleBar from "@/components/Bar/TitleBar.vue";
 import SideBar from "@/components/Bar/SideBar.vue";
@@ -38,4 +38,5 @@ const currentComponent = computed(() => {
 </template>
 
 <style scoped>
+
 </style>
