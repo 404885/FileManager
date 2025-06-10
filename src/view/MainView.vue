@@ -13,7 +13,13 @@ async function openAndReadFile() {
 }
 
  function open() {
-   openDialog()
+   openDialog({
+     type: "openFile",
+     props:{},
+     modalProps:{
+       title: "创建实体"
+     }
+   })
 
 }
 
