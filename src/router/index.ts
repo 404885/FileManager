@@ -20,7 +20,7 @@ const routers = createRouter({
             component: import('../view/UserView.vue'),
         },
         {
-            path: '/main',
+            path: '/',
             name: 'main',
             component: import('../view/MainView.vue'),
 
@@ -48,6 +48,12 @@ const routers = createRouter({
             name: 'connect',
             component: import('../view/ConnectView.vue'),
         },
+        {
+            path: '/setting',
+            name: 'setting',
+            component: import('../view/SettingView.vue'),
+        },
+
     ]
 })
 

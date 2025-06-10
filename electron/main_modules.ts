@@ -35,4 +35,6 @@ export function RegisterIpcEvent() {
         // console.log(filePath, content)
         return { canceled: false, filePath, content }
     })
+
+
 }
