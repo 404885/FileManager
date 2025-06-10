@@ -1,16 +1,16 @@
-import { createApp } from 'vue'
 import App from './App.vue'
-import ElementPlus from 'element-plus'
-import {createPinia} from "pinia";
-import 'element-plus/dist/index.css'
+import { createApp } from 'vue'
+import { createPinia } from "pinia";
+
 import VxeUITable from 'vxe-table'
-import 'vxe-table/lib/style.css'
 import VxeUIAll from 'vxe-pc-ui'
-import 'vxe-pc-ui/lib/style.css'
+
 import './style/base.css'
+
+import ElementPlus from 'element-plus'
 import router from './router'
-import resizable from '@/utils/resizeable'
-import resizableV from '@/utils/resizeable-vertical.ts'
+import directives from "@/directives";
+
 
 
 const pinia = createPinia()
@@ -18,9 +18,8 @@ const pinia = createPinia()
 createApp(App)
     .use(ElementPlus)
     .use(router)
+    .use(directives)
     .use(pinia)
     .use(VxeUIAll)
     .use(VxeUITable)
-    .directive('resizable', resizable)
-    .directive('resizeable-vertical',resizableV)
     .mount('#app')

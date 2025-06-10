@@ -134,5 +134,6 @@ onMounted(() => {
   background: #f9fbfd;
   height: calc(100vh - 82px);
   overflow: auto; /* 出现滚动条 */
+  scrollbar-width: none;
 }
 </style>
