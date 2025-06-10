@@ -1,6 +1,6 @@
 import type { App } from 'vue'
 import type { Directive } from 'vue'
-import resizable from '@/directives/resizeable.ts'
+import resizable from '@/directives/resizable.ts'
 
 interface DirectivesMap {
     [key: string]: Directive
@@ -25,5 +25,4 @@ export default {
 // 可选：导出单个指令（按需引入时使用）
 export {
     resizable,
-
 }

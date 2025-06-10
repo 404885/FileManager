@@ -82,7 +82,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="window-detail-wrapper" v-resizable="{ min: 20, max: 600 }">
+  <div class="window-detail-wrapper" v-resizable="{ min: 180, max: 600 }">
     <div class="window-detail">
       <input
           class="file-tree-filter"
