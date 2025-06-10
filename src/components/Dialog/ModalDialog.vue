@@ -1,5 +1,9 @@
 <script setup lang="ts">
 
+const { title }=defineProps<{
+  title?:string
+}>()
+
 const emit = defineEmits(['close'])
 
 function closeDialog() {
@@ -12,8 +16,13 @@ function closeDialog() {
 
 <template>
     <div class="dialog-overlay"  @click.self='closeDialog()'>
-      <div class="dialog-content">
-        <slot/>
+      <div class="dialog-window">
+        <div class="dialog-title">
+          {{title}}
+        </div>
+        <div class="dialog-content">
+          <slot/>
+        </div>
       </div>
     </div>
 </template>
@@ -30,12 +39,19 @@ function closeDialog() {
   z-index: 10000;
 }
 
-.dialog-content {
+.dialog-window {
   background: white;
-  padding: 20px;
   border-radius: 10px;
   min-width: 300px;
   max-width: 80%;
+  padding: 10px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+.dialog-title{
+  position: relative;
+}
+.dialog-content {
+  position: relative;
 }
 </style>

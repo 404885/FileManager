@@ -40,10 +40,13 @@ export default defineComponent({
   display: flex;
   flex-direction: row;
   gap: 8px;
+  min-height: 32px;
   -webkit-app-region: no-drag;
 }
 
 .window-btn {
+  margin-bottom: auto;
+  margin-top: auto;
   width: 12px;
   height: 12px;
   border-radius: 50%;

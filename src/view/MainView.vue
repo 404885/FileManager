@@ -1,31 +1,33 @@
-<script setup lang="ts">
-import { openDialog } from "@/utils/Dialog.ts";
+<template>
+  <div>
+    <button @click="pickFile">选择文件</button>
+    <button @click="pickDir">选择文件夹</button>
+    <button @click="open">弹窗</button>
+  </div>
+</template>
 
-async function openAndReadFile() {
-  const result = await window.electronAPI.openFileDialog()
-  if (!result.canceled) {
-    this.filePath = result.filePath ?? ''
-    this.fileContent = result.content ?? ''
-    // 你也可以绑定内容到页面上
-  } else {
-    alert('用户取消了选择')
+<script setup lang="ts">
+import { ref } from 'vue'
+import {openDialog} from "@/utils/Dialog.ts";
+
+
+async function pickFile() {
+  const res = await window.electronAPI.openFileDialog()
+  if (!res.canceled) {
+    console.log('文件路径:', res.filePath)
+    console.log('文件信息:', res.stats)
   }
 }
 
- function open() {
-   openDialog()
-
+async function pickDir() {
+  const res = await window.electronAPI.openDirectoryDialog()
+  if (!res.canceled) {
+    console.log('目录:', res.directory)
+    console.table(res.files)
+  }
 }
 
+function open(){
+  openDialog()
+}
 </script>
-
-<template>
-  {{ filePath }}
-  {{ fileContent }}
-  <button @click="openAndReadFile">打开并读取文件</button>
-  <button @click="open">打开</button>
-</template>
-
-<style scoped>
-
-</style>
