@@ -1,14 +1,13 @@
 <script setup lang="ts">
 
-const { title }=defineProps<{
-  title?:string
-}>()
-
 const emit = defineEmits(['close'])
+const props = defineProps({
+  title: { type: String, required: true },
+})
 
 function closeDialog() {
-  console.log("test")
   emit("close")
+
 }
 
 
@@ -16,13 +15,9 @@ function closeDialog() {
 
 <template>
     <div class="dialog-overlay"  @click.self='closeDialog()'>
-      <div class="dialog-window">
-        <div class="dialog-title">
-          {{title}}
-        </div>
-        <div class="dialog-content">
-          <slot/>
-        </div>
+      <div class="dialog-content animate__animated animate__fadeIn">
+        <p>{{ props.title || "默认标题" }}</p>
+        <slot/>
       </div>
     </div>
 </template>
@@ -39,19 +34,16 @@ function closeDialog() {
   z-index: 10000;
 }
 
-.dialog-window {
+.dialog-content {
   background: white;
+  padding: 10px;
   border-radius: 10px;
   min-width: 300px;
   max-width: 80%;
-  padding: 10px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-  position: relative;
 }
-.dialog-title{
-  position: relative;
-}
-.dialog-content {
-  position: relative;
+
+p{
+  margin: 0;
 }
 </style>
