@@ -7,6 +7,7 @@ const props = defineProps({
 
 function closeDialog() {
   emit("close")
+
 }
 
 
@@ -14,7 +15,7 @@ function closeDialog() {
 
 <template>
     <div class="dialog-overlay"  @click.self='closeDialog()'>
-      <div class="dialog-content">
+      <div class="dialog-content animate__animated animate__fadeIn">
         <p>{{ props.title || "默认标题" }}</p>
         <slot/>
       </div>
