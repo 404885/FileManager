@@ -1,83 +1,88 @@
 <script setup lang="ts">
-import {ref, watch} from 'vue'
-import {TreeInstance} from "element-plus";
+import { ref, watch, onMounted } from 'vue'
 
-
-interface Tree {
-  [key: string]: any
+// 接口定义
+interface TreeNode {
+  label: string
+  children?: TreeNode[]
+  path: string
 }
 
-const filterText = ref('')
-const treeRef = ref<TreeInstance>()
+// 原始目录结构类型（后端返回）
+interface RawNode {
+  name: string
+  path: string
+  children?: RawNode[]
+}
 
+// 树节点过滤文本
+const filterText = ref('')
+
+// el-tree 实例引用
+const treeRef = ref()
+
+// el-tree props 配置
 const defaultProps = {
   children: 'children',
   label: 'label',
+  path:'path',
 }
 
+// 树形数据绑定变量
+const data = ref<TreeNode[]>([])
+
+// 监听 filterText，实现 el-tree 的过滤功能
 watch(filterText, (val) => {
-  treeRef.value!.filter(val)
+  treeRef.value?.filter(val)
 })
 
-const filterNode = (value: string, data: Tree) => {
+// 自定义过滤函数
+const filterNode = (value: string, data: TreeNode) => {
   if (!value) return true
-  return data.label.includes(value)
+  return data.label.toLowerCase().includes(value.toLowerCase())
 }
 
-const data: Tree[] = [
-  {
-    id: 1,
-    label: 'Level one 1',
-    children: [
-      {
-        id: 4,
-        label: 'Level two 1-1',
-        children: [
-          {
-            id: 9,
-            label: 'Level three 1-1-1',
-          },
-          {
-            id: 10,
-            label: 'Level three 1-1-2',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 2,
-    label: 'Level one 2',
-    children: [
-      {
-        id: 5,
-        label: 'Level two 2-1',
-      },
-      {
-        id: 6,
-        label: 'Level two 2-2',
-      },
-    ],
-  },
-  {
-    id: 3,
-    label: 'Level one 3',
-    children: [
-      {
-        id: 7,
-        label: 'Level two 3-1',
-      },
-      {
-        id: 8,
-        label: 'Level two 3-2',
-      },
-    ],
-  },
-]
+// 将后端返回的原始结构转换为 el-tree 结构
+function convertToElTree(node: RawNode): TreeNode {
+  if (node.children && Array.isArray(node.children)) {
+    return {
+      label: node.name,
+      children: node.children.map(convertToElTree),
+      path:node.path
+    }
+  } else {
+    return {
+      label: node.name,
+      path:node.path
+    }
+  }
+}
+
+const isLoading = ref<boolean>(false);
+// 初始化加载树结构
+async function loadTree() {
+  try {
+    isLoading.value = true
+    const result = await window.electronAPI.openDirectoryDialog()
+    if (!result.canceled && result.files) {
+      const rawTree = result.files
+      data.value = [convertToElTree(rawTree)]
+    }
+    isLoading.value=false
+  } catch (err) {
+    console.error('加载目录结构失败:', err)
+  }
+}
+
+// 页面加载后调用
+onMounted(() => {
+  loadTree()
+})
+
 </script>
 
 <template>
-  <div class="window-detail-wrapper" v-resizable="{ min: 20, max: 600 }" >
+  <div class="window-detail-wrapper" v-resizable="{ min: 20, max: 600 }">
     <div class="window-detail">
       <input
           class="file-tree-filter"
@@ -85,30 +90,25 @@ const data: Tree[] = [
           placeholder="Filter keyword"
       />
       <el-tree
+          v-loading="isLoading"
+          element-loading-text="加载中"
           ref="treeRef"
           class="file-tree"
           :data="data"
           :props="defaultProps"
-          default-expand-all
           draggable
           highlight-current
           :filter-node-method="filterNode"
       />
     </div>
-    <div class="window-detail" >
-
-    </div>
   </div>
 </template>
 
 <style scoped>
-
 .window-detail-wrapper {
   display: flex;
-  height: 100%;
   background: #f9fbfd;
   border-right: 1px solid #d9e2ec;
-  overflow: hidden;
   flex-direction: column;
 }
 
@@ -116,13 +116,23 @@ const data: Tree[] = [
   flex: 1;
   padding: 5px;
   user-select: none;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.file-tree-filter {
+  height: 30px;
+  padding: 5px;
+  margin-bottom: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
-.file-tree-filter{
-  height: 10px;
-  margin-bottom: 10px;
-}
-.file-tree{
+.file-tree {
   background: #f9fbfd;
+  height: calc(100vh - 82px);
+  overflow: auto; /* 出现滚动条 */
 }
 </style>

@@ -25,7 +25,30 @@ declare namespace NodeJS {
 interface Window {
   ipcRenderer: import('electron').IpcRenderer,
   electronAPI: {
-    openFileDialog: () => Promise<{ canceled: boolean, filePath?: string, content?: string }>
+    openFileDialog: () => Promise<
+        | { canceled: true }
+        | {
+      canceled: false
+      filePath: string
+      content: string
+      stats: import('fs').Stats
+    }
+    >
+    openDirectoryDialog: () => Promise<
+        | { canceled: true }
+        | {
+      canceled: false
+      directory: string
+      files: {
+        name: string
+        path: string
+        size: number
+        birthtime: Date
+        atime: Date
+        mtime: Date
+      }[]
+    }
+    >
     windowControls: {
       minimize: () => void;
       maximize: () => void;

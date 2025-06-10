@@ -20,19 +20,60 @@ function RegisterIpcEvent() {
     win2 == null ? void 0 : win2.setAlwaysOnTop(isPinned);
   });
   ipcMain.handle("open-file-dialog", async () => {
-    const result = await dialog.showOpenDialog({
+    const { canceled, filePaths } = await dialog.showOpenDialog({
       properties: ["openFile"],
-      filters: [
-        { name: "Text Files", extensions: ["txt", "md"] },
-        { name: "All Files", extensions: ["*"] }
-      ]
+      filters: [{ name: "All Files", extensions: ["*"] }]
     });
-    if (result.canceled || result.filePaths.length === 0) {
+    if (canceled || filePaths.length === 0) return { canceled: true };
+    const filePath = filePaths[0];
+    const content = await fs.readFile(filePath, "utf-8");
+    const stats = await fs.stat(filePath);
+    return { canceled: false, filePath, content, stats };
+  });
+  ipcMain.handle("open-directory-dialog", async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+      properties: ["openDirectory"]
+    });
+    if (canceled || filePaths.length === 0) {
       return { canceled: true };
     }
-    const filePath = result.filePaths[0];
-    const content = await fs.readFile(filePath, "utf-8");
-    return { canceled: false, filePath, content };
+    const directory = filePaths[0];
+    async function walk(dir) {
+      const list = await fs.readdir(dir, { withFileTypes: true });
+      const children = [];
+      for (const entry of list) {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          const subDir = await walk(fullPath);
+          children.push({
+            name: entry.name,
+            path: fullPath,
+            children: subDir
+          });
+        } else if (entry.isFile()) {
+          const s = await fs.stat(fullPath);
+          children.push({
+            name: entry.name,
+            path: fullPath,
+            size: s.size,
+            birthtime: s.birthtime,
+            atime: s.atime,
+            mtime: s.mtime
+          });
+        }
+      }
+      return children;
+    }
+    const tree = {
+      name: path.basename(directory),
+      path: directory,
+      children: await walk(directory)
+    };
+    return {
+      canceled: false,
+      directory,
+      files: tree
+    };
   });
 }
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

@@ -23,9 +23,4 @@ createApp(App)
     .use(VxeUITable)
     .directive('resizable', resizable)
     .directive('resizeable-vertical',resizableV)
-    .mount('#app').$nextTick(() => {
-  // Use contextBridge
-  window.ipcRenderer.on('main-process-message', (_event, message) => {
-    console.log(message)
-  })
-})
+    .mount('#app')
