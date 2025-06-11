@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
+import { openMenu } from "@/utils/Menu.ts";
 
 // 接口定义
 interface TreeNode {
@@ -74,6 +75,17 @@ async function loadTree() {
   }
 }
 
+
+function onRightClick(e: MouseEvent) {
+  e.preventDefault()
+  openMenu({
+    modalProps:{
+      positionY: e.clientY,
+      positionX: e.clientX,
+    }
+  })
+}
+
 // 页面加载后调用
 onMounted(() => {
   loadTree()
@@ -82,7 +94,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="window-detail-wrapper" v-resizable="{ min: 180, max: 600 }">
+  <div class="window-detail-wrapper" v-resizable="{ min: 180, max: 600 }" @contextmenu="onRightClick">
     <div class="window-detail">
       <input
           class="file-tree-filter"

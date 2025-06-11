@@ -1,32 +1,18 @@
 /* ========== 基础字体与布局 ========== */
 :root {
-    font-family: "Inter", "Segoe UI", "Helvetica Neue", sans-serif;
-    line-height: 1.6;
-    font-weight: 400;
 
-    color: #2c3e50;
-    background-color: #ffffff;
-
-    font-synthesis: none;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-
-    --color-divider: ;
 }
 
 /* ========== 全局 Reset ========== */
-/** {*/
-/*    margin: 0;*/
-/*    padding: 0;*/
-/*    box-sizing: border-box;*/
-/*}*/
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
 html, body, #app {
     width: 100vw;
     height: 100vh;
-    margin: 0;
-    padding: 0;
 }
 
 
@@ -54,22 +40,6 @@ button:disabled {
     cursor: not-allowed;
 }
 
-/* ========== 输入框样式 ========== */
-input,
-textarea {
-    padding: 0.5rem 0.75rem;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    outline: none;
-    background: #fff;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-input:focus,
-textarea:focus {
-    border-color: #409eff;
-    box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.15);
-}
 
 /* ========== 滚动条美化 ========== */
 ::-webkit-scrollbar {

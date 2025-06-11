@@ -4,6 +4,18 @@ const props = defineProps({
   title: { type: String },
 })
 
+async function openAndReadFile() {
+  const result = await window.electronAPI.openFileDialog()
+  if (!result.canceled) {
+    const filePath:string = result.filePath ?? ''
+    const fileContent:string = result.content ?? ''
+    console.log(filePath, fileContent)
+    // 你也可以绑定内容到页面上
+  } else {
+    alert('用户取消了选择')
+  }
+}
+
 </script>
 
 <template>
@@ -13,7 +25,7 @@ const props = defineProps({
   </div>
   <div class="fileAdd-list">
     <div class="AddList list-note">
-      笔记管理
+      <button  @click="openAndReadFile">打开文件</button>
     </div>
     <div class="AddList list-file">
       本地文档管理

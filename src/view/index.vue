@@ -4,6 +4,7 @@ import {ArrowDown} from '@element-plus/icons-vue'
 import {VxeTableInstance} from "vxe-pc-ui/types/components/table";
 import {VxeColumnPropTypes} from "vxe-pc-ui/types/components/column";
 import formatter from "@/utils/formatter.ts"
+import {openDialog} from "@/utils/Dialog.ts";
 
 interface RowVO {
   id: number
@@ -64,6 +65,18 @@ const handleClickOutside = (event: MouseEvent) => {
   }
 };
 
+function open() {
+  openDialog({
+    type: "addFile",
+    modalProps:{
+    },
+    props:{
+      title: "创建实体"
+    }
+  })
+
+}
+
 onMounted(() => {
   document.addEventListener('click', handleClickOutside);
 });
@@ -74,6 +87,7 @@ onMounted(() => {
   <el-container>
     <el-header class="workspace-header">
       <h2>工作空间</h2>
+      <button class="newFile" @click="open">新增</button>
     </el-header>
     <el-main class="workspace-main">
       <vxe-table
@@ -116,12 +130,17 @@ onMounted(() => {
   display: flex;
   flex-direction: row;
   user-select: none;
+  justify-content: space-between; /* 上下两端对齐，留出中间空白 */
+  align-items: center
 }
 .workspace-main{
   background-color: white;
 }
 .dropper .el-dropdown-link {
   cursor: pointer;
+}
+.newFile{
+  height: 36px;
 }
 
 </style>

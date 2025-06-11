@@ -4,7 +4,6 @@ const emit = defineEmits(['close'])
 
 function closeDialog() {
   emit("close")
-
 }
 
 

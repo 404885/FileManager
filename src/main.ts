@@ -9,7 +9,7 @@ import './style/base.css'
 
 import ElementPlus from 'element-plus'
 import router from './router'
-import directives from "@/directives";
+import directives from "./directives";
 
 
 

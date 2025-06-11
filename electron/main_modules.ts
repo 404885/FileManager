@@ -86,4 +86,5 @@ export function RegisterIpcEvent() {
         }
     })
 
+    // ipcMain.handle("database", )
 }
