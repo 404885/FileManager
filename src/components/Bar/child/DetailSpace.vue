@@ -79,10 +79,8 @@ async function loadTree() {
 function onRightClick(e: MouseEvent) {
   e.preventDefault()
   openMenu({
-    modalProps:{
-      positionY: e.clientY,
-      positionX: e.clientX,
-    }
+    positionX: e.clientX,
+    positionY: e.clientY,
   })
 }
 
@@ -119,8 +117,8 @@ onMounted(() => {
 <style scoped>
 .window-detail-wrapper {
   display: flex;
-  background: #f9fbfd;
-  border-right: 1px solid #d9e2ec;
+  background: var(--menu-bg);
+  border-right: 1px solid var(--menu-border);
   flex-direction: column;
 }
 

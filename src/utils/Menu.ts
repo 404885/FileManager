@@ -3,11 +3,11 @@ import ContextMenu from "@/components/Menu/ContextMenu.vue";
 
 let currentInstance: ReturnType<typeof createApp> | null = null
 
-interface MenuOptions {
-    modalProps?: Record<string, any> // 给 ModalDialog 自身传的 props（比如标题）
-}
+// interface MenuOptions {
+//     modalProps?: Record<string, any> // 给 ModalDialog 自身传的 props（比如标题）
+// }
 
-export function openMenu({ modalProps = {} }: MenuOptions) {
+export function openMenu(modalProps:any) {
 
     if (currentInstance) {
         currentInstance.unmount()

@@ -1,6 +1,18 @@
 /* ========== 基础字体与布局 ========== */
 :root {
+    --menu-bg: #f9fbfd;                 /* 淡蓝色背景 */
+    --menu-border: #e2e2e2;             /* 浅灰色边框 */
+    --divider-color: #d1d1d1;           /* 更深一点的灰色，用作分割线 */
 
+    /* 图标背景色 */
+    --icon-color: #f9fbfd;               /* 柔和灰色图标背景 */
+    --icon-hover-color: #f9fbfd;          /* hover 背景：稍深灰 */
+    --icon-active-color: #ffffff;         /* active 背景：浅灰 */
+
+    /* SVG Icon Fill Colors */
+    --svg-color: #5a5a5a;                 /* 默认图标：深灰色 */
+    --svg-hover-color: #4c4c4c;           /* hover 时的图标颜色：更深灰 */
+    --svg-active-color: #2e2e2e;          /* active 时的图标颜色：更深灰 */
 }
 
 /* ========== 全局 Reset ========== */
@@ -13,6 +25,7 @@
 html, body, #app {
     width: 100vw;
     height: 100vh;
+    overflow: hidden;
 }
 
 

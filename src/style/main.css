@@ -1,3 +1,6 @@
+
+
+
 #app{
     display: flex;
     flex-direction: column;
@@ -23,16 +26,7 @@
     box-sizing: border-box;
     z-index: 9999;
     -webkit-app-region: drag;
-
 }
-
-/* ========== middle-bar ========== */
-/*.window-detail{*/
-/*    min-width: 200px;*/
-/*    border-right: 1px solid #d9e2ec; !* 浅灰蓝边框 *!*/
-/*    background-color: #f9fbfd; !* 非常浅的蓝白色背景 *!*/
-/*}*/
-
 /* ========== content ========== */
 .window-content{
     padding: 10px;

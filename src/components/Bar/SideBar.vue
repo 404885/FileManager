@@ -51,17 +51,18 @@ export default defineComponent({
 .sidebar-menu {
   display: flex;
   flex-direction: column;
-  width: 50px;
+  width: 48px;
   justify-content: space-between; /* 上下两端对齐，留出中间空白 */
-  border-right: 1px solid #d9e2ec; /* 浅灰蓝边框 */
-  background-color: #f9fbfd; /* 非常浅的蓝白色背景 */
+  border-right: 1px solid var(--menu-border); /* 浅灰蓝边框 */
+  background-color: var(--menu-bg); /* 非常浅的蓝白色背景 */
+
 }
 .menu-top, .menu-bottom {
   padding: 10px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .menu-divider {
@@ -69,41 +70,48 @@ export default defineComponent({
   height: 1px;
   border: none;
   margin: -5px;
-  background-color: #e0e6ed; /* 浅灰分割线 */
+  background-color: var(--divider-color); /* 浅灰分割线 */
 }
 
 .menu-icon {
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  background-color: transparent;
+  background-color: var(--icon-color);
   display: flex;
   align-items: center;
   justify-content: center;
-  /*border: 1px solid #ddd;*/
   cursor: pointer;
-  transition: background-color 0.2s, transform 0.2s;
+  transition:
+      background-color 0.2s,
+      transform 0.2s,
+      box-shadow 0.2s;/* 添加阴影效果过渡 */
 }
-.menu-icon:hover {
-  background-color: rgba(200, 215, 235, 0.4); /* 浅蓝背景，轻微加深 */
-  transform: translateY(-2px);
-}
-.router-link-active {
-  background-color: rgba(160, 185, 215, 0.5); /* 激活状态稍深的浅蓝背景 */
-}
-
 .menu-icon svg {
   width: 24px;
   height: 24px;
-  fill: #747474; /* 常规状态浅蓝灰 */
+  fill: var(--svg-color); /* 常规状态浅蓝灰 */
   transition: fill 0.2s ease;
   pointer-events: none;
 }
+
+
+.menu-icon:hover {
+  background-color: var(--icon-hover-color); /* 浅蓝背景，轻微加深 */
+  transform: translateY(-2px);
+
+  box-shadow: rgba(0, 0, 0, 0.4) 0 2px 4px;
+}
 .menu-icon:hover svg {
-  fill: #a0b5d7; /* hover时稍深的蓝色 */
+  fill: var(--svg-hover-color); /* hover时稍深的蓝色 */
+}
+
+.router-link-active {
+  background-color: var(--icon-active-color); /* 激活状态稍深的浅蓝背景 */
+  box-shadow: rgba(0, 0, 0, 0.18) 0 2px 4px;
 }
 .router-link-active svg {
-  fill: #738bbf; /* 激活状态深蓝灰，但依然浅色系 */
+  fill: var(--svg-active-color); /* 激活状态深蓝灰，但依然浅色系 */
 }
 
 </style>
