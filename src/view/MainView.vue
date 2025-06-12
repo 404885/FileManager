@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { openDialog } from "@/utils/Dialog.ts";
+import { openDialog } from "@/utils/component/Dialog.ts";
 
  function open() {
    openDialog({
@@ -13,10 +13,16 @@ import { openDialog } from "@/utils/Dialog.ts";
 
 }
 
+function connect(){
+  window.electronAPI.dataOperation.prepare();
+  console.log("saa")
+}
+
 </script>
 
 <template>
   <button @click="open">打开</button>
+  <button @click="connect">connect</button>
 </template>
 
 <style scoped>

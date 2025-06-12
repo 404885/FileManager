@@ -4,7 +4,7 @@ import {ArrowDown} from '@element-plus/icons-vue'
 import {VxeTableInstance} from "vxe-pc-ui/types/components/table";
 import {VxeColumnPropTypes} from "vxe-pc-ui/types/components/column";
 import formatter from "@/utils/formatter.ts"
-import {openDialog} from "@/utils/Dialog.ts";
+import {openDialog} from "@/utils/component/Dialog.ts";
 
 interface RowVO {
   id: number
@@ -19,11 +19,10 @@ const timeFormatter: VxeColumnPropTypes.Formatter = ({ cellValue }) => {
   return typeof cellValue === 'number' ? formatter.timeFormatter(cellValue) : '';
 }
 
-const filePath: string = ref('')
-const fileContent: string = ref('')
+
 
 const tableData = reactive<RowVO[]>([
-  { id: 10001, name: '《实验指导手册》实验10.Ansible源码编译安装(综合5)', createTime: Date.now() - 31 * 24 * 60 * 60 * 1000, browseTime: Date.now(), filePath},
+  { id: 10001, name: '《实验指导手册》实验10.Ansible源码编译安装(综合5)', createTime: Date.now() - 31 * 24 * 60 * 60 * 1000, browseTime: Date.now()},
   { id: 10002, name: 'Test2', createTime: Date.now(), browseTime:Date.now() - 31 * 24 * 60 * 60 * 1000},
   { id: 10003, name: 'Test3', createTime: Date.now()},
   { id: 10004, name: 'Test4', createTime: Date.now()}

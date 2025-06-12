@@ -1,10 +1,10 @@
 // utils/Dialog.ts
 import { createApp, h} from 'vue'
-import ModalDialog from '../components/Dialog/ModalDialog.vue'
-import FileAddDialog from "../components/Dialog/child/FileAddDialog.vue";
+import ModalDialog from '../../components/Dialog/ModalDialog.vue'
+import FileAddDialog from "../../components/Dialog/child/FileAddDialog.vue";
 import FileEditDialog from "@/components/Dialog/child/FileEditDialog.vue";
-import SettingDialog from "../components/Dialog/child/SettingDialog.vue";
-import UserDialog from "../components/Dialog/child/UserDialog.vue";
+import SettingDialog from "../../components/Dialog/child/SettingDialog.vue";
+import UserDialog from "../../components/Dialog/child/UserDialog.vue";
 
 
 let DialogMap = {

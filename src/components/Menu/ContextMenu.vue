@@ -22,8 +22,8 @@ function adjustPosition() {
   const winH = window.innerHeight
   const pad = 8
 
-  let x = props.positionX
-  let y = props.positionY
+  let x = props.positionX ?? 0  // 使用默认值 0
+  let y = props.positionY ?? 0  // 使用默认值 0
 
   if (x + menuW > winW - pad) {
     x = winW - menuW - pad

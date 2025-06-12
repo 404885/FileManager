@@ -9,7 +9,7 @@ const routers = createRouter({
         {
             path: '/space',
             name: 'space',
-            component: import('../view/index.vue'),
+            component: () => import('../view/index.vue'),
             meta: {
                 DetailBar: 'space',
             }
@@ -17,23 +17,23 @@ const routers = createRouter({
         {
             path: '/user',
             name: 'user',
-            component: import('../view/UserView.vue'),
+            component: () => import('../view/UserView.vue'),
         },
         {
             path: '/',
             name: 'main',
-            component: import('../view/MainView.vue'),
+            component: () => import('../view/MainView.vue'),
 
         },
         {
             path: '/recent',
             name: 'recent',
-            component: import('../view/RecentView.vue'),
+            component: () => import('../view/RecentView.vue'),
         },
         {
             path: '/tag',
             name: 'tag',
-            component: import('../view/TagView.vue'),
+            component: () => import('../view/TagView.vue'),
             meta: {
                 DetailBar: 'tag',
             }
@@ -41,17 +41,17 @@ const routers = createRouter({
         {
             path: '/like',
             name: 'like',
-            component: import('../view/LikeView.vue'),
+            component: () => import('../view/LikeView.vue'),
         },
         {
             path: '/connect',
             name: 'connect',
-            component: import('../view/ConnectView.vue'),
+            component: () => import('../view/ConnectView.vue'),
         },
         {
             path: '/setting',
             name: 'setting',
-            component: import('../view/SettingView.vue'),
+            component: () => import('../view/SettingView.vue'),
         },
 
     ]

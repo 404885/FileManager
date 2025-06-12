@@ -11,7 +11,7 @@ export default defineComponent({
 
 <template>
   <div class="window-detail">
-    tag
+    tagsadsa
   </div>
 </template>
 

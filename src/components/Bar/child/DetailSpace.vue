@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
-import { openMenu } from "@/utils/Menu.ts";
+import { openMenu } from "@/utils/component/Menu.ts";
 
 // 接口定义
 interface TreeNode {
@@ -67,8 +67,9 @@ async function loadTree() {
     const result = await window.electronAPI.openDirectoryDialog()
     if (!result.canceled && result.files) {
       const rawTree = result.files
-      data.value = [convertToElTree(rawTree)]
+      data.value = Array.isArray(rawTree) ? rawTree.map(convertToElTree) : [convertToElTree(rawTree)]
     }
+
     isLoading.value=false
   } catch (err) {
     console.error('加载目录结构失败:', err)

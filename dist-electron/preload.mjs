@@ -10,5 +10,8 @@ electron.contextBridge.exposeInMainWorld("electronAPI", {
     maximize: () => electron.ipcRenderer.send("window-maximize"),
     close: () => electron.ipcRenderer.send("window-close"),
     pinned: (isPinned) => electron.ipcRenderer.send("window-pinned", isPinned)
+  },
+  dataOperation: {
+    prepare: () => electron.ipcRenderer.send("prepare")
   }
 });

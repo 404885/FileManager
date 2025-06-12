@@ -1,26 +1,29 @@
-import { ipcMain, BrowserWindow, dialog, app } from "electron";
-import { fileURLToPath } from "node:url";
-import path from "node:path";
-import fs from "fs/promises";
+"use strict";
+Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
+const electron = require("electron");
+const node_url = require("node:url");
+const path = require("node:path");
+const fs = require("fs/promises");
+var _documentCurrentScript = typeof document !== "undefined" ? document.currentScript : null;
 function RegisterIpcEvent() {
-  ipcMain.on("window-minimize", (event) => {
-    const win2 = BrowserWindow.fromWebContents(event.sender);
+  electron.ipcMain.on("window-minimize", (event) => {
+    const win2 = electron.BrowserWindow.fromWebContents(event.sender);
     win2 == null ? void 0 : win2.minimize();
   });
-  ipcMain.on("window-maximize", (event) => {
-    const win2 = BrowserWindow.fromWebContents(event.sender);
+  electron.ipcMain.on("window-maximize", (event) => {
+    const win2 = electron.BrowserWindow.fromWebContents(event.sender);
     (win2 == null ? void 0 : win2.isMaximized()) ? win2 == null ? void 0 : win2.unmaximize() : win2 == null ? void 0 : win2.maximize();
   });
-  ipcMain.on("window-close", (event) => {
-    const win2 = BrowserWindow.fromWebContents(event.sender);
+  electron.ipcMain.on("window-close", (event) => {
+    const win2 = electron.BrowserWindow.fromWebContents(event.sender);
     win2 == null ? void 0 : win2.close();
   });
-  ipcMain.on("window-pinned", (event, isPinned) => {
-    const win2 = BrowserWindow.fromWebContents(event.sender);
+  electron.ipcMain.on("window-pinned", (event, isPinned) => {
+    const win2 = electron.BrowserWindow.fromWebContents(event.sender);
     win2 == null ? void 0 : win2.setAlwaysOnTop(isPinned);
   });
-  ipcMain.handle("open-file-dialog", async () => {
-    const { canceled, filePaths } = await dialog.showOpenDialog({
+  electron.ipcMain.handle("open-file-dialog", async () => {
+    const { canceled, filePaths } = await electron.dialog.showOpenDialog({
       properties: ["openFile"],
       filters: [{ name: "All Files", extensions: ["*"] }]
     });
@@ -30,8 +33,8 @@ function RegisterIpcEvent() {
     const stats = await fs.stat(filePath);
     return { canceled: false, filePath, content, stats };
   });
-  ipcMain.handle("open-directory-dialog", async () => {
-    const { canceled, filePaths } = await dialog.showOpenDialog({
+  electron.ipcMain.handle("open-directory-dialog", async () => {
+    const { canceled, filePaths } = await electron.dialog.showOpenDialog({
       properties: ["openDirectory"]
     });
     if (canceled || filePaths.length === 0) {
@@ -76,15 +79,36 @@ function RegisterIpcEvent() {
     };
   });
 }
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-process.env.APP_ROOT = path.join(__dirname, "..");
+function RegisterDatabase() {
+  const Database = require("better-sqlite3");
+  const path2 = require("path");
+  const { ipcMain, app } = require("electron");
+  ipcMain.on("prepare", () => {
+    console.log("Prepare");
+    const dbPath = path2.join(app.getPath("home"), "test.db");
+    const db = new Database(dbPath);
+    console.log(db);
+    db.prepare(`
+          CREATE TABLE IF NOT EXISTS workspace (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              name TEXT NOT NULL,
+              file_count INTEGER DEFAULT 0,
+              create_time TEXT DEFAULT (datetime('now', 'localtime')),
+              ast_browse_time TEXT
+          )
+      `).run();
+    console.log("connect to database");
+  });
+}
+const __dirname$1 = path.dirname(node_url.fileURLToPath(typeof document === "undefined" ? require("url").pathToFileURL(__filename).href : _documentCurrentScript && _documentCurrentScript.tagName.toUpperCase() === "SCRIPT" && _documentCurrentScript.src || new URL("main.js", document.baseURI).href));
+process.env.APP_ROOT = path.join(__dirname$1, "..");
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 const MAIN_DIST = path.join(process.env.APP_ROOT, "dist-electron");
 const RENDERER_DIST = path.join(process.env.APP_ROOT, "dist");
 process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, "public") : RENDERER_DIST;
 let win;
 function createWindow() {
-  win = new BrowserWindow({
+  win = new electron.BrowserWindow({
     width: 1280,
     height: 800,
     // 从public文件中找静态图片和图标等文件
@@ -92,7 +116,7 @@ function createWindow() {
     frame: false,
     // 预加载文件在运行时的文件夹，实际实在dist-electron中
     webPreferences: {
-      preload: path.join(__dirname, "preload.mjs"),
+      preload: path.join(__dirname$1, "preload.mjs"),
       contextIsolation: true,
       nodeIntegration: false
     }
@@ -107,20 +131,19 @@ function createWindow() {
   }
 }
 RegisterIpcEvent();
-app.on("window-all-closed", () => {
+RegisterDatabase();
+electron.app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
-    app.quit();
+    electron.app.quit();
     win = null;
   }
 });
-app.on("activate", () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
+electron.app.on("activate", () => {
+  if (electron.BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
 });
-app.whenReady().then(createWindow);
-export {
-  MAIN_DIST,
-  RENDERER_DIST,
-  VITE_DEV_SERVER_URL
-};
+electron.app.whenReady().then(createWindow);
+exports.MAIN_DIST = MAIN_DIST;
+exports.RENDERER_DIST = RENDERER_DIST;
+exports.VITE_DEV_SERVER_URL = VITE_DEV_SERVER_URL;

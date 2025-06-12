@@ -55,5 +55,8 @@ interface Window {
       close: () => void;
       pinned: (isPinned: boolean) => void;
     },
+    dataOperation: {
+      prepare: () => void,
+    }
   }
 }

@@ -12,4 +12,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     close: () => ipcRenderer.send('window-close'),
     pinned: (isPinned: boolean) => ipcRenderer.send('window-pinned', isPinned),
   },
+  dataOperation:{
+    prepare: () => ipcRenderer.send('prepare'),
+  }
 })
