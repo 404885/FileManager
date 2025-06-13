@@ -2,7 +2,7 @@ import { app, BrowserWindow } from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { RegisterIpcEvent } from "./main_modules.ts";
-import { RegisterDatabase } from "./main_database.ts";
+import { RegisterDatabase, initDatabase } from "./main_database.ts";
 
 // const require = createRequire(import.meta.url)
 // 将当前文件的文件URL转换为路径URL，并获取目录部分
@@ -54,6 +54,7 @@ function createWindow() {
 RegisterIpcEvent()
 RegisterDatabase()
 
+
 // darwin是macOS的版本，因为退出逻辑不一致，单独处理
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -72,4 +73,4 @@ app.on('activate', () => {
 })
 
 // 异步操作，需要在完成初始化后再创建窗口
-app.whenReady().then(createWindow)
+app.whenReady().then(initDatabase).then(createWindow)

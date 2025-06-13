@@ -6,13 +6,8 @@
 
     /* 图标背景色 */
     --icon-color: #f9fbfd;               /* 柔和灰色图标背景 */
-    --icon-hover-color: #f9fbfd;          /* hover 背景：稍深灰 */
-    --icon-active-color: #ffffff;         /* active 背景：浅灰 */
-
     /* SVG Icon Fill Colors */
-    --svg-color: #5a5a5a;                 /* 默认图标：深灰色 */
-    --svg-hover-color: #4c4c4c;           /* hover 时的图标颜色：更深灰 */
-    --svg-active-color: #2e2e2e;          /* active 时的图标颜色：更深灰 */
+    --svg-color: #818181;                 /* 默认图标：深灰色 */
 }
 
 /* ========== 全局 Reset ========== */
