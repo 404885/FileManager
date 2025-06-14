@@ -2,85 +2,53 @@
 import { ref, watch, onMounted } from 'vue'
 import { openMenu } from "@/utils/component/Menu.ts";
 
-// 定义tree数据传入
+// 接口定义
 interface TreeNode {
   label: string
   children?: TreeNode[]
   path: string
 }
-// 定义后端数据传入类型
-interface RawNode {
-  name: string
-  path: string
-  children?: RawNode[]
-}
 
-// input过滤文本
+// 原始目录结构类型（后端返回）
+
+// 树节点过滤文本
 const filterText = ref('')
-// 绑定el-tree实例
-const treeRef = ref()
-// 注解传入tree的data
-const data = ref<TreeNode[]>([])
-// 默认加载动画为false
-const isLoading = ref<boolean>(false);
 
+// el-tree 实例引用
+const treeRef = ref()
 
 // el-tree props 配置
 const defaultProps = {
   children: 'children',
   label: 'label',
-  path: 'path',
+  path:'path',
 }
 
-// 监听过滤值变化，并调用回调函数向过滤方法中传值
+// 树形数据绑定变量
+const data = ref<TreeNode[]>([])
+
+// 监听 filterText，实现 el-tree 的过滤功能
 watch(filterText, (val) => {
   treeRef.value?.filter(val)
 })
 
-// 自定义过滤函数（回调函数传入值，el-tree的全部树节点）
+// 自定义过滤函数
 const filterNode = (value: string, data: TreeNode) => {
   if (!value) return true
   return data.label.toLowerCase().includes(value.toLowerCase())
 }
 
-// 将后端返回的原始结构转换为 el-tree 结构
-function convertToElTree(node: RawNode): TreeNode {
-  // 判断是否为数组且有无子节点
-  if (node.children && Array.isArray(node.children)) {
-    return {
-      label: node.name,
-      // 遍历子数组并使用转换
-      children: node.children.map(convertToElTree),
-      path:node.path
-    }
-  }
-  else {
-    return {
-      label: node.name,
-      path:node.path
-    }
-  }
-}
-
-// 初始化加载树结构
+const isLoading = ref<boolean>(false);
 async function loadTree() {
   try {
-    // 设置
     isLoading.value = true
-    const result = await window.electronAPI.openDirectoryDialog()
-    if (!result.canceled && result.files) {
-      const rawTree = result.files
-      data.value = Array.isArray(rawTree) ? rawTree.map(convertToElTree) : [convertToElTree(rawTree)]
-    }
+    data.value = await window.electronAPI.dataOperation.loadTree()
     isLoading.value=false
-  }
-  catch (err) {
+  } catch (err) {
     console.error('加载目录结构失败:', err)
   }
 }
 
-
-// 页面弹窗
 function onRightClick(e: MouseEvent) {
   e.preventDefault()
   openMenu({
@@ -88,7 +56,6 @@ function onRightClick(e: MouseEvent) {
     positionY: e.clientY,
   })
 }
-
 
 // 页面加载后调用
 onMounted(() => {
@@ -100,10 +67,14 @@ onMounted(() => {
 <template>
   <div class="window-detail-wrapper" v-resizable="{ min: 180, max: 600 }" @contextmenu="onRightClick">
     <div class="window-detail">
-      <input class="file-tree-filter" v-model="filterText" placeholder="Filter keyword"/>
+      <input
+          class="file-tree-filter"
+          v-model="filterText"
+          placeholder="Filter keyword"
+      />
       <el-tree
           v-loading="isLoading"
-          element-loading-text="加载数据中"
+          element-loading-text="加载中"
           ref="treeRef"
           class="file-tree"
           :data="data"
