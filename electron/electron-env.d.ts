@@ -50,13 +50,13 @@ interface Window {
     }
     >
     windowControls: {
-      minimize: () => void;
-      maximize: () => void;
-      close: () => void;
-      pinned: (isPinned: boolean) => void;
+      minimize,
+      maximize,
+      close,
+      pinned,
     },
     dataOperation: {
-      prepare: () => void,
+      prepare,
     }
   }
 }
