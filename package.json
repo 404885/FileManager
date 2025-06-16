@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
+    "@he-tree/vue": "^2.9.4",
     "animate.css": "^4.1.1",
     "better-sqlite3": "^11.10.0",
     "element-plus": "^2.9.11",

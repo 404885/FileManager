@@ -6,6 +6,8 @@ import VxeUITable from 'vxe-table'
 import VxeUIAll from 'vxe-pc-ui'
 
 import './style/base.css'
+import '@he-tree/vue/style/default.css'
+
 
 import ElementPlus from 'element-plus'
 import router from '@/router'

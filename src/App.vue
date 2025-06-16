@@ -4,13 +4,13 @@ import { RouterView, useRoute } from 'vue-router'
 import TitleBar from "@/components/Bar/TitleBar.vue";
 import SideBar from "@/components/Bar/SideBar.vue";
 
-import DetailSpace from "@/components/Bar/child/DetailSpace.vue";
+import DetailS from "@/components/Bar/child/DetailS.vue";
 import DetailTag from "@/components/Bar/child/DetailTag.vue";
 
 const route = useRoute()
 
 const componentMap = {
-  space: DetailSpace,
+  space: DetailS,
   tag: DetailTag,
 }
 
