@@ -49,16 +49,19 @@ export function RegisterIpcEvent() {
 
             for (const entry of list) {
                 const fullPath = path.join(dir, entry.name)
+                const s = await fs.stat(fullPath)
 
                 if (entry.isDirectory()) {
                     const subDir = await walk(fullPath)
                     children.push({
                         name: entry.name,
                         path: fullPath,
+                        birthtime: s.birthtime,
+                        atime: s.atime,
+                        mtime: s.mtime,
                         children: subDir
                     })
                 } else if (entry.isFile()) {
-                    const s = await fs.stat(fullPath)
                     children.push({
                         name: entry.name,
                         path: fullPath,
@@ -81,10 +84,8 @@ export function RegisterIpcEvent() {
 
         return {
             canceled: false,
-            directory,
             files: tree
         }
     })
 
-    // ipcMain.handle("database", )
 }

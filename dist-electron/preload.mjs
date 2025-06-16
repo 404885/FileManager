@@ -12,6 +12,11 @@ electron.contextBridge.exposeInMainWorld("electronAPI", {
     pinned: (isPinned) => electron.ipcRenderer.send("window-pinned", isPinned)
   },
   dataOperation: {
-    prepare: () => electron.ipcRenderer.send("prepare")
+    queryAll: (sql, params = []) => electron.ipcRenderer.invoke("queryAll", sql, params),
+    queryOne: (sql, params = []) => electron.ipcRenderer.invoke("queryOne", sql, params),
+    execute: (sql, params = []) => electron.ipcRenderer.invoke("execute", sql, params),
+    saveDirectoryToDb: (tree) => electron.ipcRenderer.invoke("saveDirectoryToDb", tree),
+    saveProgress: (callback) => electron.ipcRenderer.on("saveDirectoryToDb-progress", callback),
+    loadTree: () => electron.ipcRenderer.invoke("load-tree")
   }
 });

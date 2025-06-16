@@ -4,6 +4,7 @@ const props = defineProps({
   title: { type: String },
 })
 
+
 async function openAndReadFile() {
   const result = await window.electronAPI.openFileDialog()
   if (!result.canceled) {
@@ -13,6 +14,18 @@ async function openAndReadFile() {
     // 你也可以绑定内容到页面上
   } else {
     alert('用户取消了选择')
+  }
+}
+
+async function openAndSaveFolder() {
+  const result = await window.electronAPI.openDirectoryDialog();
+  if (result.canceled) return;
+  // 保存结构到数据库
+  const success=await window.electronAPI.dataOperation.saveDirectoryToDb(result.files);
+  if (success){
+    alert('导入成功')
+  }else {
+    alert('导入失败')
   }
 }
 
@@ -27,7 +40,7 @@ async function openAndReadFile() {
     <div class="fileAdd-list">
       <div class="list-title">个人笔记</div>
       <div @click="openAndReadFile" class="list-add animate_button">导入文件</div>
-      <div @click="" class="list-add animate_button">dianji</div>
+      <div @click="openAndSaveFolder" class="list-add animate_button">导入文件夹</div>
       <div @click="" class="list-add animate_button">dianji</div>
       <div @click="" class="list-add animate_button">dianji</div>
     </div>

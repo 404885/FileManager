@@ -1,5 +1,15 @@
 import { ipcRenderer, contextBridge } from 'electron'
 
+interface FileNode {
+  name: string
+  path: string
+  size?: number
+  birthtime?: Date
+  atime?: Date
+  mtime?: Date
+  children?: FileNode[] // 递归类型，表示目录结构
+}
+
 
 contextBridge.exposeInMainWorld("electronAPI", {
   // 这种方式能只暴露指定的api方法
@@ -12,7 +22,17 @@ contextBridge.exposeInMainWorld("electronAPI", {
     close: () => ipcRenderer.send('window-close'),
     pinned: (isPinned: boolean) => ipcRenderer.send('window-pinned', isPinned),
   },
-  dataOperation:{
-    prepare: () => ipcRenderer.send('prepare'),
+  dataOperation: {
+    queryAll: (sql: string, params: any[] = []) =>
+        ipcRenderer.invoke('queryAll', sql, params),
+    queryOne: (sql: string, params: any[] = []) =>
+        ipcRenderer.invoke('queryOne', sql, params),
+    execute: (sql: string, params: any[] = []) =>
+        ipcRenderer.invoke('execute', sql, params),
+    saveDirectoryToDb: (tree:FileNode) =>
+        ipcRenderer.invoke('saveDirectoryToDb', tree),
+    saveProgress: (callback:any)=>
+        ipcRenderer.on('saveDirectoryToDb-progress',callback),
+    loadTree: () => ipcRenderer.invoke('load-tree'),
   }
 })
