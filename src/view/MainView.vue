@@ -13,10 +13,6 @@ import { openDialog } from "@/utils/component/Dialog.ts";
 
 }
 
-function connect(){
-  window.electronAPI.dataOperation.prepare();
-  console.log("saa")
-}
 
 </script>
 
@@ -24,7 +20,6 @@ function connect(){
   <div class="box" v-drag>拖动我</div>
   <div v-drag>test</div>
   <button @click="open" v-drag>打开</button>
-  <button @click="connect">connect</button>
 </template>
 
 <style scoped>

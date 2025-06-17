@@ -316,7 +316,7 @@ app.on("activate", () => {
     createWindow();
   }
 });
-app.whenReady().then(initDatabase).then(createWindow);
+app.whenReady().then(createWindow).then(initDatabase);
 export {
   MAIN_DIST,
   RENDERER_DIST,

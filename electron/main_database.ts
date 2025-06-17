@@ -1,7 +1,6 @@
 import path from 'path';
-import {ipcMain, IpcMainInvokeEvent} from 'electron';
+import {ipcMain, IpcMainInvokeEvent } from 'electron';
 import {createRequire} from 'module';
-
 const require = createRequire(import.meta.url);
 const Database = require('better-sqlite3');
 
@@ -20,6 +19,7 @@ interface FileNode {
 
 
 export function initDatabase() {
+    // const dbPath = path.join(app.getPath('userData'), 'FileManager.db');
     const dbPath = path.join(process.cwd(), 'FileManager.db');
 
     db = new Database(dbPath);

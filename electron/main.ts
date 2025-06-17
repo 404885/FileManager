@@ -73,4 +73,4 @@ app.on('activate', () => {
 })
 
 // 异步操作，需要在完成初始化后再创建窗口
-app.whenReady().then(initDatabase).then(createWindow)
+app.whenReady().then(createWindow).then(initDatabase)

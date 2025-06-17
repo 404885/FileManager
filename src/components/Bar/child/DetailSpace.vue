@@ -15,12 +15,22 @@ interface RawNode {
   children?: RawNode[]
 }
 
+interface ElTreeNode {
+  id: number;
+  label: string;
+  children?: ElTreeNode[];
+  isLeaf?: boolean;
+  // 可按需加其他字段，如 fullPath、size 等
+  fullPath?: string;
+  size?: number;
+}
+
 // input过滤文本
 const filterText = ref('')
 // 绑定el-tree实例
 const treeRef = ref()
 // 注解传入tree的data
-const data = ref<TreeNode[]>([])
+const data = ref<ElTreeNode[]>([])
 // 默认加载动画为false
 const isLoading = ref<boolean>(false);
 
@@ -43,75 +53,28 @@ const filterNode = (value: string, data: TreeNode) => {
   return data.label.toLowerCase().includes(value.toLowerCase())
 }
 
-// 将后端返回的原始结构转换为 el-tree 结构
-function convertToElTree(node: RawNode): TreeNode {
-  // 判断是否为数组且有无子节点
-  if (node.children && Array.isArray(node.children)) {
-    return {
-      label: node.name,
-      // 遍历子数组并使用转换
-      children: node.children.map(convertToElTree),
-      path:node.path
-    }
-  }
-  else {
-    return {
-      label: node.name,
-      path:node.path
-    }
-  }
-}
 
 // 初始化加载树结构
-async function loadTree() {
+async function load() {
   try {
-    // 设置
-    isLoading.value = true
-    const result = await window.electronAPI.openDirectoryDialog()
-    if (!result.canceled && result.files) {
-      const rawTree = result.files
-      data.value = Array.isArray(rawTree) ? rawTree.map(convertToElTree) : [convertToElTree(rawTree)]
-    }
-    isLoading.value=false
-  }
-  catch (err) {
+    data.value = await window.electronAPI.dataOperation.loadTree()
+  } catch (err) {
     console.error('加载目录结构失败:', err)
   }
 }
 
-function onDragEnd(draggingNode: { data: RawNode }, dropNode: { data: RawNode }, dropType: 'prev' | 'inner' | 'next', event: DragEvent) {
-  // 处理数据
-  console.log('1', draggingNode.data);
-  console.log('2', dropNode);
-  console.log('3', dropType);
-  console.log('4', event);
-  // 不需要return
-}
 
 const allowDrop = (draggingNode: { data: RawNode }, dropNode: { data: RawNode }, dropType: 'prev' | 'inner' | 'next') => {
-  console.log('拖拽节点:', draggingNode.data)
-  console.log('目标节点:', dropNode.data)
-  console.log('目标是否有 children:', Array.isArray(dropNode.data.children))
-  console.log('放置类型:', dropType)
+  console.log("drag:", draggingNode.data)
+  console.log("drop:", dropNode.data)
   return dropType === 'inner'
 }
 
-const beforeDrop = (draggingNode: { data: RawNode }, dropNode: { data: RawNode }, dropType: 'prev' | 'inner' | 'next') => {
-  if (dropType !== 'inner') {
-    return false; // 阻止拖放
-  }
-  return true;
+const enter = (dragNode: { data: RawNode }, dropNode: { data: RawNode }, event:any) => {
+  console.log("drag:", dragNode.data)
+  console.log("drop:", dropNode.data)
+  console.log("event:", event)
 }
-
-const handleDragOver = (e: DragEvent) => {
-  // 如果拖动目标不是内部，手动阻止
-  const target = e.target as HTMLElement;
-  if (!target.closest('.el-tree-node__content')) {
-    console.log("prevent")
-    e.preventDefault();
-    return;
-  }
-};
 
 
 // 页面弹窗
@@ -123,16 +86,26 @@ function onRightClick(e: MouseEvent) {
   })
 }
 
+// 动态切换icon
+function iconSwitch(label: string) {
+  const suffix = label?.split('.').pop()
+  return ['md', 'docx', 'txt', 'ppt', 'pptx', 'xlsx', 'pdf'].includes(suffix) ? suffix : 'zip'
+}
+
+function levelSwitch(level: string) {
+  console.log("level"+level)
+  return "level" + level
+}
 
 // 页面加载后调用
 onMounted(() => {
-  loadTree()
+  load()
 })
 
 </script>
 
 <template>
-  <div class="window-detail-wrapper" v-resizable="{ min: 180, max: 600 }" @contextmenu="onRightClick">
+  <div class="window-detail-wrapper" v-resizable="{ min: 180, max: 600 }">
     <div class="window-detail">
       <input class="file-tree-filter" v-model="filterText" placeholder="Filter keyword"/>
       <el-tree
@@ -143,13 +116,26 @@ onMounted(() => {
           :data="data"
           :props="defaultProps"
           draggable
-          highlight-current
           :filter-node-method="filterNode"
           :allow-drop="allowDrop"
-          :before-drop="beforeDrop"
-          @dragover="handleDragOver"
-          @node-drag-end="onDragEnd"
-      />
+          @node-drag-enter="enter"
+          @node-contextmenu="onRightClick"
+          :indent="16"
+      >
+        <template #default="{ node, data }">
+          <div class="test">
+            <svg class="icon" aria-hidden="true" v-show="data.isLeaf">
+              <use :xlink:href="'#icon-' + iconSwitch(data.label)"></use>
+            </svg>
+            <svg class="icon" aria-hidden="true" v-show="!data.isLeaf">
+              <use :xlink:href="'#icon-' + levelSwitch(node.level)"></use>
+            </svg>
+            <span>
+               {{ data.label }}
+            </span>
+          </div>
+        </template>
+      </el-tree>
     </div>
   </div>
 </template>
@@ -193,15 +179,24 @@ onMounted(() => {
   user-select: none;
 }
 
+.icon {
+  width: 16px;
+  height: 16px;
+  vertical-align: -0.15em;
+  align-items: center;
+  fill: currentColor;
+  overflow: hidden;
+}
+
+/* 关闭拖拽线 */
 ::v-deep(.el-tree__drop-indicator) {
   display: none !important;
 }
 
 
-/* 重置 el-tree 节点内容的 margin 和 padding */
+/* 相当于节点 */
 ::v-deep(.el-tree-node__content) {
-  margin: 0 !important;
-  padding: 6px 12px !important; /* 内边距让内容舒适 */
+  margin-top: 8px;
   cursor: pointer;
   border-radius: 6px; /* 圆角 */
   transition:
@@ -219,29 +214,20 @@ onMounted(() => {
   background-color: #cde1ff;
 }
 
-/* 重置展开箭头的 margin 和 padding */
-::v-deep(.el-tree-node__expand-icon) {
-  margin: 7px;
-  padding: 0 !important;
-}
-
-/* 子节点容器：去除顶部 margin，避免间距叠加 */
-::v-deep(.el-tree-node__children) {
-  margin-left: 12px;
-  margin-top: 0 !important; /* 这里去掉，保证层级间距只靠节点 margin 控制 */
-  padding: 0 !important;
-}
-
-/* 节点统一上下间距 */
-::v-deep(.el-tree-node) {
-  margin: 8px 0; /* 节点上下间距一致 */
-}
-
-/* 当前选中节点样式 */
+/* el-tree-node是节点即选中节点，但选中节点可能包含孙元素，因此用大于符号选中直接子元素 */
 ::v-deep(.el-tree-node.is-current > .el-tree-node__content) {
-  background-color: var(--icon-active-color, #a3c1ff);
+  background-color: #a3c1ff;
   box-shadow: rgba(0, 0, 0, 0.12) 0 2px 4px; /* 轻阴影 */
   border-radius: 6px; /* 保持圆角 */
+}
+
+/* el-tree-node是节点即选中节点，但选中节点可能包含孙元素，因此用大于符号选中直接子元素 */
+::v-deep(.el-tree-node.is-drop-inner > .el-tree-node__content) {
+  background-color: transparent;           /* 取消背景色 */
+  border: 2px dashed #409eff;               /* 蓝色虚线边框 */
+  box-shadow: none;                         /* 去掉阴影 */
+  border-radius: 6px;                       /* 保持圆角 */
+  transition: border-color 0.3s ease;      /* 动画效果 */
 }
 </style>
 
