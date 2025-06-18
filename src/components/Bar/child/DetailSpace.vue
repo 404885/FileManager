@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import {ref, watch, onMounted } from 'vue'
 import { openMenu } from "@/utils/component/Menu.ts";
+import Icon from "@/components/Icon.vue";
+import path from "node:path";
 
 // 定义tree数据传入
 interface TreeNode {
@@ -8,19 +10,12 @@ interface TreeNode {
   children?: TreeNode[]
   path: string
 }
-// 定义后端数据传入类型
-interface RawNode {
-  name: string
-  path: string
-  children?: RawNode[]
-}
 
 interface ElTreeNode {
   id: number;
   label: string;
   children?: ElTreeNode[];
   isLeaf?: boolean;
-  // 可按需加其他字段，如 fullPath、size 等
   fullPath?: string;
   size?: number;
 }
@@ -64,38 +59,30 @@ async function load() {
 }
 
 
-const allowDrop = (draggingNode: { data: RawNode }, dropNode: { data: RawNode }, dropType: 'prev' | 'inner' | 'next') => {
+const allowDrop = (draggingNode: { data: ElTreeNode }, dropNode: { data: ElTreeNode }, dropType: 'prev' | 'inner' | 'next') => {
   console.log("drag:", draggingNode.data)
   console.log("drop:", dropNode.data)
+  if(draggingNode.data.id == dropNode.data.id) {
+    return false
+  }
   return dropType === 'inner'
-}
-
-const enter = (dragNode: { data: RawNode }, dropNode: { data: RawNode }, event:any) => {
-  console.log("drag:", dragNode.data)
-  console.log("drop:", dropNode.data)
-  console.log("event:", event)
 }
 
 
 // 页面弹窗
-function onRightClick(e: MouseEvent) {
+function onRightClick(e: MouseEvent, data: ElTreeNode) {
   e.preventDefault()
   openMenu({
     positionX: e.clientX,
     positionY: e.clientY,
   })
+  console.log(data)
+  treeRef.value?.setCurrentKey(data.id)
 }
 
-// 动态切换icon
-function iconSwitch(label: string) {
-  const suffix = label?.split('.').pop()
-  return ['md', 'docx', 'txt', 'ppt', 'pptx', 'xlsx', 'pdf'].includes(suffix) ? suffix : 'zip'
-}
 
-function levelSwitch(level: string) {
-  console.log("level"+level)
-  return "level" + level
-}
+
+
 
 // 页面加载后调用
 onMounted(() => {
@@ -108,28 +95,25 @@ onMounted(() => {
   <div class="window-detail-wrapper" v-resizable="{ min: 180, max: 600 }">
     <div class="window-detail">
       <input class="file-tree-filter" v-model="filterText" placeholder="Filter keyword"/>
+      <div class="default">默认收藏</div>
+
       <el-tree
           v-loading="isLoading"
           element-loading-text="加载数据中"
           ref="treeRef"
           class="file-tree"
           :data="data"
+          node-key="id"
           :props="defaultProps"
           draggable
           :filter-node-method="filterNode"
           :allow-drop="allowDrop"
-          @node-drag-enter="enter"
           @node-contextmenu="onRightClick"
           :indent="16"
       >
         <template #default="{ node, data }">
           <div class="test">
-            <svg class="icon" aria-hidden="true" v-show="data.isLeaf">
-              <use :xlink:href="'#icon-' + iconSwitch(data.label)"></use>
-            </svg>
-            <svg class="icon" aria-hidden="true" v-show="!data.isLeaf">
-              <use :xlink:href="'#icon-' + levelSwitch(node.level)"></use>
-            </svg>
+            <Icon :label="data.label" :is-leaf="data.isLeaf" :level="String(node.level)"/>
             <span>
                {{ data.label }}
             </span>
@@ -179,14 +163,7 @@ onMounted(() => {
   user-select: none;
 }
 
-.icon {
-  width: 16px;
-  height: 16px;
-  vertical-align: -0.15em;
-  align-items: center;
-  fill: currentColor;
-  overflow: hidden;
-}
+
 
 /* 关闭拖拽线 */
 ::v-deep(.el-tree__drop-indicator) {

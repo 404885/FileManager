@@ -45,12 +45,14 @@ function handleClick(e: MouseEvent) {
 onMounted(async () => {
   await nextTick()
   adjustPosition()
-  document.addEventListener('click', handleClick)
+  document.addEventListener('mousedown', handleClick)
 })
 
 onBeforeUnmount(() => {
-  document.removeEventListener('click', handleClick)
+  document.removeEventListener('mousedown', handleClick)
 })
+
+
 
 // 监听位置变化后重新调整
 watch(() => [props.positionX, props.positionY], async () => {
