@@ -5,6 +5,7 @@ import FileAddDialog from "../../components/Dialog/child/FileAddDialog.vue";
 import FileEditDialog from "@/components/Dialog/child/FileEditDialog.vue";
 import SettingDialog from "../../components/Dialog/child/SettingDialog.vue";
 import UserDialog from "../../components/Dialog/child/UserDialog.vue";
+import Dialog from "../../components/Dialog/child/Dialog.vue";
 
 
 let DialogMap = {
@@ -12,6 +13,7 @@ let DialogMap = {
     editFile: FileEditDialog,
     setting: SettingDialog,
     user: UserDialog,
+    dialog: Dialog,
 }
 
 

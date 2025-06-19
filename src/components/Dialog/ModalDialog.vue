@@ -31,6 +31,7 @@ function closeDialog() {
   z-index: 10000;
 }
 
+
 .dialog-content {
   background: white;
   border-radius: 10px;
