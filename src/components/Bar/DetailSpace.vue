@@ -109,35 +109,9 @@ onMounted(() => {
   <div class="window-detail-wrapper" v-resizable="{ min: 180, max: 600 }">
     <div class="window-detail">
       <input class="detail-filter" v-model="filterText" placeholder="Filter keyword"/>
-      <div class="detail-content">
-        <div class="detail-list">
-          <div class="folder">快捷节点</div>
-          <el-tree
-              v-loading="isLoading"
-              element-loading-text="加载数据中"
-              ref="treeRef"
-              class="file-tree"
-              :data="data"
-              node-key="id"
-              :props="defaultProps"
-              draggable
-              :allow-drop="allowDrop"
-              @node-contextmenu="onRightClick"
-              @node-drag-end="end"
-              :indent="16">
-            <template #default="{ node, data }">
-              <div class="test">
-                <Icon :label="data.label" :is-leaf="data.isLeaf" :level="String(node.level)"/>
-                <span>
-               {{ data.label }}
-            </span>
-              </div>
-            </template>
-          </el-tree>
-        </div>
-        <div class="detail-list">
-          <div class="folder">工作空间</div>
-          <el-tree
+      <div class="folder">快捷节点</div>
+      <div class="folder">工作空间</div>
+      <el-tree
               v-loading="isLoading"
               element-loading-text="加载数据中"
               ref="treeRef"
@@ -155,13 +129,11 @@ onMounted(() => {
               <div class="test">
                 <Icon :label="data.label" :is-leaf="data.isLeaf" :level="String(node.level)"/>
                 <span>
-               {{ data.label }}
-            </span>
+                  {{ data.label }}
+                </span>
               </div>
             </template>
           </el-tree>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -179,9 +151,8 @@ onMounted(() => {
   user-select: none;
   display: flex;
   flex-direction: column;
-  overflow: auto;
-  height: 100vh;
-  scrollbar-width: none;
+  height: calc(100vh - 33px);
+  overflow: hidden;
 }
 
 .detail-filter {
@@ -194,9 +165,6 @@ onMounted(() => {
   border-radius: 4px;
 }
 
-.detail-list{
-  height: auto;
-}
 
 .folder{
   font-size: 12px;
@@ -208,6 +176,7 @@ onMounted(() => {
 .file-tree {
   background: #f9fbfd;
   font-size: 14px;
+  flex: 1;
   color: #444;
   width: auto;
   overflow: auto;
