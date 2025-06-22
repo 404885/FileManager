@@ -113,7 +113,13 @@ function initDatabase() {
       connected_workspace INTEGER DEFAULT 1,
       associated_folder INTEGER DEFAULT 0,
       create_time INTEGER,
-      last_browse_time INTEGER
+      last_browse_time INTEGER,
+      FOREIGN KEY (connected_workspace)
+        REFERENCES workspace(id)
+        ON DELETE CASCADE,
+      FOREIGN KEY (associated_folder)
+        REFERENCES portfolio(id)
+        ON DELETE CASCADE
     )
   `).run();
   db.prepare(`
@@ -126,7 +132,13 @@ function initDatabase() {
       connected_workspace INTEGER DEFAULT 1,
       associated_folder INTEGER DEFAULT 0,
       create_time INTEGER,
-      last_browse_time INTEGER
+      last_browse_time INTEGER,
+      FOREIGN KEY (connected_workspace)
+        REFERENCES workspace(id)
+        ON DELETE CASCADE,
+      FOREIGN KEY (associated_folder)
+        REFERENCES portfolio(id)
+        ON DELETE CASCADE
     )
   `).run();
   console.log("DataBase has initialized", dbPath);

@@ -2,7 +2,9 @@
 import { ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 
 const emit = defineEmits(['close'])
+
 const container = ref<HTMLElement | null>(null)
+
 const props = defineProps({
   positionX: { type: Number },
   positionY: { type: Number },
@@ -68,19 +70,30 @@ watch(() => [props.positionX, props.positionY], async () => {
         class="menu-context"
         :style="{ top: `${computedY}px`, left: `${computedX}px` }"
         ref="container">
-      这是上下文菜单
+      <div class="context-file">
+
+      </div>
+      <div class="context-folder">
+        <div class="context-item">新建文件</div>
+        <div class="context-item">新建文件夹</div>
+        <div class="context-item">重命名</div>
+        <div class="context-item disabled">移动</div>
+        <div class="context-item">属性</div>
+        <div class="context-item danger">删除</div>
+      </div>
+
+
     </div>
 </template>
 
 <style scoped>
 .menu-context {
   position: absolute;
-  width: 200px;
-  height: 150px;
-  padding: 12px 16px;
+  width: 180px;
+  padding: 10px;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.5);  /* 半透明白 */
-  backdrop-filter: blur(12px);            /* 背景模糊 */
+  backdrop-filter: blur(20px);            /* 背景模糊 */
   -webkit-backdrop-filter: blur(12px);    /* 兼容 Safari */
   border: 1px solid rgba(255, 255, 255, 0.4); /* 半透明边框 */
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
@@ -92,7 +105,31 @@ watch(() => [props.positionX, props.positionY], async () => {
   transition: box-shadow 0.3s ease;
 }
 
-.menu-context:hover {
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+.context-item {
+  padding: 6px 6px 6px 10px;
+  margin: 3px 0;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  color: #000000;
+  background: transparent;
+  transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+  user-select: none;
 }
+
+.context-item.danger {
+  color: #e74c3c;
+}
+
+.context-item:hover {
+  background-color: #e6f0ff;
+  color: #007aff;
+}
+
+.context-item.danger:hover {
+  background-color: #fdecea;
+  color: #d32f2f;
+}
+
+
 </style>

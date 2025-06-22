@@ -19,36 +19,31 @@
 }
 
 
-
-
+/* ---------------------------------------------------- */
+/* el tree组件修改 */
 .el-tree__drop-indicator {
     display: none !important;
 }
 .el-tree-node__content:hover{
     background-color: transparent;
 }
-.el-tree-node__content:active{
-    transform: scale(0.985); /* 轻微下移且稍微缩小 */
-    /*box-shadow: rgba(0, 0, 0, 0.12) 0 1px 1px;*/
-    background-color: transparent;
-}
+
 
 /* 取消移动时的背景色 */
 .el-tree-node:focus > .el-tree-node__content{
     background-color: transparent;           /* 取消背景色 */
 }
-/* 选中将要拖入的元素 */
+/* 拖入时：细灰边 + 浅蓝背景 */
 .el-tree-node.is-drop-inner > .el-tree-node__content {
-    border: 1px dashed #999;
-    background-color: #f5f5f5;
+    background-color: #f5f9ff;
+    border: 1px solid #a3cfff; /* 柔和蓝色边框 */
     border-radius: 4px;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, border-color 0.2s;
 }
-/* 当前选中的节点高亮 */
+/* 当前选中节点：浅蓝背景 + 主色边框 */
 .el-tree-node.is-current > .el-tree-node__content {
-    background-color: #f5f5f5;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    box-shadow: 0 0 4px rgba(0, 0, 0, 0.06);
+    background-color: #e6f0ff;
+    border-radius: 4px;
+    box-shadow: none;
     transition: all 0.2s ease;
 }
