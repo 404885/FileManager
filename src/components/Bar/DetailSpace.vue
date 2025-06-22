@@ -20,7 +20,8 @@ const isLoading = ref<boolean>(false);
 const hasAlerted = ref(false)
 //当前工作空间
 const currentWorkspace = ref<number>(1)
-
+// 计时器
+let timer: ReturnType<typeof setTimeout> | null = null
 
 // el-tree props 配置
 const defaultProps = {
@@ -29,18 +30,6 @@ const defaultProps = {
   path: 'path',
 }
 
-watch(()=>store.getChangedFolder, async (_val) => {
-  store.setChangedFolder(-1)
-  await onSearch(currentWorkspace.value,filterText.value);
-})
-
-let timer: ReturnType<typeof setTimeout> | null = null
-watch(filterText, async (val) => {
-  if (timer) clearTimeout(timer)
-  timer = setTimeout(async () => {
-    await onSearch(currentWorkspace.value, val);
-  }, 300)
-})
 
 
 async function onSearch(workspace:number,keyword:string){
@@ -48,6 +37,7 @@ async function onSearch(workspace:number,keyword:string){
   data.value = await window.electronAPI.dataOperation.load(workspace,keyword)
   isLoading.value = false
 }
+
 async function load() {
   try {
     isLoading.value = true
@@ -61,12 +51,12 @@ async function load() {
 
 
 const allowDrop = (draggingNode: { data: ElTreeNode }, dropNode: { data: ElTreeNode }, dropType: 'prev' | 'inner' | 'next') => {
-  if(draggingNode.data.id == dropNode.data.id) {
+  // 给拖动节点添加高亮
+  treeRef.value?.setCurrentKey(draggingNode.data.uniqueKey)
+  if(draggingNode.data.uniqueKey == dropNode.data.uniqueKey) {
     return false
   }
   if (dropType === 'inner' && dropNode.data.isLeaf) {
-    console.log(dropNode.data)
-
     return false
   }
   return dropType === 'inner'
@@ -74,6 +64,7 @@ const allowDrop = (draggingNode: { data: ElTreeNode }, dropNode: { data: ElTreeN
 
 
 const end = (_draggingNode: { data: ElTreeNode }, dropNode: { data: ElTreeNode }, _e: any, _el:any) => {
+  // 拖拽时间不允许，拖入节点为空
   if (!dropNode){
     if (!hasAlerted.value) {
       showNotification({
@@ -90,14 +81,18 @@ const end = (_draggingNode: { data: ElTreeNode }, dropNode: { data: ElTreeNode }
   }
 }
 
+
+
 const drop = async (draggingNode: {data: ElTreeNode} , dropNode: {data: ElTreeNode}, _dropType: 'inner'|'prev'|'next', _event: DragEvent)=>{
-  const tableName=draggingNode.data.isLeaf?'file':'portfolio'
+  const tableName = draggingNode.data.isLeaf?'file':'portfolio'
   const parentId = dropNode.data.id === 0 ? null : dropNode.data.id;
-  const result=await window.electronAPI.dataOperation.execute(
+  const result = await window.electronAPI.dataOperation.execute(
       `UPDATE ${tableName} SET associated_folder = ? WHERE ID = ?;`,
       [parentId,draggingNode.data.id]
   )
+  // 更新成功
   if (result){
+    // 通过pinia设置更新状态
     store.setChangedFolder(dropNode.data.id)
     return;
   }
@@ -110,9 +105,23 @@ function onRightClick(e: MouseEvent, data: ElTreeNode) {
     positionX: e.clientX,
     positionY: e.clientY,
   })
-  console.log(data)
-  treeRef.value?.setCurrentKey(data.id)
+  treeRef.value?.setCurrentKey(data.uniqueKey)
 }
+
+
+// 搜索防抖
+watch(filterText, async (val) => {
+  if (timer) clearTimeout(timer)
+  timer = setTimeout(async () => {
+    await onSearch(currentWorkspace.value, val);
+  }, 300)
+})
+
+// 通过getter监听state值变化后重设为默认值
+watch(()=>store.getChangedFolder, async (_val) => {
+  store.setChangedFolder(-1)
+  await onSearch(currentWorkspace.value,filterText.value);
+})
 
 onMounted(()=>{
   load()
@@ -121,10 +130,15 @@ onMounted(()=>{
 </script>
 
 <template>
-  <div class="window-detail-wrapper" v-resizable="{ min: 20, max: 600 }">
+  <div class="window-detail-wrapper" v-resizable="{ min: 180, max: 600 }">
     <div class="window-detail">
       <input class="detail-filter" v-model="filterText" placeholder="Filter keyword"/>
       <div class="folder">快捷节点</div>
+      <div class="folders">全部文档</div>
+      <div class="folders">搜索结果</div>
+      <div class="folders">收藏夹</div>
+      <div class="folders">回收站</div>
+      <div class="folders">草稿箱</div>
       <div class="folder">工作空间</div>
       <el-tree
               v-loading="isLoading"
@@ -187,7 +201,18 @@ onMounted(()=>{
   color: grey;
   margin-bottom: 4px;
   margin-top: 4px;
+  text-wrap: nowrap;
+  overflow: hidden;
 }
+
+.folders{
+  font-size: 14px;
+  color: #444;
+  align-items: center;
+  cursor: pointer;
+  margin-left: 16px;
+}
+
 /* 树背景和字体 */
 .file-tree {
   background: #f9fbfd;

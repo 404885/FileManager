@@ -9,7 +9,7 @@ const routers = createRouter({
         {
             path: '/space',
             name: 'space',
-            component: () => import('../view/index.vue'),
+            component: () => import('../view/IndexView.vue'),
             meta: {
                 DetailBar: 'space',
             }

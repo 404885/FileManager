@@ -3,16 +3,16 @@
 import {ArrowDownBold, Close, Plus, Search} from "@element-plus/icons-vue";
 import Tab from "@/components/tab/Tab.vue";
 import {computed, markRaw, reactive, ref, watch} from "vue";
-import Index from "@/view/index.vue";
+import IndexView from "@/view/IndexView.vue";
 
 const active = ref(0)
 
-const tabs = reactive([{ id: crypto.randomUUID(), title: '首页', icon: markRaw(Search), component:markRaw(Index)}]);
+const tabs = reactive([{ id: crypto.randomUUID(), title: '首页', icon: markRaw(Search), component:markRaw(IndexView)}]);
 const currentComponent = computed(() => tabs[active.value]?.component)
 
 watch(tabs, (newVal) => {
   if (newVal.length === 0){
-    newVal.push({ id: crypto.randomUUID(), title: '首页', icon: markRaw(Search), component:markRaw(Index)})
+    newVal.push({ id: crypto.randomUUID(), title: '首页', icon: markRaw(Search), component:markRaw(IndexView)})
     active.value = 0
   }
 })
@@ -27,7 +27,7 @@ const handleTabClose = (index: number) => {
 }
 
 const handleAddTab = () => {
-  tabs.push({ id: crypto.randomUUID(), title: '首页', icon: markRaw(Search), component:markRaw(Index)})
+  tabs.push({ id: crypto.randomUUID(), title: '首页', icon: markRaw(Search), component:markRaw(IndexView)})
 };
 
 </script>

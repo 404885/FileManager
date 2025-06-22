@@ -10,6 +10,7 @@ export interface ElTreeNode {
     marked?: 0 | 1;
     associated_folder: number | null;
     connected_workspace: number;
+    uniqueKey?: string;
 }
 
 export interface FileNode {
