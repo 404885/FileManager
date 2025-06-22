@@ -41,7 +41,7 @@ export function initDatabase() {
       name TEXT NOT NULL,
       type TEXT NOT NULL DEFAULT 'folder',
       connected_workspace INTEGER DEFAULT 1,
-      associated_folder INTEGER DEFAULT 0,
+      associated_folder INTEGER NULL DEFAULT NULL,
       create_time INTEGER,
       last_browse_time INTEGER,
       FOREIGN KEY (connected_workspace)
@@ -60,7 +60,7 @@ export function initDatabase() {
       file_path TEXT NOT NULL,
       type TEXT NOT NULL,
       connected_workspace INTEGER DEFAULT 1,
-      associated_folder INTEGER DEFAULT 0,
+      associated_folder INTEGER NULL DEFAULT NULL,
       create_time INTEGER,
       last_browse_time INTEGER,
       FOREIGN KEY (connected_workspace)
@@ -229,7 +229,7 @@ export function RegisterDataBaseOperations() {
                 id: number;
                 name: string;
                 type: string;
-                associated_folder: number;
+                associated_folder: number|null;
                 create_time: number;
                 last_browse_time: number;
                 connected_workspace:number;
@@ -244,7 +244,7 @@ export function RegisterDataBaseOperations() {
                 file_size: number;
                 file_path: string;
                 type: string;
-                associated_folder: number;
+                associated_folder: number|null;
                 connected_workspace:number;
                 create_time: number;
                 last_browse_time: number;
@@ -257,11 +257,12 @@ export function RegisterDataBaseOperations() {
             const childrenMap = new Map<number, ElTreeNode[]>();
 
             // helper：往 map 里 push
-            function pushChild(parentId: number, node: ElTreeNode) {
-                if (!childrenMap.has(parentId)) {
-                    childrenMap.set(parentId, []);
+            function pushChild(parentId: number | null, node: ElTreeNode) {
+                const key = parentId ?? 0;            // null 或者 undefined 都归为 0
+                if (!childrenMap.has(key)) {
+                    childrenMap.set(key, []);
                 }
-                childrenMap.get(parentId)!.push(node);
+                childrenMap.get(key)!.push(node);
             }
 
             // 3. 把所有目录先插入 map
@@ -404,9 +405,12 @@ export function RegisterDataBaseOperations() {
         const childrenMap = new Map<number, ElTreeNode[]>();
         childrenMap.set(0, []);
         for (const node of nodes) {
-            const pid = node.associated_folder;
-            if (!childrenMap.has(pid)) childrenMap.set(pid, []);
-            childrenMap.get(pid)!.push(node);
+            // 把 null 或 undefined 的父 ID 归到 0
+            const key = node.associated_folder ?? 0;
+            if (!childrenMap.has(key)) {
+                childrenMap.set(key, []);
+            }
+            childrenMap.get(key)!.push(node);
         }
 
         // —— 递归生成树 —— //

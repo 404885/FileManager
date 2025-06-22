@@ -92,9 +92,10 @@ const end = (_draggingNode: { data: ElTreeNode }, dropNode: { data: ElTreeNode }
 
 const drop = async (draggingNode: {data: ElTreeNode} , dropNode: {data: ElTreeNode}, _dropType: 'inner'|'prev'|'next', _event: DragEvent)=>{
   const tableName=draggingNode.data.isLeaf?'file':'portfolio'
+  const parentId = dropNode.data.id === 0 ? null : dropNode.data.id;
   const result=await window.electronAPI.dataOperation.execute(
       `UPDATE ${tableName} SET associated_folder = ? WHERE ID = ?;`,
-      [dropNode.data.id,draggingNode.data.id]
+      [parentId,draggingNode.data.id]
   )
   if (result){
     store.setChangedFolder(dropNode.data.id)
@@ -120,7 +121,7 @@ onMounted(()=>{
 </script>
 
 <template>
-  <div class="window-detail-wrapper" v-resizable="{ min: 180, max: 600 }">
+  <div class="window-detail-wrapper" v-resizable="{ min: 20, max: 600 }">
     <div class="window-detail">
       <input class="detail-filter" v-model="filterText" placeholder="Filter keyword"/>
       <div class="folder">快捷节点</div>

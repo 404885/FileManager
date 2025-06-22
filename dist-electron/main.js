@@ -111,7 +111,7 @@ function initDatabase() {
       name TEXT NOT NULL,
       type TEXT NOT NULL DEFAULT 'folder',
       connected_workspace INTEGER DEFAULT 1,
-      associated_folder INTEGER DEFAULT 0,
+      associated_folder INTEGER NULL DEFAULT NULL,
       create_time INTEGER,
       last_browse_time INTEGER,
       FOREIGN KEY (connected_workspace)
@@ -130,7 +130,7 @@ function initDatabase() {
       file_path TEXT NOT NULL,
       type TEXT NOT NULL,
       connected_workspace INTEGER DEFAULT 1,
-      associated_folder INTEGER DEFAULT 0,
+      associated_folder INTEGER NULL DEFAULT NULL,
       create_time INTEGER,
       last_browse_time INTEGER,
       FOREIGN KEY (connected_workspace)
@@ -272,10 +272,11 @@ function RegisterDataBaseOperations() {
           `).all();
       const childrenMap = /* @__PURE__ */ new Map();
       function pushChild(parentId, node) {
-        if (!childrenMap.has(parentId)) {
-          childrenMap.set(parentId, []);
+        const key = parentId ?? 0;
+        if (!childrenMap.has(key)) {
+          childrenMap.set(key, []);
         }
-        childrenMap.get(parentId).push(node);
+        childrenMap.get(key).push(node);
       }
       for (const p of portfolios) {
         const node = {
@@ -400,9 +401,11 @@ function RegisterDataBaseOperations() {
     const childrenMap = /* @__PURE__ */ new Map();
     childrenMap.set(0, []);
     for (const node of nodes) {
-      const pid = node.associated_folder;
-      if (!childrenMap.has(pid)) childrenMap.set(pid, []);
-      childrenMap.get(pid).push(node);
+      const key = node.associated_folder ?? 0;
+      if (!childrenMap.has(key)) {
+        childrenMap.set(key, []);
+      }
+      childrenMap.get(key).push(node);
     }
     function buildTree(parentId) {
       const list = childrenMap.get(parentId) || [];

@@ -11,7 +11,6 @@ const store = useTreeCondition()
 
 async function openAndReadFile() {
   const result = await window.electronAPI.openFileDialog()
-  console.log(result)
   if (result.canceled) return;
   // 保存结构到数据库
   const data ={
@@ -42,7 +41,6 @@ async function openAndReadFile() {
 
 async function openAndSaveFolder() {
   const result = await window.electronAPI.openDirectoryDialog();
-  console.log(result)
   if (result.canceled) return;
   // 保存结构到数据库
   const success=await window.electronAPI.dataOperation.saveDirectoryToDb(result.files,1);

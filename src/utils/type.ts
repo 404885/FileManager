@@ -8,7 +8,7 @@ export interface ElTreeNode {
     type: string;
     isLeaf: 0 | 1;
     marked?: 0 | 1;
-    associated_folder: number;
+    associated_folder: number | null;
     connected_workspace: number;
 }
 
