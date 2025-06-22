@@ -1,14 +1,5 @@
 import { ipcRenderer, contextBridge } from 'electron'
-
-interface FileNode {
-  name: string
-  path: string
-  size?: number
-  birthtime?: Date
-  atime?: Date
-  mtime?: Date
-  children?: FileNode[] // 递归类型，表示目录结构
-}
+import {FileNode} from "@/utils/type.ts";
 
 
 contextBridge.exposeInMainWorld("electronAPI", {
@@ -29,10 +20,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
         ipcRenderer.invoke('queryOne', sql, params),
     execute: (sql: string, params: any[] = []) =>
         ipcRenderer.invoke('execute', sql, params),
-    saveDirectoryToDb: (tree:FileNode) =>
-        ipcRenderer.invoke('saveDirectoryToDb', tree),
-    saveProgress: (callback:any)=>
-        ipcRenderer.on('saveDirectoryToDb-progress',callback),
-    loadTree: () => ipcRenderer.invoke('load-tree'),
+    saveFileToDb: (file:FileNode,workspace:number) =>
+        ipcRenderer.invoke('saveFileToDb', file, workspace),
+    saveDirectoryToDb: (directory:FileNode,workspace:number) =>
+        ipcRenderer.invoke('saveDirectoryToDb', directory, workspace),
+    loadAll: () => ipcRenderer.invoke('loadAll'),
+    load: (workspace:number,keyword?:string) => ipcRenderer.invoke('load',workspace,keyword),
   }
 })

@@ -30,7 +30,8 @@ function RegisterIpcEvent() {
     const filePath = filePaths[0];
     const content = await fs.readFile(filePath, "utf-8");
     const stats = await fs.stat(filePath);
-    return { canceled: false, filePath, content, stats };
+    const fileName = path.basename(filePath);
+    return { canceled: false, name: fileName, path: filePath, content, stats };
   });
   ipcMain.handle("open-directory-dialog", async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog({
@@ -86,6 +87,7 @@ let db = null;
 function initDatabase() {
   const dbPath = path$1.join(process.cwd(), "FileManager.db");
   db = new Database(dbPath);
+  db.exec(`PRAGMA foreign_keys = ON;`);
   db.prepare(`
     CREATE TABLE IF NOT EXISTS workspace (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -107,6 +109,7 @@ function initDatabase() {
     CREATE TABLE IF NOT EXISTS portfolio (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
+      type TEXT NOT NULL DEFAULT 'folder',
       connected_workspace INTEGER DEFAULT 1,
       associated_folder INTEGER DEFAULT 0,
       create_time INTEGER,
@@ -141,15 +144,45 @@ function RegisterDataBaseOperations() {
     if (!db) initDatabase();
     return db.prepare(sql).run(params);
   });
-  ipcMain.handle("saveDirectoryToDb", async (e, files) => {
+  ipcMain.handle("saveFileToDb", async (_e, file, workspace) => {
+    var _a, _b;
+    if (!db) initDatabase();
+    const now = Date.now();
+    try {
+      const stmt = db.prepare(`
+              INSERT INTO file
+                (name, connected_workspace, file_size, file_path, type, create_time, last_browse_time)
+              VALUES (?, ?, ?, ?, ?, ?, ?)
+            `);
+      const result = stmt.run(
+        file.name,
+        workspace,
+        file.size ?? 0,
+        file.path,
+        path$1.extname(file.name).substring(1),
+        ((_a = file.birthtime) == null ? void 0 : _a.getTime()) ?? now,
+        ((_b = file.atime) == null ? void 0 : _b.getTime()) ?? now
+      );
+      if (result.changes === 1) {
+        return { success: true, lastInsertRowid: result.lastInsertRowid };
+      } else {
+        return { success: false, reason: "no rows inserted" };
+      }
+    } catch (err) {
+      console.error("插入文件失败：", err);
+      return { success: false, error: err.message };
+    }
+  });
+  ipcMain.handle("saveDirectoryToDb", async (_e, files, workspace) => {
     var _a, _b;
     if (!db) initDatabase();
     const now = Date.now();
     const rootInfo = db.prepare(`
-        INSERT INTO portfolio (name, create_time, last_browse_time)
-        VALUES (?, ?, ?)
+        INSERT INTO portfolio (name, connected_workspace, create_time, last_browse_time)
+        VALUES (?, ?, ?, ?)
       `).run(
       files.name,
+      workspace,
       ((_a = files.birthtime) == null ? void 0 : _a.getTime()) ?? now,
       ((_b = files.atime) == null ? void 0 : _b.getTime()) ?? now
     );
@@ -171,10 +204,11 @@ function RegisterDataBaseOperations() {
           if (node.children && node.children.length > 0) {
             const info = db.prepare(`
                             INSERT INTO portfolio
-                              (name, associated_folder, create_time, last_browse_time)
-                            VALUES (?, ?, ?, ?)
+                              (name, connected_workspace, associated_folder, create_time, last_browse_time)
+                            VALUES (?, ?, ?, ?, ?)
                           `).run(
               node.name,
+              workspace,
               parentId,
               ((_a2 = node.birthtime) == null ? void 0 : _a2.getTime()) ?? now,
               ((_b2 = node.atime) == null ? void 0 : _b2.getTime()) ?? now
@@ -187,10 +221,11 @@ function RegisterDataBaseOperations() {
           } else {
             db.prepare(`
                         INSERT INTO file
-                          (name, file_size, file_path, type, associated_folder, create_time, last_browse_time)
-                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                          (name, connected_workspace, file_size, file_path, type, associated_folder, create_time, last_browse_time)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                       `).run(
               node.name,
+              workspace,
               node.size ?? 0,
               node.path,
               path$1.extname(node.name).substring(1),
@@ -207,30 +242,21 @@ function RegisterDataBaseOperations() {
       }
     }
     function processQueue() {
-      if (queue.length === 0) {
-        e.sender.send("saveDirectoryToDb-progress", { done: true });
-        return;
-      }
       const batch = queue.splice(0, 100);
       insertBatch(batch);
-      e.sender.send("saveDirectoryToDb-progress", {
-        remaining: queue.length
-      });
       setImmediate(processQueue);
     }
     processQueue();
     return { success: true };
   });
-  ipcMain.handle("load-tree", () => {
+  ipcMain.handle("loadAll", () => {
     if (!db) initDatabase();
     function loadTreeFromDb() {
       const portfolios = db.prepare(`
-            SELECT id, name, associated_folder, create_time, last_browse_time
-            FROM portfolio
+            SELECT * ,0 AS isLeaf FROM portfolio
           `).all();
       const files = db.prepare(`
-            SELECT id, name, file_size, file_path, type, associated_folder, create_time, last_browse_time
-            FROM file
+            SELECT *, 1 AS isLeaf FROM file
           `).all();
       const childrenMap = /* @__PURE__ */ new Map();
       function pushChild(parentId, node) {
@@ -242,19 +268,28 @@ function RegisterDataBaseOperations() {
       for (const p of portfolios) {
         const node = {
           id: p.id,
-          label: p.name
+          label: p.name,
+          name: p.name,
+          type: p.type,
+          associated_folder: p.associated_folder,
+          isLeaf: p.isLeaf,
+          connected_workspace: p.connected_workspace
           // children 会在后面自动填充
         };
         pushChild(p.associated_folder, node);
       }
       for (const f of files) {
         const node = {
-          id: f.id + 1e6,
+          id: f.id,
           // 防止与目录 id 冲突，可选
           label: f.name,
-          isLeaf: true,
-          fullPath: f.file_path,
-          size: f.file_size
+          isLeaf: f.isLeaf,
+          file_path: f.file_path,
+          file_size: f.file_size,
+          associated_folder: f.associated_folder,
+          connected_workspace: f.connected_workspace,
+          name: f.name,
+          type: f.type
         };
         pushChild(f.associated_folder, node);
       }
@@ -271,6 +306,103 @@ function RegisterDataBaseOperations() {
       return buildTree(0);
     }
     return loadTreeFromDb();
+  });
+  ipcMain.handle("load", async (_e, workspace, keyword) => {
+    if (!db) initDatabase();
+    const safeKeyword = (keyword || "").trim();
+    const likePattern = `%${safeKeyword}%`;
+    let rows;
+    if (!safeKeyword) {
+      const portfolios = db.prepare(`
+              SELECT id, name, NULL AS file_size, NULL AS file_path, type,
+                     connected_workspace, associated_folder,
+                     create_time, last_browse_time,
+                     0 AS isLeaf, 0 AS marked
+              FROM portfolio
+              WHERE connected_workspace = ?
+            `).all(workspace);
+      const files = db.prepare(`
+              SELECT id, name, file_size, file_path, type,
+                     connected_workspace, associated_folder,
+                     create_time, last_browse_time,
+                     1 AS isLeaf, 0 AS marked
+              FROM file
+              WHERE connected_workspace = ?
+            `).all(workspace);
+      rows = [...portfolios, ...files];
+    } else {
+      const sql = `
+              WITH RECURSIVE result AS (
+                SELECT id, name, file_size, file_path, type,
+                       connected_workspace, associated_folder,
+                       create_time, last_browse_time,
+                       1 AS isLeaf, 1 AS marked
+                FROM file
+                WHERE connected_workspace = ? AND name LIKE ?
+        
+                UNION ALL
+        
+                SELECT id, name, NULL AS file_size, NULL AS file_path, type,
+                       connected_workspace, associated_folder,
+                       create_time, last_browse_time,
+                       0 AS isLeaf, 1 AS marked
+                FROM portfolio
+                WHERE connected_workspace = ? AND name LIKE ?
+        
+                UNION ALL
+        
+                SELECT p.id, p.name, NULL AS file_size, NULL AS file_path, p.type,
+                       p.connected_workspace, p.associated_folder,
+                       p.create_time, p.last_browse_time,
+                       0 AS isLeaf, 0 AS marked
+                FROM portfolio p
+                JOIN result r ON p.id = r.associated_folder
+                WHERE p.connected_workspace = ?
+              )
+              SELECT
+                id, name, file_size, file_path, type,
+                connected_workspace, associated_folder,
+                create_time, last_browse_time,
+                isLeaf,
+                MAX(marked) AS marked
+              FROM result
+              GROUP BY id;
+            `;
+      const stmt = db.prepare(sql);
+      rows = stmt.all(
+        workspace,
+        likePattern,
+        workspace,
+        likePattern,
+        workspace
+      );
+    }
+    const nodes = rows.map((row) => ({
+      ...row,
+      label: row.name,
+      isLeaf: Boolean(row.isLeaf),
+      uniqueKey: (row.isLeaf ? "f_" : "p_") + row.id,
+      // 无关键词时 marked 统一为 false；有关键词则用 SQL 标记
+      marked: Boolean(row.marked)
+    }));
+    const childrenMap = /* @__PURE__ */ new Map();
+    childrenMap.set(0, []);
+    for (const node of nodes) {
+      const pid = node.associated_folder;
+      if (!childrenMap.has(pid)) childrenMap.set(pid, []);
+      childrenMap.get(pid).push(node);
+    }
+    function buildTree(parentId) {
+      const list = childrenMap.get(parentId) || [];
+      for (const node of list) {
+        if (!node.isLeaf) {
+          const kids = buildTree(node.id);
+          if (kids.length) node.children = kids;
+        }
+      }
+      return list;
+    }
+    return buildTree(0);
   });
 }
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

@@ -15,8 +15,9 @@ electron.contextBridge.exposeInMainWorld("electronAPI", {
     queryAll: (sql, params = []) => electron.ipcRenderer.invoke("queryAll", sql, params),
     queryOne: (sql, params = []) => electron.ipcRenderer.invoke("queryOne", sql, params),
     execute: (sql, params = []) => electron.ipcRenderer.invoke("execute", sql, params),
-    saveDirectoryToDb: (tree) => electron.ipcRenderer.invoke("saveDirectoryToDb", tree),
-    saveProgress: (callback) => electron.ipcRenderer.on("saveDirectoryToDb-progress", callback),
-    loadTree: () => electron.ipcRenderer.invoke("load-tree")
+    saveFileToDb: (file, workspace) => electron.ipcRenderer.invoke("saveFileToDb", file, workspace),
+    saveDirectoryToDb: (directory, workspace) => electron.ipcRenderer.invoke("saveDirectoryToDb", directory, workspace),
+    loadAll: () => electron.ipcRenderer.invoke("loadAll"),
+    load: (workspace, keyword) => electron.ipcRenderer.invoke("load", workspace, keyword)
   }
 });

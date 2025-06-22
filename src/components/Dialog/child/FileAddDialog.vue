@@ -1,31 +1,66 @@
 <script setup lang="ts">
 
+import {ElNotification} from "element-plus";
+import {useTreeCondition} from "@/pinia/TreeCondition.ts";
+
 const props = defineProps({
   title: { type: String },
 })
 
+const store = useTreeCondition()
 
 async function openAndReadFile() {
   const result = await window.electronAPI.openFileDialog()
-  if (!result.canceled) {
-    const filePath:string = result.filePath ?? ''
-    const fileContent:string = result.content ?? ''
-    console.log(filePath, fileContent)
-    // 你也可以绑定内容到页面上
-  } else {
-    alert('用户取消了选择')
+  console.log(result)
+  if (result.canceled) return;
+  // 保存结构到数据库
+  const data ={
+    name:result.name,
+    path:result.path,
+    size:result.stats.size,
+    birthtime:result.stats.birthtime,
+    atime:result.stats.atime,
+  }
+  const callback=await window.electronAPI.dataOperation.saveFileToDb(data,1);
+
+  store.setChangedFolder(0)
+
+  if (callback.success){
+    ElNotification.success({
+      title:'成功',
+      message:'文件已经导入成功',
+      position:'bottom-right'
+    })
+  }else {
+    ElNotification.error({
+      title:'失败',
+      message:'文件导入失败',
+      position:'bottom-right'
+    })
   }
 }
 
 async function openAndSaveFolder() {
   const result = await window.electronAPI.openDirectoryDialog();
+  console.log(result)
   if (result.canceled) return;
   // 保存结构到数据库
-  const success=await window.electronAPI.dataOperation.saveDirectoryToDb(result.files);
+  const success=await window.electronAPI.dataOperation.saveDirectoryToDb(result.files,1);
+
+  store.setChangedFolder(0)
+
   if (success){
-    alert('导入成功')
+    ElNotification.success({
+      title:'成功',
+      message:'文件已经导入成功',
+      position:'bottom-right'
+    })
   }else {
-    alert('导入失败')
+    ElNotification.error({
+      title:'失败',
+      message:'文件导入失败',
+      position:'bottom-right'
+    })
   }
 }
 
@@ -41,8 +76,6 @@ async function openAndSaveFolder() {
       <div class="list-title">个人笔记</div>
       <div @click="openAndReadFile" class="list-add animate_button">导入文件</div>
       <div @click="openAndSaveFolder" class="list-add animate_button">导入文件夹</div>
-      <div @click="" class="list-add animate_button">dianji</div>
-      <div @click="" class="list-add animate_button">dianji</div>
     </div>
     <div class="fileAdd-list">
       <div class="list-title">文档管理</div>

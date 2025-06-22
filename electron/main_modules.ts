@@ -30,7 +30,9 @@ export function RegisterIpcEvent() {
         const filePath = filePaths[0]
         const content = await fs.readFile(filePath, 'utf-8')
         const stats = await fs.stat(filePath)
-        return { canceled: false, filePath, content, stats }
+
+        const fileName = path.basename(filePath)
+        return { canceled: false, name:fileName ,path:filePath, content:content, stats:stats }
     })
     ipcMain.handle('open-directory-dialog', async () => {
         const { canceled, filePaths } = await dialog.showOpenDialog({

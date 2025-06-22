@@ -1,28 +1,22 @@
 import path from 'path';
-import {ipcMain, IpcMainInvokeEvent } from 'electron';
+import {ipcMain, IpcMainInvokeEvent} from 'electron';
 import {createRequire} from 'module';
+import {ElTreeNode, FileNode} from "@/utils/type.ts";
+
 const require = createRequire(import.meta.url);
 const Database = require('better-sqlite3');
 
 
 let db: InstanceType<typeof Database> | null = null;
 
-interface FileNode {
-    name: string
-    path: string
-    size?: number
-    birthtime?: Date
-    atime?: Date
-    mtime?: Date
-    children?: FileNode[] // 递归类型，表示目录结构
-}
-
-
 export function initDatabase() {
     // const dbPath = path.join(app.getPath('userData'), 'FileManager.db');
     const dbPath = path.join(process.cwd(), 'FileManager.db');
 
     db = new Database(dbPath);
+
+    db.exec(`PRAGMA foreign_keys = ON;`);
+
     db.prepare(`
     CREATE TABLE IF NOT EXISTS workspace (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,10 +39,17 @@ export function initDatabase() {
     CREATE TABLE IF NOT EXISTS portfolio (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
+      type TEXT NOT NULL DEFAULT 'folder',
       connected_workspace INTEGER DEFAULT 1,
       associated_folder INTEGER DEFAULT 0,
       create_time INTEGER,
-      last_browse_time INTEGER
+      last_browse_time INTEGER,
+      FOREIGN KEY (connected_workspace)
+        REFERENCES workspace(id)
+        ON DELETE CASCADE,
+      FOREIGN KEY (associated_folder)
+        REFERENCES portfolio(id)
+        ON DELETE CASCADE
     )
   `).run();
     db.prepare(`
@@ -61,7 +62,13 @@ export function initDatabase() {
       connected_workspace INTEGER DEFAULT 1,
       associated_folder INTEGER DEFAULT 0,
       create_time INTEGER,
-      last_browse_time INTEGER
+      last_browse_time INTEGER,
+      FOREIGN KEY (connected_workspace)
+        REFERENCES workspace(id)
+        ON DELETE CASCADE,
+      FOREIGN KEY (associated_folder)
+        REFERENCES portfolio(id)
+        ON DELETE CASCADE
     )
   `).run();
 
@@ -84,17 +91,49 @@ export function RegisterDataBaseOperations() {
         if (!db) initDatabase();
         return db.prepare(sql).run(params);  // 返回 { changes, lastInsertRowid }
     });
+    ipcMain.handle('saveFileToDb', async (_e, file: FileNode, workspace: number) => {
+        if (!db) initDatabase();
+        const now = Date.now();
 
-    ipcMain.handle('saveDirectoryToDb', async (e, files: FileNode) => {
+        try {
+            const stmt = db.prepare(`
+              INSERT INTO file
+                (name, connected_workspace, file_size, file_path, type, create_time, last_browse_time)
+              VALUES (?, ?, ?, ?, ?, ?, ?)
+            `);
+            const result = stmt.run(
+                file.name,
+                workspace,
+                file.size ?? 0,
+                file.path,
+                path.extname(file.name).substring(1),
+                file.birthtime?.getTime() ?? now,
+                file.atime?.getTime()      ?? now
+            );
+
+            if (result.changes === 1) {
+                return { success: true, lastInsertRowid: result.lastInsertRowid };
+            } else {
+                // 极少会发生 INSERT changes === 0 的情况
+                return { success: false, reason: 'no rows inserted' };
+            }
+        } catch (err: any) {
+            console.error('插入文件失败：', err);
+            return { success: false, error: err.message };
+        }
+    });
+
+    ipcMain.handle('saveDirectoryToDb', async (_e, files: FileNode, workspace: number) => {
         if (!db) initDatabase();
         const now = Date.now();
 
         // 1. 插入根目录
         const rootInfo = db!.prepare(`
-        INSERT INTO portfolio (name, create_time, last_browse_time)
-        VALUES (?, ?, ?)
+        INSERT INTO portfolio (name, connected_workspace, create_time, last_browse_time)
+        VALUES (?, ?, ?, ?)
       `).run(
             files.name,
+            workspace,
             files.birthtime?.getTime() ?? now,
             files.atime?.getTime()      ?? now
         );
@@ -121,10 +160,11 @@ export function RegisterDataBaseOperations() {
                         // 目录节点
                         const info = db!.prepare(`
                             INSERT INTO portfolio
-                              (name, associated_folder, create_time, last_browse_time)
-                            VALUES (?, ?, ?, ?)
+                              (name, connected_workspace, associated_folder, create_time, last_browse_time)
+                            VALUES (?, ?, ?, ?, ?)
                           `).run(
                             node.name,
+                            workspace,
                             parentId,
                             node.birthtime?.getTime() ?? now,
                             node.atime?.getTime()      ?? now
@@ -141,10 +181,11 @@ export function RegisterDataBaseOperations() {
                         // 文件节点
                         db!.prepare(`
                         INSERT INTO file
-                          (name, file_size, file_path, type, associated_folder, create_time, last_browse_time)
-                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                          (name, connected_workspace, file_size, file_path, type, associated_folder, create_time, last_browse_time)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                       `).run(
                             node.name,
+                            workspace,
                             node.size ?? 0,
                             node.path,
                             path.extname(node.name).substring(1),
@@ -164,20 +205,10 @@ export function RegisterDataBaseOperations() {
 
         // 4. 分批异步执行
         function processQueue() {
-            if (queue.length === 0) {
-                // 全部处理完毕，返回成功
-                e.sender.send('saveDirectoryToDb-progress', { done: true });
-                return;
-            }
 
             // 每次取 100 条
             const batch = queue.splice(0, 100);
             insertBatch(batch);
-
-            // 可选：发送进度到渲染进程
-            e.sender.send('saveDirectoryToDb-progress', {
-                remaining: queue.length
-            });
 
             // 下一轮异步调度
             setImmediate(processQueue);
@@ -188,17 +219,7 @@ export function RegisterDataBaseOperations() {
 
         return { success: true };
     });
-
-    interface ElTreeNode {
-        id: number;
-        label: string;
-        children?: ElTreeNode[];
-        isLeaf?: boolean;
-        // 可按需加其他字段，如 fullPath、size 等
-        fullPath?: string;
-        size?: number;
-    }
-    ipcMain.handle('load-tree', () => {
+    ipcMain.handle('loadAll', () => {
         if (!db) initDatabase();
 
         function loadTreeFromDb(): ElTreeNode[] {
@@ -207,13 +228,14 @@ export function RegisterDataBaseOperations() {
             const portfolios: Array<{
                 id: number;
                 name: string;
-                folder_path: string;
+                type: string;
                 associated_folder: number;
                 create_time: number;
                 last_browse_time: number;
+                connected_workspace:number;
+                isLeaf:0 | 1;
             }> = db!.prepare(`
-            SELECT id, name, associated_folder, create_time, last_browse_time
-            FROM portfolio
+            SELECT * ,0 AS isLeaf FROM portfolio
           `).all();
 
             const files: Array<{
@@ -223,11 +245,12 @@ export function RegisterDataBaseOperations() {
                 file_path: string;
                 type: string;
                 associated_folder: number;
+                connected_workspace:number;
                 create_time: number;
                 last_browse_time: number;
+                isLeaf:0 | 1;
             }> = db!.prepare(`
-            SELECT id, name, file_size, file_path, type, associated_folder, create_time, last_browse_time
-            FROM file
+            SELECT *, 1 AS isLeaf FROM file
           `).all();
 
             // 2. 构建一个通用的 Map：parentId -> 子节点列表
@@ -246,6 +269,11 @@ export function RegisterDataBaseOperations() {
                 const node: ElTreeNode = {
                     id: p.id,
                     label: p.name,
+                    name: p.name,
+                    type: p.type,
+                    associated_folder: p.associated_folder,
+                    isLeaf: p.isLeaf,
+                    connected_workspace:p.connected_workspace
                     // children 会在后面自动填充
                 };
                 pushChild(p.associated_folder, node);
@@ -254,11 +282,15 @@ export function RegisterDataBaseOperations() {
             // 4. 再把文件插入 map
             for (const f of files) {
                 const node: ElTreeNode = {
-                    id: f.id + 1000000,          // 防止与目录 id 冲突，可选
+                    id: f.id,          // 防止与目录 id 冲突，可选
                     label: f.name,
-                    isLeaf: true,
-                    fullPath: f.file_path,
-                    size: f.file_size,
+                    isLeaf: f.isLeaf,
+                    file_path: f.file_path,
+                    file_size: f.file_size,
+                    associated_folder: f.associated_folder,
+                    connected_workspace: f.connected_workspace,
+                    name: f.name,
+                    type: f.type
                 };
                 pushChild(f.associated_folder, node);
             }
@@ -281,9 +313,116 @@ export function RegisterDataBaseOperations() {
 
         return loadTreeFromDb();
     });
+    ipcMain.handle('load', async (_e: IpcMainInvokeEvent, workspace: number, keyword?: string): Promise<ElTreeNode[]> => {
+        if (!db) initDatabase();
 
+        const safeKeyword = (keyword || '').trim();
+        const likePattern = `%${safeKeyword}%`;
 
+        let rows: any[];
 
+        if (!safeKeyword) {
+            // —— 无关键词：直接拿全表（portfolio + file），不标记 —— //
+            const portfolios = db.prepare(`
+              SELECT id, name, NULL AS file_size, NULL AS file_path, type,
+                     connected_workspace, associated_folder,
+                     create_time, last_browse_time,
+                     0 AS isLeaf, 0 AS marked
+              FROM portfolio
+              WHERE connected_workspace = ?
+            `).all(workspace);
+
+                    const files = db.prepare(`
+              SELECT id, name, file_size, file_path, type,
+                     connected_workspace, associated_folder,
+                     create_time, last_browse_time,
+                     1 AS isLeaf, 0 AS marked
+              FROM file
+              WHERE connected_workspace = ?
+            `).all(workspace);
+
+            rows = [...portfolios, ...files];
+
+        } else {
+            // —— 有关键词：CTE + GROUP BY + MAX(marked) —— //
+            const sql = `
+              WITH RECURSIVE result AS (
+                SELECT id, name, file_size, file_path, type,
+                       connected_workspace, associated_folder,
+                       create_time, last_browse_time,
+                       1 AS isLeaf, 1 AS marked
+                FROM file
+                WHERE connected_workspace = ? AND name LIKE ?
+        
+                UNION ALL
+        
+                SELECT id, name, NULL AS file_size, NULL AS file_path, type,
+                       connected_workspace, associated_folder,
+                       create_time, last_browse_time,
+                       0 AS isLeaf, 1 AS marked
+                FROM portfolio
+                WHERE connected_workspace = ? AND name LIKE ?
+        
+                UNION ALL
+        
+                SELECT p.id, p.name, NULL AS file_size, NULL AS file_path, p.type,
+                       p.connected_workspace, p.associated_folder,
+                       p.create_time, p.last_browse_time,
+                       0 AS isLeaf, 0 AS marked
+                FROM portfolio p
+                JOIN result r ON p.id = r.associated_folder
+                WHERE p.connected_workspace = ?
+              )
+              SELECT
+                id, name, file_size, file_path, type,
+                connected_workspace, associated_folder,
+                create_time, last_browse_time,
+                isLeaf,
+                MAX(marked) AS marked
+              FROM result
+              GROUP BY id;
+            `;
+            const stmt = db.prepare(sql);
+            rows = stmt.all(
+                workspace, likePattern,
+                workspace, likePattern,
+                workspace
+            );
+        }
+
+        // —— 通用：把 rows 映射成 ElTreeNode —— //
+        const nodes: ElTreeNode[] = rows.map(row => ({
+            ...row,
+            label: row.name,
+            isLeaf: Boolean(row.isLeaf),
+            uniqueKey: (row.isLeaf ? 'f_' : 'p_') + row.id,
+            // 无关键词时 marked 统一为 false；有关键词则用 SQL 标记
+            marked: Boolean(row.marked)
+        }));
+
+        // —— 构造 childrenMap —— //
+        const childrenMap = new Map<number, ElTreeNode[]>();
+        childrenMap.set(0, []);
+        for (const node of nodes) {
+            const pid = node.associated_folder;
+            if (!childrenMap.has(pid)) childrenMap.set(pid, []);
+            childrenMap.get(pid)!.push(node);
+        }
+
+        // —— 递归生成树 —— //
+        function buildTree(parentId: number): ElTreeNode[] {
+            const list = childrenMap.get(parentId) || [];
+            for (const node of list) {
+                if (!node.isLeaf) {
+                    const kids = buildTree(node.id);
+                    if (kids.length) node.children = kids;
+                }
+            }
+            return list;
+        }
+
+        return buildTree(0);
+    });
 }
 
 

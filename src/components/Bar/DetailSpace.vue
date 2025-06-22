@@ -1,20 +1,13 @@
 <script setup lang="ts">
-import {ref, watch, onMounted } from 'vue'
-import { openMenu } from "@/utils/component/Menu.ts";
+import {onMounted, ref, watch} from 'vue'
+import {openMenu} from "@/utils/component/Menu.ts";
 import Icon from "@/components/Icon.vue";
 import {showNotification} from "@/utils/component/Notification.ts";
+import {ElTreeNode} from "@/utils/type.ts";
+import {useTreeCondition} from "@/pinia/TreeCondition.ts";
 
-
-
-interface ElTreeNode {
-  id: number;
-  label: string;
-  children?: ElTreeNode[];
-  isLeaf?: boolean;
-  fullPath?: string;
-  size?: number;
-}
-
+//pinia初始化
+const store = useTreeCondition()
 // input过滤文本
 const filterText = ref('')
 // 绑定el-tree实例
@@ -25,43 +18,52 @@ const data = ref<ElTreeNode[]>([])
 const isLoading = ref<boolean>(false);
 // 设置警告弹窗
 const hasAlerted = ref(false)
+//当前工作空间
+const currentWorkspace = ref<number>(1)
 
 
 // el-tree props 配置
 const defaultProps = {
   children: 'children',
   label: 'label',
-  path: 'path',
 }
 
-// 监听过滤值变化，并调用回调函数向过滤方法中传值
-watch(filterText, (val) => {
-  treeRef.value?.filter(val)
+watch(()=>store.getChangedFolder, async (_val) => {
+  store.setChangedFolder(-1)
+  await onSearch(currentWorkspace.value,filterText.value);
 })
 
-// 自定义过滤函数（回调函数传入值，el-tree的全部树节点）
-// const filterNode = (value: string, data: TreeNode) => {
-//   if (!value) return true
-//   return data.label.toLowerCase().includes(value.toLowerCase())
-// }
+let timer: ReturnType<typeof setTimeout> | null = null
+watch(filterText, async (val) => {
+  if (timer) clearTimeout(timer)
+  timer = setTimeout(async () => {
+    await onSearch(currentWorkspace.value, val);
+  }, 300)
+})
 
 
-// 初始化加载树结构
+async function onSearch(workspace:number,keyword:string){
+  isLoading.value = true
+  data.value = await window.electronAPI.dataOperation.load(workspace,keyword)
+  isLoading.value = false
+}
 async function load() {
   try {
-    data.value = await window.electronAPI.dataOperation.loadTree()
+    isLoading.value = true
+    data.value = await window.electronAPI.dataOperation.load(currentWorkspace.value)
+    isLoading.value = false
   } catch (err) {
     console.error('加载目录结构失败:', err)
+    isLoading.value = false
   }
 }
-
 
 const allowDrop = (draggingNode: { data: ElTreeNode }, dropNode: { data: ElTreeNode }, dropType: 'prev' | 'inner' | 'next') => {
   if(draggingNode.data.id == dropNode.data.id) {
     return false
   }
   if (dropType === 'inner' && dropNode.data.isLeaf) {
-    console.log(dropNode.data)
+    // console.log(dropNode.data)
 
     return false
   }
@@ -69,7 +71,7 @@ const allowDrop = (draggingNode: { data: ElTreeNode }, dropNode: { data: ElTreeN
 }
 
 
-const end = (draggingNode: { data: ElTreeNode }, dropNode: { data: ElTreeNode }, e: any, el:any) => {
+const end = (_draggingNode: { data: ElTreeNode }, dropNode: { data: ElTreeNode }, _e: any, _el:any) => {
   if (!dropNode){
     if (!hasAlerted.value) {
       showNotification({
@@ -86,6 +88,18 @@ const end = (draggingNode: { data: ElTreeNode }, dropNode: { data: ElTreeNode },
   }
 }
 
+const drop = async (draggingNode: {data: ElTreeNode} , dropNode: {data: ElTreeNode}, _dropType: 'inner'|'prev'|'next', _event: DragEvent)=>{
+  const tableName=draggingNode.data.isLeaf?'file':'portfolio'
+  const result=await window.electronAPI.dataOperation.execute(
+      `UPDATE ${tableName} SET associated_folder = ? WHERE ID = ?;`,
+      [dropNode.data.id,draggingNode.data.id]
+  )
+  if (result){
+    store.setChangedFolder(dropNode.data.id)
+    return;
+  }
+}
+
 // 页面弹窗
 function onRightClick(e: MouseEvent, data: ElTreeNode) {
   e.preventDefault()
@@ -97,12 +111,9 @@ function onRightClick(e: MouseEvent, data: ElTreeNode) {
   treeRef.value?.setCurrentKey(data.id)
 }
 
-
-// 页面加载后调用
-onMounted(() => {
+onMounted(()=>{
   load()
 })
-
 </script>
 
 <template>
@@ -117,23 +128,24 @@ onMounted(() => {
               ref="treeRef"
               class="file-tree"
               :data="data"
-              node-key="id"
+              node-key="uniqueKey"
               :props="defaultProps"
               draggable
               :allow-drop="allowDrop"
               @node-contextmenu="onRightClick"
               @node-drag-end="end"
+              @node-drop="drop"
               :highlight-current="false"
               :indent="16">
             <template #default="{ node, data }">
               <div class="test">
                 <Icon :label="data.label" :is-leaf="data.isLeaf" :level="String(node.level)"/>
-                <span>
+                <span :class="{ 'highlight': data.marked }">
                   {{ data.label }}
                 </span>
               </div>
             </template>
-          </el-tree>
+      </el-tree>
     </div>
   </div>
 </template>
@@ -185,7 +197,9 @@ onMounted(() => {
   --el-tree-node-hover-bg-color: #e6f0ff; /* 轻微悬浮底色 */
 }
 
-
+.highlight {
+  color: #bfbf7b;
+}
 
 </style>
 
