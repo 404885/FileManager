@@ -7,10 +7,12 @@ export interface ElTreeNode {
     file_size?: number | null;
     type: string;
     isLeaf: 0 | 1;
-    marked?: 0 | 1;
+    marked?: 0 | 1 | boolean;
     associated_folder: number | null;
     connected_workspace: number;
-    uniqueKey?: string;
+    create_time?: number,
+    last_browse_time?: number,
+    uniqueKey?: string,
 }
 
 export interface FileNode {

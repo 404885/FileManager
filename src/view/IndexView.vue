@@ -93,7 +93,7 @@ onMounted(() => {
           :data="tableData"
           :show-header="true"
           show-overflow
-          :row-config="{isCurrent: true, isHover: true, resizable:true}"
+          :row-config="{isCurrent: true, isHover: true}"
           style="--vxe-ui-table-header-background-color:white;">
         <vxe-column field="name" title="文件名" fixed="left">
           <template #header>

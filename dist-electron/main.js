@@ -330,13 +330,10 @@ function RegisterDataBaseOperations() {
     }
     return loadTreeFromDb();
   });
-  ipcMain.handle("load", async (_e, workspace, keyword) => {
+  ipcMain.handle("load", async (_e, workspace, _keyword) => {
     if (!db) initDatabase();
-    const safeKeyword = (keyword || "").trim();
-    const likePattern = `%${safeKeyword}%`;
     let rows;
-    if (!safeKeyword) {
-      const portfolios = db.prepare(`
+    const portfolios = db.prepare(`
               SELECT id, name, NULL AS file_size, NULL AS file_path, type,
                      connected_workspace, associated_folder,
                      create_time, last_browse_time,
@@ -344,7 +341,7 @@ function RegisterDataBaseOperations() {
               FROM portfolio
               WHERE connected_workspace = ?
             `).all(workspace);
-      const files = db.prepare(`
+    const files = db.prepare(`
               SELECT id, name, file_size, file_path, type,
                      connected_workspace, associated_folder,
                      create_time, last_browse_time,
@@ -352,54 +349,7 @@ function RegisterDataBaseOperations() {
               FROM file
               WHERE connected_workspace = ?
             `).all(workspace);
-      rows = [...portfolios, ...files];
-    } else {
-      const sql = `
-              WITH RECURSIVE result AS (
-                SELECT id, name, file_size, file_path, type,
-                       connected_workspace, associated_folder,
-                       create_time, last_browse_time,
-                       1 AS isLeaf, 1 AS marked
-                FROM file
-                WHERE connected_workspace = ? AND name LIKE ?
-        
-                UNION ALL
-        
-                SELECT id, name, NULL AS file_size, NULL AS file_path, type,
-                       connected_workspace, associated_folder,
-                       create_time, last_browse_time,
-                       0 AS isLeaf, 1 AS marked
-                FROM portfolio
-                WHERE connected_workspace = ? AND name LIKE ?
-        
-                UNION ALL
-        
-                SELECT p.id, p.name, NULL AS file_size, NULL AS file_path, p.type,
-                       p.connected_workspace, p.associated_folder,
-                       p.create_time, p.last_browse_time,
-                       0 AS isLeaf, 0 AS marked
-                FROM portfolio p
-                JOIN result r ON p.id = r.associated_folder
-                WHERE p.connected_workspace = ?
-              )
-              SELECT
-                id, name, file_size, file_path, type,
-                connected_workspace, associated_folder,
-                create_time, last_browse_time,
-                isLeaf,
-                MAX(marked) AS marked
-              FROM result
-              GROUP BY id;
-            `;
-      const stmt = db.prepare(sql);
-      rows = stmt.all(
-        workspace,
-        likePattern,
-        workspace,
-        likePattern,
-        workspace
-      );
-    }
+    rows = [...portfolios, ...files];
     const nodes = rows.map((row) => ({
       ...row,
       label: row.name,
