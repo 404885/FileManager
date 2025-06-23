@@ -213,7 +213,7 @@ function RegisterDataBaseOperations() {
       try {
         for (const node of batch) {
           const parentId = parentMap.get(node);
-          if (node.children && node.children.length > 0) {
+          if (node.children) {
             const info = db.prepare(`
                             INSERT INTO portfolio
                               (name, connected_workspace, associated_folder, create_time, last_browse_time)

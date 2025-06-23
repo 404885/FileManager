@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref, watch, onMounted } from 'vue'
+import {ref, watch, onMounted} from 'vue'
 import { openMenu } from "@/utils/component/Menu.ts";
 import Icon from "@/components/Icon.vue";
 import {showNotification} from "@/utils/component/Notification.ts";
@@ -20,6 +20,8 @@ const isLoading = ref<boolean>(false);
 const hasAlerted = ref(false)
 //当前工作空间
 const currentWorkspace = ref<number>(1)
+// 节点展开key(浅引用，变化直接更改了state？？)
+const idList = store.expandedNode
 // 计时器
 let timer: ReturnType<typeof setTimeout> | null = null
 
@@ -49,7 +51,7 @@ async function load() {
   }
 }
 
-
+// 允许拖拽的情况
 const allowDrop = (draggingNode: { data: ElTreeNode }, dropNode: { data: ElTreeNode }, dropType: 'prev' | 'inner' | 'next') => {
   // 给拖动节点添加高亮
   treeRef.value?.setCurrentKey(draggingNode.data.uniqueKey)
@@ -61,8 +63,7 @@ const allowDrop = (draggingNode: { data: ElTreeNode }, dropNode: { data: ElTreeN
   }
   return dropType === 'inner'
 }
-
-
+// 拖拽事件结束（未完成则返回未定义）
 const end = (_draggingNode: { data: ElTreeNode }, dropNode: { data: ElTreeNode }, _e: any, _el:any) => {
   // 拖拽时间不允许，拖入节点为空
   if (!dropNode){
@@ -80,9 +81,7 @@ const end = (_draggingNode: { data: ElTreeNode }, dropNode: { data: ElTreeNode }
     }
   }
 }
-
-
-
+// 拖拽事件完成
 const drop = async (draggingNode: {data: ElTreeNode} , dropNode: {data: ElTreeNode}, _dropType: 'inner'|'prev'|'next', _event: DragEvent)=>{
   const tableName = draggingNode.data.isLeaf?'file':'portfolio'
   const parentId = dropNode.data.id === 0 ? null : dropNode.data.id;
@@ -97,16 +96,49 @@ const drop = async (draggingNode: {data: ElTreeNode} , dropNode: {data: ElTreeNo
     return;
   }
 }
+// 节点展开
+const expand = (data: ElTreeNode) => {
+  // 展开的时候添加节点id
+  if(data.uniqueKey){
+    idList.push(data.uniqueKey)
+    console.log(idList)
+    console.log(store.expandedNode)
+  }
+}
+// 节点关闭
+const collapse = (data: ElTreeNode) => {
+  // 递归删除idList中的id，得到收起父节点，子节点直接关闭的效果
+  const removeNodeAndChildren = (node: ElTreeNode) => {
+    if (!node) return
+    if (node.uniqueKey) {
+      const index = idList.indexOf(node.uniqueKey)
+      if (index !== -1) {
+        idList.splice(index, 1)
+      }
+    }
+    if (node.children && node.children.length) {
+      node.children.forEach(child => removeNodeAndChildren(child))
+    }
+  }
+  removeNodeAndChildren(data)
+  load()
+}
 
 // 页面弹窗
-function onRightClick(e: MouseEvent, data: ElTreeNode) {
+function contextmenu(e: MouseEvent, data: ElTreeNode) {
   e.preventDefault()
   openMenu({
+    isLeaf: data.isLeaf,
     positionX: e.clientX,
     positionY: e.clientY,
+    currentWorkspace,
+    treeRef,
+    data
   })
   treeRef.value?.setCurrentKey(data.uniqueKey)
 }
+
+
 
 
 // 搜索防抖
@@ -122,6 +154,7 @@ watch(()=>store.getChangedFolder, async (_val) => {
   store.setChangedFolder(-1)
   await onSearch(currentWorkspace.value,filterText.value);
 })
+
 
 onMounted(()=>{
   load()
@@ -141,23 +174,26 @@ onMounted(()=>{
       <div class="folders">草稿箱</div>
       <div class="folder">工作空间</div>
       <el-tree
-              v-loading="isLoading"
-              element-loading-text="加载数据中"
-              ref="treeRef"
-              class="file-tree"
-              :data="data"
-              node-key="uniqueKey"
-              :props="defaultProps"
-              draggable
-              :allow-drop="allowDrop"
-              @node-contextmenu="onRightClick"
-              @node-drag-end="end"
-              @node-drop="drop"
-              :highlight-current="false"
-              :indent="16">
-            <template #default="{ node, data }">
+          v-loading="isLoading"
+          element-loading-text="加载数据中"
+          ref="treeRef"
+          class="file-tree"
+          :data="data"
+          node-key="uniqueKey"
+          :props="defaultProps"
+          draggable
+          :allow-drop="allowDrop"
+          @node-contextmenu="contextmenu"
+          @node-drag-end="end"
+          @node-drop="drop"
+          :default-expanded-keys="store.expandedNode"
+          @node-expand="expand"
+          @node-collapse="collapse"
+          :highlight-current="false"
+          :indent="16">
+            <template #default="{ data }">
               <div class="test">
-                <Icon :label="data.label" :is-leaf="data.isLeaf" :level="String(node.level)"/>
+                <Icon :type="data.type" :is-leaf="data.isLeaf" />
                 <span :class="{ 'highlight': data.marked }">
                   {{ data.label }}
                 </span>

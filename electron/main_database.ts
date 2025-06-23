@@ -156,7 +156,7 @@ export function RegisterDataBaseOperations() {
                 for (const node of batch) {
                     const parentId = parentMap.get(node)!;
 
-                    if (node.children && node.children.length > 0) {
+                    if (node.children) {
                         // 目录节点
                         const info = db!.prepare(`
                             INSERT INTO portfolio
