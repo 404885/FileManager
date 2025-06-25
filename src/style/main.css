@@ -4,30 +4,26 @@
     flex-direction: column;
 }
 
-.window-main{
+
+
+/* ======蒙版和弹窗外层======= */
+.dialog-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background-color: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     display: flex;
-    flex-direction: row;
-    flex: 1;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
 }
 
-/* ========== title-bar ========== */
-.window-title {
-    height: 32px;
-    background: rgba(255, 255, 255, 0.06);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid #ddd;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    padding: 0 12px;
-    box-sizing: border-box;
-    z-index: 9999;
-    -webkit-app-region: drag;
-}
-/* ========== content ========== */
-.window-content{
-    padding: 10px;
-    min-width: 200px;
-    flex: 1;
+.dialog-border {
+    background: white;
+    border-radius: 10px;
+    min-width: 300px;
+    max-width: 80%;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
 }

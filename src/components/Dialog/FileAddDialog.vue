@@ -1,12 +1,15 @@
 <script setup lang="ts">
+import { ElNotification } from "element-plus";
+import { useTreeCondition } from "@/pinia/TreeCondition.ts";
 
-import {ElNotification} from "element-plus";
-import {useTreeCondition} from "@/pinia/TreeCondition.ts";
-
+const emit = defineEmits(['close'])
 const props = defineProps({
   title: { type: String },
 })
 
+function closeDialog() {
+  emit("close")
+}
 const store = useTreeCondition()
 
 async function openAndReadFile() {
@@ -62,34 +65,42 @@ async function openAndSaveFolder() {
   }
 }
 
+
 </script>
 
 <template>
-<div class="dialog-fileAdd">
-  <div class="fileAdd-title">
-    <b>{{ props.title || "默认标题" }}</b>
+  <div class="dialog-overlay"  @click.self='closeDialog()'>
+    <div class="dialog-border fadeIn-slide">
+      <div class="dialog-fileAdd">
+        <div class="fileAdd-title">
+          <b>{{ props.title || "默认标题" }}</b>
+        </div>
+        <div class="fileAdd-menu">
+          <div class="menu-list">
+            <div class="list-title">个人笔记</div>
+            <div @click="openAndReadFile" class="list-add animate_button">导入文件</div>
+            <div @click="openAndSaveFolder" class="list-add animate_button">导入文件夹</div>
+          </div>
+          <div class="menu-list">
+            <div class="list-title">文档管理</div>
+            <div @click="" class="list-add">dianji</div>
+            <div @click="" class="list-add">dianji</div>
+            <div @click="" class="list-add">dianji</div>
+            <div @click="" class="list-add">dianji</div>
+          </div>
+          <div class="menu-list">
+            <div class="list-title">其余操作</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="fileAdd-menu">
-    <div class="fileAdd-list">
-      <div class="list-title">个人笔记</div>
-      <div @click="openAndReadFile" class="list-add animate_button">导入文件</div>
-      <div @click="openAndSaveFolder" class="list-add animate_button">导入文件夹</div>
-    </div>
-    <div class="fileAdd-list">
-      <div class="list-title">文档管理</div>
-      <div @click="" class="list-add">dianji</div>
-      <div @click="" class="list-add">dianji</div>
-      <div @click="" class="list-add">dianji</div>
-      <div @click="" class="list-add">dianji</div>
-    </div>
-    <div class="fileAdd-list">
-      <div class="list-title">其余操作</div>
-    </div>
-  </div>
-</div>
+
+
 </template>
 
 <style scoped>
+
 .dialog-fileAdd {
   height: 400px;
   display: flex;
@@ -106,7 +117,7 @@ async function openAndSaveFolder() {
   gap: 10px;
 }
 
-.fileAdd-list{
+.menu-list{
   width: 220px;
   border-radius: 6px;
   display: flex;
@@ -120,7 +131,6 @@ async function openAndSaveFolder() {
   font-size: 13px;
   color: #888888;
 }
-
 .list-add{
   width: 100%;
   height: 40px;
@@ -129,4 +139,5 @@ async function openAndSaveFolder() {
   align-items: center;
   justify-content: center;
 }
+
 </style>

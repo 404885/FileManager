@@ -18,5 +18,20 @@
 }
 
 
+.fadeIn-slide {
+    animation: fadeInSlide 0.35s ease;
+}
+@keyframes fadeInSlide {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+
 
 

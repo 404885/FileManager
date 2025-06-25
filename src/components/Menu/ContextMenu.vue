@@ -2,6 +2,7 @@
 import {ref, onMounted, onBeforeUnmount, nextTick, watch, Ref} from 'vue'
 import {ElTreeNode} from "@/utils/type.ts";
 import {useTreeCondition} from "@/pinia/TreeCondition.ts";
+import {openDialog,openDialogAsync} from "@/utils/component/Dialog.ts";
 
 
 const emit = defineEmits(['close'])
@@ -24,14 +25,28 @@ const computedX = ref(props.positionX)
 const computedY = ref(props.positionY)
 
 
+
+
 async function newFolder(){
-  const newNode = {
-    label: '新建文件夹',
-    isLeaf: false,
-    type: 'folder',
-  }
+  // const newNode = {
+  //   label: '新建文件夹',
+  //   isLeaf: false,
+  //   type: 'folder',
+  // }
+  // openDialog({
+  //   type: "editFile",
+  //   props:{
+  //     title: "新建文件夹",
+  //   },
+  // })
+
+
+  const data = await openDialogAsync({
+    type: 'editFile',
+    props: { title: '新建文件夹' }
+  })
+  const name = data?.fileName?.trim() || '新建文件夹'
   const tableName = 'portfolio'
-  const name = '新建文件夹'
   const parentId = props.data.id
   const create_time = Date.now()
   const workspace = props.currentWorkspace.value
@@ -40,13 +55,17 @@ async function newFolder(){
       [name, workspace, parentId, create_time]
   )
   if (result){
-    props.treeRef.value.append(newNode, props.data)
+    // 直接通过load()取数据库数据来实现刷新
+    // props.treeRef.value.append(newNode, props.data)
     // 通过pinia设置更新状态
     store.setChangedFolder(props.data.id)
     return;
   }
 }
 
+async function renameFolder(){
+
+}
 
 
 
@@ -112,7 +131,7 @@ watch(() => [props.positionX, props.positionY], async () => {
       <div class="context-folder" v-show="!props.isLeaf">
         <div class="context-item" @click="">新建文件</div>
         <div class="context-item" @click="newFolder">新建文件夹</div>
-        <div class="context-item" @click="">重命名</div>
+        <div class="context-item" @click="renameFolder">重命名</div>
         <div class="context-item">移动</div>
         <div class="context-item">属性</div>
         <div class="context-item danger">删除</div>
