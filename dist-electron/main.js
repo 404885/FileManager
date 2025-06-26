@@ -271,79 +271,17 @@ function RegisterDataBaseOperations() {
     processQueue();
     return { success: true };
   });
-  ipcMain.handle("loadAll", () => {
-    if (!db) initDatabase();
-    function loadTreeFromDb() {
-      const portfolios = db.prepare(`
-            SELECT * ,0 AS isLeaf FROM portfolio
-          `).all();
-      const files = db.prepare(`
-            SELECT *, 1 AS isLeaf FROM file
-          `).all();
-      const childrenMap = /* @__PURE__ */ new Map();
-      function pushChild(parentId, node) {
-        const key = parentId ?? 0;
-        if (!childrenMap.has(key)) {
-          childrenMap.set(key, []);
-        }
-        childrenMap.get(key).push(node);
-      }
-      for (const p of portfolios) {
-        const node = {
-          id: p.id,
-          label: p.name,
-          name: p.name,
-          type: p.type,
-          associated_folder: p.associated_folder,
-          isLeaf: p.isLeaf,
-          connected_workspace: p.connected_workspace
-          // children 会在后面自动填充
-        };
-        pushChild(p.associated_folder, node);
-      }
-      for (const f of files) {
-        const node = {
-          id: f.id,
-          // 防止与目录 id 冲突，可选
-          label: f.name,
-          isLeaf: f.isLeaf,
-          file_path: f.file_path,
-          file_size: f.file_size,
-          associated_folder: f.associated_folder,
-          connected_workspace: f.connected_workspace,
-          name: f.name,
-          type: f.type
-        };
-        pushChild(f.associated_folder, node);
-      }
-      function buildTree(parentId) {
-        const list = childrenMap.get(parentId) || [];
-        for (const node of list) {
-          const kids = buildTree(node.id);
-          if (kids.length) {
-            node.children = kids;
-          }
-        }
-        return list;
-      }
-      return buildTree(0);
-    }
-    return loadTreeFromDb();
-  });
-  ipcMain.handle("load", async (_e, workspace, _keyword) => {
+  ipcMain.handle("loadTree", async (_e, workspace, _keyword) => {
     if (!db) initDatabase();
     let rows;
     const portfolios = db.prepare(`
-              SELECT id, name, NULL AS file_size, NULL AS file_path, type,
-                     connected_workspace, associated_folder,
-                     create_time, last_browse_time,
+              SELECT *,
                      0 AS isLeaf, 0 AS marked
               FROM portfolio
               WHERE connected_workspace = ?
             `).all(workspace);
     const files = db.prepare(`
-              SELECT id, name, file_size, file_path, type,
-                     connected_workspace, associated_folder,
+              SELECT *,
                      create_time, last_browse_time,
                      1 AS isLeaf, 0 AS marked
               FROM file
@@ -378,6 +316,38 @@ function RegisterDataBaseOperations() {
       return list;
     }
     return buildTree(0);
+  });
+  ipcMain.handle("loadTable", async (_e, workspace, associatedFolder = null) => {
+    if (!db) initDatabase();
+    let portfolios;
+    let files;
+    if (associatedFolder != null) {
+      portfolios = db.prepare(`SELECT * FROM portfolio WHERE connected_workspace = ? AND associated_folder = ?`).all(workspace, associatedFolder);
+      files = db.prepare(`SELECT * FROM file WHERE connected_workspace = ? AND associated_folder = ?`).all(workspace, associatedFolder);
+    } else {
+      portfolios = db.prepare(`SELECT * FROM portfolio WHERE connected_workspace = ? AND associated_folder IS NULL`).all(workspace);
+      files = db.prepare(`SELECT * FROM file WHERE connected_workspace = ? AND associated_folder IS NULL`).all(workspace);
+    }
+    const rows = [...portfolios, ...files];
+    const nodes = rows.map((row) => ({
+      ...row,
+      uniqueKey: (row.type !== "folder" ? "f_" : "p_") + row.id,
+      parentId: row.associated_folder != null ? "p_" + row.associated_folder : null
+    }));
+    return nodes;
+  });
+  ipcMain.handle("loadTableV2", async (_e, workspace) => {
+    if (!db) initDatabase();
+    let rows;
+    const portfolios = db.prepare(`SELECT * FROM portfolio WHERE connected_workspace = ?`).all(workspace);
+    const files = db.prepare(`SELECT * FROM file WHERE connected_workspace = ?`).all(workspace);
+    rows = [...portfolios, ...files];
+    const nodes = rows.map((row) => ({
+      ...row,
+      uniqueKey: (row.type !== "folder" ? "f_" : "p_") + row.id,
+      parentId: "p_" + row.associated_folder
+    }));
+    return nodes;
   });
 }
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

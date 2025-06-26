@@ -25,3 +25,17 @@ export interface FileNode {
     mtime?: Date
     children?: FileNode[] // 递归类型，表示目录结构
 }
+
+export interface VXETableNode {
+    id: number;
+    name: string;
+    file_path?: string | null;
+    file_size?: number | null;
+    type: string;
+    associated_folder: number | null;
+    connected_workspace: number;
+    create_time: number,
+    last_browse_time?: number,
+    tag?:string,
+    description?: string,
+}

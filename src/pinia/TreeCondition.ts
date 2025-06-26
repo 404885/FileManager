@@ -5,10 +5,15 @@ export const useTreeCondition= defineStore('TreeCondition', {
         changedFolder: -1 as number,
         expandedNode: [] as string[],
 
+        currentWorkspace: 1 as number,
     }),
     getters:{
         getChangedFolder(state){
             return state.changedFolder;
+        },
+
+        getCurrentWorkSpace(state){
+            return state.currentWorkspace;
         },
         getExpanded(state){
             return state.expandedNode;
@@ -17,6 +22,9 @@ export const useTreeCondition= defineStore('TreeCondition', {
     actions:{
         setChangedFolder(changedFolder: number){
             this.changedFolder = changedFolder
+        },
+        setCurrentWorkSpace(currentWorkspace: number){
+            this.currentWorkspace = currentWorkspace
         },
         setChangedExpanded(idList: string[]){
             this.expandedNode = idList

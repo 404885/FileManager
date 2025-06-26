@@ -1,7 +1,7 @@
 import path from 'path';
 import {ipcMain, IpcMainInvokeEvent} from 'electron';
 import {createRequire} from 'module';
-import {ElTreeNode, FileNode} from "@/utils/type.ts";
+import {ElTreeNode, FileNode, VXETableNode} from "@/utils/type.ts";
 
 const require = createRequire(import.meta.url);
 const Database = require('better-sqlite3');
@@ -219,117 +219,19 @@ export function RegisterDataBaseOperations() {
 
         return { success: true };
     });
-    ipcMain.handle('loadAll', () => {
-        if (!db) initDatabase();
-
-        function loadTreeFromDb(): ElTreeNode[] {
-
-            // 1. 读取所有目录（portfolio）和文件（file）
-            const portfolios: Array<{
-                id: number;
-                name: string;
-                type: string;
-                associated_folder: number|null;
-                create_time: number;
-                last_browse_time: number;
-                connected_workspace:number;
-                isLeaf:0 | 1;
-            }> = db!.prepare(`
-            SELECT * ,0 AS isLeaf FROM portfolio
-          `).all();
-
-            const files: Array<{
-                id: number;
-                name: string;
-                file_size: number;
-                file_path: string;
-                type: string;
-                associated_folder: number|null;
-                connected_workspace:number;
-                create_time: number;
-                last_browse_time: number;
-                isLeaf:0 | 1;
-            }> = db!.prepare(`
-            SELECT *, 1 AS isLeaf FROM file
-          `).all();
-
-            // 2. 构建一个通用的 Map：parentId -> 子节点列表
-            const childrenMap = new Map<number, ElTreeNode[]>();
-
-            // helper：往 map 里 push
-            function pushChild(parentId: number | null, node: ElTreeNode) {
-                const key = parentId ?? 0;            // null 或者 undefined 都归为 0
-                if (!childrenMap.has(key)) {
-                    childrenMap.set(key, []);
-                }
-                childrenMap.get(key)!.push(node);
-            }
-
-            // 3. 把所有目录先插入 map
-            for (const p of portfolios) {
-                const node: ElTreeNode = {
-                    id: p.id,
-                    label: p.name,
-                    name: p.name,
-                    type: p.type,
-                    associated_folder: p.associated_folder,
-                    isLeaf: p.isLeaf,
-                    connected_workspace:p.connected_workspace
-                    // children 会在后面自动填充
-                };
-                pushChild(p.associated_folder, node);
-            }
-
-            // 4. 再把文件插入 map
-            for (const f of files) {
-                const node: ElTreeNode = {
-                    id: f.id,          // 防止与目录 id 冲突，可选
-                    label: f.name,
-                    isLeaf: f.isLeaf,
-                    file_path: f.file_path,
-                    file_size: f.file_size,
-                    associated_folder: f.associated_folder,
-                    connected_workspace: f.connected_workspace,
-                    name: f.name,
-                    type: f.type
-                };
-                pushChild(f.associated_folder, node);
-            }
-
-            // 5. 递归构建树：从 associated_folder = 0（根）开始
-            function buildTree(parentId: number): ElTreeNode[] {
-                const list = childrenMap.get(parentId) || [];
-                for (const node of list) {
-                    const kids = buildTree(node.id);
-                    if (kids.length) {
-                        node.children = kids;
-                    }
-                }
-                return list;
-            }
-
-            // 根节点 list
-            return buildTree(0);
-        }
-
-        return loadTreeFromDb();
-    });
-    ipcMain.handle('load', async (_e: IpcMainInvokeEvent, workspace: number, _keyword?: string): Promise<ElTreeNode[]> => {
+    ipcMain.handle('loadTree', async (_e: IpcMainInvokeEvent, workspace: number, _keyword?: string) => {
         if (!db) initDatabase();
 
         let rows: any[];
         const portfolios = db.prepare(`
-              SELECT id, name, NULL AS file_size, NULL AS file_path, type,
-                     connected_workspace, associated_folder,
-                     create_time, last_browse_time,
+              SELECT *,
                      0 AS isLeaf, 0 AS marked
               FROM portfolio
               WHERE connected_workspace = ?
             `).all(workspace);
 
         const files = db.prepare(`
-              SELECT id, name, file_size, file_path, type,
-                     connected_workspace, associated_folder,
+              SELECT *,
                      create_time, last_browse_time,
                      1 AS isLeaf, 0 AS marked
               FROM file
@@ -445,6 +347,158 @@ export function RegisterDataBaseOperations() {
 
         return buildTree(0);
     });
+
+    ipcMain.handle("loadTable", async (_e: IpcMainInvokeEvent, workspace: number, associatedFolder:number | null = null) => {
+        if (!db) initDatabase();
+
+        let portfolios: any[];
+        let files: any[];
+
+        if (associatedFolder != null) {
+            // 有传 folderId，就只拿那一层的子项
+            portfolios = db
+                .prepare(`SELECT * FROM portfolio WHERE connected_workspace = ? AND associated_folder = ?`)
+                .all(workspace, associatedFolder);
+            files = db
+                .prepare(`SELECT * FROM file WHERE connected_workspace = ? AND associated_folder = ?`)
+                .all(workspace, associatedFolder);
+        } else {
+            // 没传 folderId，就只拿根目录（associated_folder IS NULL）
+            portfolios = db
+                .prepare(`SELECT * FROM portfolio WHERE connected_workspace = ? AND associated_folder IS NULL`)
+                .all(workspace);
+
+            files = db
+                .prepare(`SELECT * FROM file WHERE connected_workspace = ? AND associated_folder IS NULL`)
+                .all(workspace);
+        }
+
+        const rows = [...portfolios, ...files];
+        const nodes: VXETableNode[] = rows.map((row) => ({
+            ...row,
+            uniqueKey: (row.type !== 'folder' ? "f_" : "p_") + row.id,
+            parentId: row.associated_folder != null ? "p_" + row.associated_folder : null,
+        }));
+        return nodes;
+    });
+
+    ipcMain.handle('loadTableV2', async (_e: IpcMainInvokeEvent, workspace: number)=> {
+        if (!db) initDatabase();
+
+        let rows: any[];
+        const portfolios = db.prepare(`SELECT * FROM portfolio WHERE connected_workspace = ?`).all(workspace);
+
+        const files = db.prepare(`SELECT * FROM file WHERE connected_workspace = ?`).all(workspace);
+
+        rows = [...portfolios, ...files];
+
+        const nodes: VXETableNode[] = rows.map(row => ({
+            ...row,
+            uniqueKey: (row.type !== 'folder' ? 'f_' : 'p_') + row.id,
+            parentId: 'p_' + row.associated_folder,
+        }));
+
+        return nodes;
+
+    });
+
+
+    // ipcMain.handle('loadAll', () => {
+    //     if (!db) initDatabase();
+    //
+    //     function loadTreeFromDb(): ElTreeNode[] {
+    //
+    //         // 1. 读取所有目录（portfolio）和文件（file）
+    //         const portfolios: Array<{
+    //             id: number;
+    //             name: string;
+    //             type: string;
+    //             associated_folder: number|null;
+    //             create_time: number;
+    //             last_browse_time: number;
+    //             connected_workspace:number;
+    //             isLeaf:0 | 1;
+    //         }> = db!.prepare(`
+    //         SELECT * ,0 AS isLeaf FROM portfolio
+    //       `).all();
+    //
+    //         const files: Array<{
+    //             id: number;
+    //             name: string;
+    //             file_size: number;
+    //             file_path: string;
+    //             type: string;
+    //             associated_folder: number|null;
+    //             connected_workspace:number;
+    //             create_time: number;
+    //             last_browse_time: number;
+    //             isLeaf:0 | 1;
+    //         }> = db!.prepare(`
+    //         SELECT *, 1 AS isLeaf FROM file
+    //       `).all();
+    //
+    //         // 2. 构建一个通用的 Map：parentId -> 子节点列表
+    //         const childrenMap = new Map<number, ElTreeNode[]>();
+    //
+    //         // helper：往 map 里 push
+    //         function pushChild(parentId: number | null, node: ElTreeNode) {
+    //             const key = parentId ?? 0;            // null 或者 undefined 都归为 0
+    //             if (!childrenMap.has(key)) {
+    //                 childrenMap.set(key, []);
+    //             }
+    //             childrenMap.get(key)!.push(node);
+    //         }
+    //
+    //         // 3. 把所有目录先插入 map
+    //         for (const p of portfolios) {
+    //             const node: ElTreeNode = {
+    //                 id: p.id,
+    //                 label: p.name,
+    //                 name: p.name,
+    //                 type: p.type,
+    //                 associated_folder: p.associated_folder,
+    //                 isLeaf: p.isLeaf,
+    //                 connected_workspace:p.connected_workspace
+    //                 // children 会在后面自动填充
+    //             };
+    //             pushChild(p.associated_folder, node);
+    //         }
+    //
+    //         // 4. 再把文件插入 map
+    //         for (const f of files) {
+    //             const node: ElTreeNode = {
+    //                 id: f.id,          // 防止与目录 id 冲突，可选
+    //                 label: f.name,
+    //                 isLeaf: f.isLeaf,
+    //                 file_path: f.file_path,
+    //                 file_size: f.file_size,
+    //                 associated_folder: f.associated_folder,
+    //                 connected_workspace: f.connected_workspace,
+    //                 name: f.name,
+    //                 type: f.type
+    //             };
+    //             pushChild(f.associated_folder, node);
+    //         }
+    //
+    //         // 5. 递归构建树：从 associated_folder = 0（根）开始
+    //         function buildTree(parentId: number): ElTreeNode[] {
+    //             const list = childrenMap.get(parentId) || [];
+    //             for (const node of list) {
+    //                 const kids = buildTree(node.id);
+    //                 if (kids.length) {
+    //                     node.children = kids;
+    //                 }
+    //             }
+    //             return list;
+    //         }
+    //
+    //         // 根节点 list
+    //         return buildTree(0);
+    //     }
+    //
+    //     return loadTreeFromDb();
+    // });
+
 }
 
 

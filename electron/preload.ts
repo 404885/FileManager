@@ -27,7 +27,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
         ipcRenderer.invoke('saveFileToDb', file, workspace),
     saveDirectoryToDb: (directory:FileNode,workspace:number) =>
         ipcRenderer.invoke('saveDirectoryToDb', directory, workspace),
-    loadAll: () => ipcRenderer.invoke('loadAll'),
-    load: (workspace:number,keyword?:string) => ipcRenderer.invoke('load',workspace,keyword),
+    loadTree: (workspace:number,keyword?:string) => ipcRenderer.invoke('loadTree',workspace,keyword),
+    loadTable: (workspace:number,associatedFolder:number | null = null) => ipcRenderer.invoke('loadTable',workspace,associatedFolder),
+    loadTableV2: (workspace:number) => ipcRenderer.invoke('loadTableV2',workspace),
   }
 })

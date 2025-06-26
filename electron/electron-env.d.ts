@@ -1,6 +1,6 @@
 /// <reference types="vite-plugin-electron/electron-env" />
 
-import {ElTreeNode, FileNode} from "@/utils/type.ts";
+import {ElTreeNode, FileNode, VXETableNode} from "@/utils/type.ts";
 
 export {};
 
@@ -61,8 +61,9 @@ declare global{
         execute: (sql: string, params?: any[]) => Promise<{ changes: number, lastInsertRowid: number }>,
         saveFileToDb: (file: FileNode, workspace: number) => Promise<{ success: boolean,lastInsertRowid?: number,reason?: string,error?: any}>,
         saveDirectoryToDb: (directory: FileNode, workspace: number) => Promise<{ success: boolean }>,
-        loadAll: () => Promise<ElTreeNode[]>,
-        load: (workspace: number,keyword?: string) => Promise<ElTreeNode[]>,
+        loadTree: (workspace: number,keyword?: string) => Promise<ElTreeNode[]>,
+        loadTable: (workspace: number,associatedFolder:number | null = null) => Promise<VXETableNode[]>,
+        loadTableV2: (workspace: number) => Promise<VXETableNode[]>,
       }
     }
   }

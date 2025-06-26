@@ -64,18 +64,13 @@ const onSearch: FilterNodeMethodFunction = (value: string, data: Tree) => {
 async function load() {
   try {
     isLoading.value = true
-    data.value = await window.electronAPI.dataOperation.load(currentWorkspace.value)
+    data.value = await window.electronAPI.dataOperation.loadTree(currentWorkspace.value)
     isLoading.value = false
   } catch (err) {
     console.error('加载目录结构失败:', err)
     isLoading.value = false
   }
 }
-
-const nodeClick = (data,node ,_event) => {
-  console.log(data,node)
-}
-
 const allowDrop = (draggingNode: { data: ElTreeNode }, dropNode: { data: ElTreeNode }, dropType: 'prev' | 'inner' | 'next') => {
   if(draggingNode.data.uniqueKey == dropNode.data.uniqueKey) {
     return false
@@ -137,10 +132,15 @@ onMounted(()=>{
 </script>
 
 <template>
-  <div class="window-detail-wrapper" v-resizable="{ min: 20, max: 600 }">
+  <div class="window-detail-wrapper" v-resizable="{ min: 180, max: 600 }">
     <div class="window-detail">
-      <input class="detail-filter" v-model="filterText" placeholder="搜索关键词"/>
+      <input class="detail-filter" v-model="filterText" placeholder="Filter keyword"/>
       <div class="folder">快捷节点</div>
+      <div class="folders">全部文档</div>
+      <div class="folders">搜索结果</div>
+      <div class="folders">收藏夹</div>
+      <div class="folders">回收站</div>
+      <div class="folders">草稿箱</div>
       <div class="folder">工作空间</div>
       <el-tree
               v-loading="isLoading"
@@ -156,12 +156,11 @@ onMounted(()=>{
               @node-contextmenu="onRightClick"
               @node-drag-end="end"
               @node-drop="drop"
-              @nodeClick="nodeClick"
               :highlight-current="false"
               :indent="16">
-            <template #default="{ node, data }">
+            <template #default="{ data }">
               <div class="test">
-                <Icon :label="data.label" :is-leaf="data.isLeaf" :level="String(node.level)"/>
+                <Icon :label="data.label" :is-leaf="data.isLeaf" :type="data.type"/>
                 <span :class="{ 'highlight': data.marked }">
                   {{ data.label }}
                 </span>
@@ -208,6 +207,15 @@ onMounted(()=>{
   text-wrap: nowrap;
   overflow: hidden;
 }
+
+.folders{
+  font-size: 14px;
+  color: #444;
+  align-items: center;
+  cursor: pointer;
+  margin-left: 16px;
+}
+
 /* 树背景和字体 */
 .file-tree {
   background: #f9fbfd;

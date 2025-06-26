@@ -18,7 +18,8 @@ electron.contextBridge.exposeInMainWorld("electronAPI", {
     execute: (sql, params = []) => electron.ipcRenderer.invoke("execute", sql, params),
     saveFileToDb: (file, workspace) => electron.ipcRenderer.invoke("saveFileToDb", file, workspace),
     saveDirectoryToDb: (directory, workspace) => electron.ipcRenderer.invoke("saveDirectoryToDb", directory, workspace),
-    loadAll: () => electron.ipcRenderer.invoke("loadAll"),
-    load: (workspace, keyword) => electron.ipcRenderer.invoke("load", workspace, keyword)
+    loadTree: (workspace, keyword) => electron.ipcRenderer.invoke("loadTree", workspace, keyword),
+    loadTable: (workspace, associatedFolder = null) => electron.ipcRenderer.invoke("loadTable", workspace, associatedFolder),
+    loadTableV2: (workspace) => electron.ipcRenderer.invoke("loadTableV2", workspace)
   }
 });
