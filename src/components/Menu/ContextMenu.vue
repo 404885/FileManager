@@ -28,22 +28,9 @@ const computedY = ref(props.positionY)
 
 
 async function newFolder(){
-  // const newNode = {
-  //   label: '新建文件夹',
-  //   isLeaf: false,
-  //   type: 'folder',
-  // }
-  // openDialog({
-  //   type: "editFile",
-  //   props:{
-  //     title: "新建文件夹",
-  //   },
-  // })
-
-
   const data = await openDialogAsync({
     type: 'editFile',
-    props: { title: '新建文件夹' }
+    props: { title: '新建文件夹', choose: 'edit' }
   })
   const name = data?.fileName?.trim() || '新建文件夹'
   const tableName = 'portfolio'
@@ -55,16 +42,62 @@ async function newFolder(){
       [name, workspace, parentId, create_time]
   )
   if (result){
-    // 直接通过load()取数据库数据来实现刷新
-    // props.treeRef.value.append(newNode, props.data)
     // 通过pinia设置更新状态
     store.setChangedFolder(props.data.id)
     return;
   }
 }
 
-async function renameFolder(){
+async function renameNode() {
+  const oldName = props.data.label  // 当前节点的旧名称
+  const id = props.data.id
+  const tableName = 'portfolio'
 
+  const data = await openDialogAsync({
+    type: 'editFile',
+    props: {
+      choose: 'edit',
+      title: '重命名',
+      defaultValue: oldName
+    }
+  })
+
+  const newName = data?.fileName?.trim()
+
+  // 没填或名称未变，不操作
+  if (!newName || newName === oldName) return
+
+  const result = await window.electronAPI.dataOperation.execute(
+      `UPDATE ${tableName} SET name = ? WHERE id = ?`,
+      [newName, id]
+  )
+
+  if (result) {
+    store.setChangedFolder(props.data.associated_folder || 0) // 通知父级刷新
+  }
+}
+
+async function deleteNode() {
+  const data = await openDialogAsync({
+    type: 'editFile',
+    props: { title: '新建文件夹', choose: 'delete' }
+  })
+
+  console.log(data)
+
+  const tableName = props.data.isLeaf?'file':'portfolio'
+  const id = props.data.id
+
+  const result = await window.electronAPI.dataOperation.execute(
+      `DELETE FROM ${tableName} WHERE id = ?`,
+      [id]
+  )
+
+  if (result) {
+    // 通过pinia设置更新状态
+    store.setChangedFolder(props.data.id)
+    return;
+  }
 }
 
 
@@ -131,10 +164,10 @@ watch(() => [props.positionX, props.positionY], async () => {
       <div class="context-folder" v-show="!props.isLeaf">
         <div class="context-item" @click="">新建文件</div>
         <div class="context-item" @click="newFolder">新建文件夹</div>
-        <div class="context-item" @click="renameFolder">重命名</div>
+        <div class="context-item" @click="renameNode">重命名</div>
         <div class="context-item">移动</div>
         <div class="context-item">属性</div>
-        <div class="context-item danger">删除</div>
+        <div class="context-item danger" @click="deleteNode">删除</div>
       </div>
 
 

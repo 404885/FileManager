@@ -4,6 +4,7 @@ import { ref } from "vue";
 const emit = defineEmits(['close', 'confirm'])
 const props = defineProps<{
   title: string,
+  choose: string,
 }>()
 
 
@@ -11,8 +12,16 @@ const fileName = ref('')
 
 
 function confirmDialog() {
-  emit("confirm", {'fileName': fileName.value})
-  emit('close')
+  console.log("das")
+  if (props.choose === 'edit') {
+    emit("confirm", {'fileName': fileName.value})
+    emit('close')
+  }
+  else if (props.choose === 'delete') {
+    emit("confirm", {'delete': true})
+    emit('close')
+  }
+
 }
 
 function cancelDialog() {
@@ -28,9 +37,16 @@ function cancelDialog() {
         <div class="fileEdit-title">
           <b>{{ props.title || "默认标题" }}</b>
         </div>
-        <div class="fileEdit-menu">
+        <div class="fileEdit-edit" v-if="choose === 'edit' ">
           <div class="menu-tip">将{{}}命名为：</div>
-          <input class="menu-input" type="text" v-model="fileName" placeholder="请输入文件名">
+          <input class="menu-input" type="text" v-model="fileName" placeholder="新建文件夹">
+        </div>
+
+        <div class="fileEdit-delete" v-if="choose === 'delete' ">
+          <div class="menu-tip">确定要删除吗</div>
+        </div>
+
+        <div class="fileEdit-button">
           <button class="menu-button" @click="confirmDialog">确认</button>
           <button class="menu-button" @click="cancelDialog">取消</button>
         </div>
@@ -58,7 +74,7 @@ function cancelDialog() {
   font-size: 14px !important;
 }
 
-.fileEdit-menu {
+.fileEdit-edit {
   display: flex;
   flex-direction: column;
 }
