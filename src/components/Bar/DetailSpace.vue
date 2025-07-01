@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import {ref, watch, onMounted} from 'vue'
-import { openMenu } from "@/utils/component/Menu.ts";
+
 import Icon from "@/components/Icon.vue";
+import SwitchDialog from "@/components/Dialog/SwitchDialog.vue";
+
+import { openMenu } from "@/utils/component/Menu.ts";
 import {showNotification} from "@/utils/component/Notification.ts";
 import {ElTreeNode} from "@/utils/type.ts";
 import {useTreeCondition} from "@/pinia/TreeCondition.ts";
+import {openDialogAsync, openDialog} from "@/utils/component/Dialog.ts";
 
 //pinia初始化
 const store = useTreeCondition()
@@ -20,7 +24,7 @@ const isLoading = ref<boolean>(false);
 const hasAlerted = ref(false)
 //当前工作空间
 const currentWorkspace = ref<number>(1)
-// 节点展开key(浅引用，变化直接更改了state？？)
+// 节点展开key
 const idList = store.expandedNode
 // 计时器
 let timer: ReturnType<typeof setTimeout> | null = null
@@ -138,6 +142,14 @@ function contextmenu(e: MouseEvent, data: ElTreeNode) {
   treeRef.value?.setCurrentKey(data.uniqueKey)
 }
 
+function workspace(){
+  openDialog({
+    type: 'switch',
+    props: {
+    }
+  })
+}
+
 
 
 
@@ -163,61 +175,65 @@ onMounted(()=>{
 </script>
 
 <template>
-  <div class="window-detail-wrapper" v-resizable="{ min: 180, max: 600 }">
-    <div class="window-detail">
+    <div class="window-detail"  v-resizable="{ min: 180, max: 600 }">
       <input class="detail-filter" v-model="filterText" placeholder="Filter keyword"/>
-      <div class="folder">快捷节点</div>
-      <div class="folders">全部文档</div>
-      <div class="folders">搜索结果</div>
-      <div class="folders">收藏夹</div>
-      <div class="folders">回收站</div>
-      <div class="folders">草稿箱</div>
-      <div class="folder">工作空间</div>
-      <el-tree
-          v-loading="isLoading"
-          element-loading-text="加载数据中"
-          ref="treeRef"
-          class="file-tree"
-          :data="data"
-          node-key="uniqueKey"
-          :props="defaultProps"
-          draggable
-          :allow-drop="allowDrop"
-          @node-contextmenu="contextmenu"
-          @node-drag-end="end"
-          @node-drop="drop"
-          :default-expanded-keys="store.expandedNode"
-          @node-expand="expand"
-          @node-collapse="collapse"
-          :highlight-current="false"
-          :indent="16">
-            <template #default="{ data }">
-              <div class="test">
-                <Icon :type="data.type" :is-leaf="data.isLeaf" />
-                <span :class="{ 'highlight': data.marked }">
+      <div class="folder">
+        快捷节点
+        <div class="folders">全部文档</div>
+        <div class="folders" @click="workspace">切换空间</div>
+        <div class="folders">搜索结果</div>
+        <div class="folders">收藏夹</div>
+        <div class="folders">回收站</div>
+        <div class="folders">草稿箱</div>
+      </div>
+
+
+
+      <div class="folder">
+        工作空间
+        <el-tree
+            v-loading="isLoading"
+            element-loading-text="加载数据中"
+            ref="treeRef"
+            class="file-tree"
+            :data="data"
+            node-key="uniqueKey"
+            :props="defaultProps"
+            draggable
+            :allow-drop="allowDrop"
+            @node-contextmenu="contextmenu"
+            @node-drag-end="end"
+            @node-drop="drop"
+            :default-expanded-keys="store.expandedNode"
+            @node-expand="expand"
+            @node-collapse="collapse"
+            :highlight-current="false"
+            :indent="16">
+          <template #default="{ data }">
+            <div class="test">
+              <Icon :type="data.type" :is-leaf="data.isLeaf" source="tree"/>
+              <span :class="{ 'highlight': data.marked }">
                   {{ data.label }}
                 </span>
-              </div>
-            </template>
-          </el-tree>
+            </div>
+          </template>
+        </el-tree>
+      </div>
+
+
     </div>
-  </div>
 </template>
 
 <style scoped>
-.window-detail-wrapper {
-  display: flex;
-  background: var(--menu-bg);
-  border-right: 1px solid var(--menu-border);
-  flex-direction: column;
-}
 
 .window-detail {
-  padding: 5px;
-  user-select: none;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 33px);
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-radius: 6px;
+  padding: 5px;
+  user-select: none;
   overflow: hidden;
 }
 
@@ -239,6 +255,7 @@ onMounted(()=>{
   margin-top: 4px;
   text-wrap: nowrap;
   overflow: hidden;
+
 }
 
 .folders{
@@ -251,7 +268,6 @@ onMounted(()=>{
 
 /* 树背景和字体 */
 .file-tree {
-  background: #f9fbfd;
   font-size: 14px;
   flex: 1;
   color: #444;

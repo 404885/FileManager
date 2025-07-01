@@ -1,14 +1,16 @@
 // utils/Dialog.ts
 import { createApp, h} from 'vue'
 import FileAddDialog from "@/components/Dialog/FileAddDialog.vue";
-import FileEditDialog from "@/components/Dialog/FileEditDialog.vue";
+import EditDialog from "@/components/Dialog/EditDialog.vue";
 import SettingDialog from "@/components/Dialog/SettingDialog.vue";
 import UserDialog from "@/components/Dialog/UserDialog.vue";
+import SwitchDialog from "@/components/Dialog/SwitchDialog.vue";
 
 
 let DialogMap = {
+    switch: SwitchDialog,
     addFile: FileAddDialog,
-    editFile: FileEditDialog,
+    edit: EditDialog,
     setting: SettingDialog,
     user: UserDialog,
 }
@@ -23,6 +25,7 @@ interface DialogOptions {
 
 interface DialogResult {
     fileName: string
+    delete: boolean
 }
 
 export function openDialog({ type, props = {}, onConfirm }: DialogOptions ) {

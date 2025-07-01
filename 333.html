@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8" />
+    <title>卡牌抽出效果示范（修正版）</title>
+    <style>
+
+    body {
+            margin: 0;
+            font-family: system-ui, sans-serif;
+            background: #f5f7fa;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+        }
+        button.open-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            background: #409eff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            z-index: 30;
+        }
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 1000;
+        }
+        .overlay.active {
+            display: flex;
+        }
+        .scene {
+            width: 700px;
+            height: 300px;
+            position: relative;
+            perspective: 800px;
+        }
+        .card {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 320px;
+            height: 220px;
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: transform 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.5s ease;
+            opacity: 0;
+            pointer-events: none;
+            transform-origin: center center;
+            filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1));
+        }
+        .card.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        /* 抽出卡牌用transform直接写，不用class */
+        .card.center {
+            /* 这个类可留空或者删掉 */
+        }
+        .card.left {
+            /* 空 */
+        }
+        .card.right {
+            /* 空 */
+        }
+        .card.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .card h3 {
+            font-size: 22px;
+            margin: 0 0 10px 0;
+        }
+        .card p {
+            font-size: 15px;
+            color: #555;
+            margin: 0;
+        }
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 26px;
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            z-index: 100;
+        }
+        .dots {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            user-select: none;
+        }
+        .dot {
+            width: 26px;
+            height: 26px;
+            background: #ccc;
+            border-radius: 6px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .dot.active {
+            background: #409eff;
+        }
+    </style>
+</head>
+<body>
+
+<button class="open-btn" id="openBtn">切换工作区</button>
+
+<div class="overlay" id="overlay">
+    <button class="close-btn" id="closeBtn">×</button>
+    <div class="scene" id="scene"></div>
+    <div class="dots" id="dots"></div>
+</div>
+
+<script>
+    const workspaces = [
+        { name: '工作区 A', desc: '📂 项目 / 文件' },
+        { name: '工作区 B', desc: '📁 Markdown 文档' },
+        { name: '工作区 C', desc: '📝 草稿 / 快捷记录' },
+        { name: '工作区 D', desc: '🗂️ 日志 / 归档' },
+        { name: '工作区 E', desc: '📋 TODO / 日程' },
+        { name: '工作区 F', desc: '📸 图片归档' },
+        { name: '工作区 G', desc: '🔖 剪藏与书签' }
+    ];
+    const total = workspaces.length;
+    const overlay = document.getElementById('overlay');
+    const scene = document.getElementById('scene');
+    const dots = document.getElementById('dots');
+
+    let currentIndex = 0;
+    let scrollDelta = 0;
+    let scrollTimer = null;
+
+    function mod(n, m) {
+        return ((n % m) + m) % m;
+    }
+
+    function init() {
+        scene.innerHTML = '';
+        dots.innerHTML = '';
+        for (let i = 0; i < total; i++) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.style.transition = 'transform 0.5s ease, opacity 0.5s ease';
+            card.innerHTML = `<h3>${workspaces[i].name}</h3><p>${workspaces[i].desc}</p>`;
+            card.onclick = () => selectWorkspace(i);
+            scene.appendChild(card);
+
+            const dot = document.createElement('div');
+            dot.className = 'dot';
+            dot.textContent = i + 1;
+            dot.onclick = () => setIndex(i);
+            dots.appendChild(dot);
+        }
+        update();
+    }
+
+    function update() {
+        const cards = scene.querySelectorAll('.card');
+        cards.forEach((card, i) => {
+            card.style.transition = 'transform 0.5s ease, opacity 0.5s ease';
+            card.style.opacity = '0';
+            card.style.pointerEvents = 'none';
+            card.style.zIndex = '0';
+
+            if (i === currentIndex) {
+                card.style.transform = 'translate(-50%, -50%) translateX(0) translateZ(80px) scale(1.15)';
+                card.style.opacity = '1';
+                card.style.pointerEvents = 'auto';
+                card.style.zIndex = '20';
+            } else if (i === mod(currentIndex - 1, total)) {
+                card.style.transform = 'translate(-150%, -50%) translateZ(0) scale(0.85) rotateY(20deg)';
+                card.style.opacity = '0.7';
+                card.style.pointerEvents = 'auto';
+                card.style.zIndex = '10';
+            } else if (i === mod(currentIndex + 1, total)) {
+                card.style.transform = 'translate(50%, -50%) translateZ(0) scale(0.85) rotateY(-20deg)';
+                card.style.opacity = '0.7';
+                card.style.pointerEvents = 'auto';
+                card.style.zIndex = '10';
+            } else {
+                card.style.transition = 'none';
+                card.style.transform = 'translate(-50%, -50%) scale(0.7)';
+                card.style.opacity = '0';
+                card.style.pointerEvents = 'none';
+                card.style.zIndex = '0';
+                requestAnimationFrame(() => {
+                    card.style.transition = 'transform 0.5s ease, opacity 0.5s ease';
+                });
+            }
+        });
+
+        dots.querySelectorAll('.dot').forEach((dot, i) => {
+            dot.classList.toggle('active', i === currentIndex);
+        });
+    }
+
+    function setIndex(index) {
+        currentIndex = mod(index, total);
+        update();
+    }
+
+    function selectWorkspace(i) {
+        alert(`✅ 已切换到 ${workspaces[i].name}`);
+        overlay.classList.remove('active');
+    }
+
+    document.getElementById('openBtn').onclick = () => {
+        overlay.classList.add('active');
+        init();
+    };
+
+    document.getElementById('closeBtn').onclick = () => {
+        overlay.classList.remove('active');
+    };
+
+    // 丝滑滚轮 + 自动吸附最近卡片
+    overlay.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        scrollDelta += e.deltaY;
+
+        // 等用户停止滚动一段时间再切换
+        clearTimeout(scrollTimer);
+        scrollTimer = setTimeout(() => {
+            if (scrollDelta > 40) {
+                setIndex(currentIndex + 1);
+            } else if (scrollDelta < -40) {
+                setIndex(currentIndex - 1);
+            }
+            scrollDelta = 0;
+        }, 120); // 越小越灵敏
+    }, { passive: false });
+
+    // 键盘方向键支持
+    document.addEventListener('keydown', (e) => {
+        if (!overlay.classList.contains('active')) return;
+
+        if (e.key === 'ArrowRight') setIndex(currentIndex + 1);
+        if (e.key === 'ArrowLeft') setIndex(currentIndex - 1);
+        if (e.key === 'Escape') overlay.classList.remove('active');
+    });
+</script>
+
+
+
+</body>
+</html>

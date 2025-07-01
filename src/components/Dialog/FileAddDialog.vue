@@ -10,6 +10,7 @@ const props = defineProps({
 function closeDialog() {
   emit("close")
 }
+
 const store = useTreeCondition()
 
 async function openAndReadFile() {

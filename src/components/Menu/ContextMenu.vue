@@ -2,7 +2,7 @@
 import {ref, onMounted, onBeforeUnmount, nextTick, watch, Ref} from 'vue'
 import {ElTreeNode} from "@/utils/type.ts";
 import {useTreeCondition} from "@/pinia/TreeCondition.ts";
-import {openDialog,openDialogAsync} from "@/utils/component/Dialog.ts";
+import {openDialogAsync} from "@/utils/component/Dialog.ts";
 
 
 const emit = defineEmits(['close'])
@@ -29,7 +29,7 @@ const computedY = ref(props.positionY)
 
 async function newFolder(){
   const data = await openDialogAsync({
-    type: 'editFile',
+    type: 'edit',
     props: { title: '新建文件夹', choose: 'edit' }
   })
   const name = data?.fileName?.trim() || '新建文件夹'
@@ -49,21 +49,15 @@ async function newFolder(){
 }
 
 async function renameNode() {
+  const data = await openDialogAsync({
+    type: 'edit',
+    props: { choose: 'edit', title: '重命名',}
+  })
+
   const oldName = props.data.label  // 当前节点的旧名称
   const id = props.data.id
   const tableName = 'portfolio'
-
-  const data = await openDialogAsync({
-    type: 'editFile',
-    props: {
-      choose: 'edit',
-      title: '重命名',
-      defaultValue: oldName
-    }
-  })
-
   const newName = data?.fileName?.trim()
-
   // 没填或名称未变，不操作
   if (!newName || newName === oldName) return
 
@@ -71,32 +65,28 @@ async function renameNode() {
       `UPDATE ${tableName} SET name = ? WHERE id = ?`,
       [newName, id]
   )
-
   if (result) {
-    store.setChangedFolder(props.data.associated_folder || 0) // 通知父级刷新
+    const node = props.treeRef.value.getNode(props.data.uniqueKey)
+    node.data.label = newName
   }
 }
 
 async function deleteNode() {
-  const data = await openDialogAsync({
-    type: 'editFile',
+  const confirmData = await openDialogAsync({
+    type: 'edit',
     props: { title: '新建文件夹', choose: 'delete' }
   })
-
-  console.log(data)
-
-  const tableName = props.data.isLeaf?'file':'portfolio'
-  const id = props.data.id
-
-  const result = await window.electronAPI.dataOperation.execute(
-      `DELETE FROM ${tableName} WHERE id = ?`,
-      [id]
-  )
-
-  if (result) {
-    // 通过pinia设置更新状态
-    store.setChangedFolder(props.data.id)
-    return;
+  if(confirmData?.delete){
+    const tableName = props.data.isLeaf?'file':'portfolio'
+    const id = props.data.id
+    const result = await window.electronAPI.dataOperation.execute(
+        `DELETE FROM ${tableName} WHERE id = ?`,
+        [id]
+    )
+    if (result) {
+      props.treeRef.value.remove(props.data.uniqueKey)
+      return;
+    }
   }
 }
 

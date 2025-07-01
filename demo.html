@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>图标连接滑块菜单</title>
+    <style>
+        body {
+            margin: 0;
+            background: #f0f2f5;
+            font-family: system-ui, sans-serif;
+        }
+
+        .window-bar {
+            width: 60px;
+            height: 100vh;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            margin: 10px 0;
+            background: #eee;
+            border-radius: 8px 0 0 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            font-size: 20px;
+            transition: background 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: #ddd;
+        }
+
+        .slider-menu {
+            position: fixed;
+            display: flex;
+            flex-direction: row;
+            background: #fff;
+            border-radius: 0 12px 12px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            z-index: 1000;
+            overflow: hidden;
+            height: 40px;
+        }
+
+        .slider-option {
+            padding: 0 20px;
+            font-size: 14px;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .slider-option:hover {
+            background: #f5f5f5;
+        }
+
+        .slider-option.active::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 10%;
+            width: 80%;
+            height: 3px;
+            background: dodgerblue;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="window-bar">
+    <div class="icon-btn" id="iconTag">🏷️</div>
+    <div class="icon-btn" id="iconFolder">📁</div>
+</div>
+
+<div class="slider-menu" id="sliderMenu" style="display: none;">
+    <div class="slider-option active">标签</div>
+    <div class="slider-option">收藏</div>
+    <div class="slider-option">归档</div>
+</div>
+
+<script>
+    const sliderMenu = document.getElementById('sliderMenu')
+    const iconTag = document.getElementById('iconTag')
+    const iconFolder = document.getElementById('iconFolder')
+    const options = document.querySelectorAll('.slider-option')
+
+    function showMenuForIcon(icon) {
+        const rect = icon.getBoundingClientRect()
+        sliderMenu.style.top = rect.top + 'px'
+        sliderMenu.style.left = rect.right + 'px'
+        sliderMenu.style.display = 'flex'
+
+        document.addEventListener('click', () => {
+            sliderMenu.style.display = 'none'
+        }, { once: true })
+    }
+
+    iconTag.addEventListener('contextmenu', e => {
+        e.preventDefault()
+        showMenuForIcon(iconTag)
+    })
+
+    iconFolder.addEventListener('contextmenu', e => {
+        e.preventDefault()
+        showMenuForIcon(iconFolder)
+    })
+
+    options.forEach(opt => {
+        opt.addEventListener('click', () => {
+            options.forEach(o => o.classList.remove('active'))
+            opt.classList.add('active')
+        })
+    })
+</script>
+
+</body>
+</html>

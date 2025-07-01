@@ -1,31 +1,37 @@
 <script setup lang="ts">
 
 const props = defineProps<{
-  type: string,
-  isLeaf: boolean,
+  type?: string,
+  isLeaf?: boolean,
+  source: string,
 }>()
 
+
+// const IconSource =
 
 const fileIconMap: Record<string, string> = JSON.parse(localStorage.getItem('customFileIconMap') || '{}')
 
 // 动态切换icon
-function iconSwitch(type: string, isLeaf: boolean) {
-  if (isLeaf){
-    return '#' + (fileIconMap[type] || 'icon-file')
+function iconSwitch(type: string, isLeaf: boolean, source: string) {
+  if (source === 'tree') {
+    if (isLeaf){
+      return  fileIconMap[type] || fileIconMap.default
+    }
+    else{
+      return '#icon-morenwenjianjia'
+    }
   }
-  else{
-    return '#icon-morenwenjianjia'
+  else if (source === 'bar') {
+    return type
   }
+
 }
 
 </script>
 
 <template>
-  <svg class="icon" aria-hidden="true" v-show="!props.isLeaf">
-    <use :xlink:href="iconSwitch(props.type, props.isLeaf)"></use>
-  </svg>
-  <svg class="icon" aria-hidden="true" v-show="props.isLeaf">
-    <use :xlink:href="iconSwitch(props.type, props.isLeaf)"></use>
+  <svg class="icon" aria-hidden="true">
+    <use :xlink:href="iconSwitch(props.type, props.isLeaf, props.source)"></use>
   </svg>
 </template>
 
@@ -35,7 +41,6 @@ function iconSwitch(type: string, isLeaf: boolean) {
   height: 16px;
   vertical-align: -0.20em;
   align-items: center;
-  fill: currentColor;
   overflow: hidden;
 }
 </style>
