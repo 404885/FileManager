@@ -8,7 +8,6 @@ export function useHandleClick(delay = 250) {
         doubleClickFn: (data: any) => void
     ) {
         const now = Date.now()
-
         if (clickTimer) {
             // 已有未处理的单击定时器，判断两次点击间隔
             if (now - lastClickTime < delay) {

@@ -1,4 +1,4 @@
-import { ipcMain, BrowserWindow, dialog, app } from "electron";
+import { ipcMain, BrowserWindow, dialog, shell, app } from "electron";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import fs from "fs/promises";
@@ -79,6 +79,16 @@ function RegisterIpcEvent() {
       canceled: false,
       files: tree
     };
+  });
+  ipcMain.handle("close-directory-dialog", async () => {
+  });
+  ipcMain.handle("open-file", async (_event, filePath) => {
+    try {
+      return await shell.openPath(filePath);
+    } catch (err) {
+      console.error("打开文件失败:", err);
+      return "error";
+    }
   });
 }
 const require2 = createRequire(import.meta.url);

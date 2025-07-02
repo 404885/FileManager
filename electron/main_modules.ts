@@ -1,6 +1,7 @@
-import {ipcMain, BrowserWindow, dialog} from 'electron';
+import {BrowserWindow, dialog, ipcMain, shell} from 'electron';
 import fs from "fs/promises";
 import path from "node:path";
+
 
 export function RegisterIpcEvent() {
     ipcMain.on('window-minimize', (event) => {
@@ -87,6 +88,17 @@ export function RegisterIpcEvent() {
         return {
             canceled: false,
             files: tree
+        }
+    })
+
+    ipcMain.handle('close-directory-dialog', async () => {})
+
+    ipcMain.handle('open-file', async (_event, filePath) => {
+        try {
+            return await shell.openPath(filePath) // 空字符串表示成功
+        } catch (err) {
+            console.error('打开文件失败:', err)
+            return 'error'
         }
     })
 

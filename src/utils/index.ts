@@ -17,9 +17,6 @@ const Component = {
     openMenu
 }
 
-const Type = {
-}
-
 const IconMap = {
     getFileIcon,
     getFileIconMap,
@@ -28,9 +25,10 @@ const IconMap = {
     defaultFileIconMap,
 }
 
+
+
 export {
     Handle,
     Component,
-    Type,
     IconMap,
 }

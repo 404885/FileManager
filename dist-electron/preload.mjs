@@ -5,6 +5,7 @@ electron.contextBridge.exposeInMainWorld("electronAPI", {
   // 从渲染进程中接受参数，通过通道传递至主进程的处理器（ipcMain.handle）中进行处理
   openFileDialog: () => electron.ipcRenderer.invoke("open-file-dialog"),
   openDirectoryDialog: () => electron.ipcRenderer.invoke("open-directory-dialog"),
+  openFile: (filePath) => electron.ipcRenderer.invoke("open-file", filePath),
   windowControls: {
     minimize: () => electron.ipcRenderer.send("window-minimize"),
     maximize: () => electron.ipcRenderer.send("window-maximize"),

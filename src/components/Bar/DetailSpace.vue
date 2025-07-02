@@ -1,17 +1,14 @@
 <script setup lang="ts">
 import {ref, watch, onMounted} from 'vue'
-import { nextTick } from 'vue'
+
 
 import Icon from "@/components/Icon.vue";
 
-import { openMenu } from "@/utils/component/Menu.ts";
-import { openNotification } from "@/utils/component/Notification.ts";
+
 import { ElTreeNode } from "@/utils/type.ts";
 import { useTreeCondition } from "@/pinia/TreeCondition.ts";
-import { openDialog } from "@/utils/component/Dialog.ts";
-// import { useHandleClick } from "@/utils/handleClick.ts";
 
-import { Handle } from "@/utils"
+import { Component, Handle } from "@/utils"
 
 
 //pinia初始化
@@ -32,34 +29,56 @@ const currentWorkspace = ref<number>(1)
 const idList = store.expandedNode
 // 计时器
 let timer: ReturnType<typeof setTimeout> | null = null
-
-
-
+// 点击事件并设置双击间隔
 const { handleClick } = Handle.useHandleClick(200)
-
-
-async function onSingleClick(node:any) {
-  console.time('expandTime')
-  node.expanded = !node.expanded
-  await nextTick()    // 等待 DOM 更新完成
-  console.timeEnd('expandTime')
-}
-
-function onDoubleClick(node: any) {
-  console.log('双击事件', node)
-  openDialog({
-    type: "file",
-    props: {}
-  })
-}
-
-
 // el-tree props 配置
-const defaultProps = {
-  children: 'children',
-  label: 'label',
-  path: 'path',
+const defaultProps = {children: 'children', label: 'label', path: 'path',}
+
+
+
+// 单击事件处理
+function onSingleClick(node:any) {
+  if(node.data.isLeaf) return
+  node.expanded = !node.expanded
+  if(node.expanded){
+    if (node.data.uniqueKey && !idList.includes(node.data.uniqueKey)) {
+      idList.push(node.data.uniqueKey)
+    }
+  }
+  else {
+    // 递归删除idList中的id，得到收起父节点，子节点直接关闭的效果
+    const removeNodeAndChildren = (node: ElTreeNode) => {
+      if (!node) return
+      if (node.uniqueKey) {
+        const index = idList.indexOf(node.uniqueKey)
+        if (index !== -1) {
+          idList.splice(index, 1)
+        }
+      }
+      if (node.children && node.children.length) {
+        node.children.forEach(child => removeNodeAndChildren(child))
+      }
+    }
+    removeNodeAndChildren(node.data)
+    load()
+  }
+
+
+
 }
+// 双击事件处理
+function onDoubleClick(node: any) {
+  if(!node.data.isLeaf) return
+  console.log('双击事件', node.data)
+  window.electronAPI.openFile(node.data.file_path)
+  // openDialog({
+  //   type: "file",
+  //   props: {}
+  // })
+}
+
+
+
 
 
 
@@ -80,6 +99,7 @@ async function load() {
   }
 }
 
+
 // 允许拖拽的情况
 const allowDrop = (draggingNode: { data: ElTreeNode }, dropNode: { data: ElTreeNode }, dropType: 'prev' | 'inner' | 'next') => {
   // 给拖动节点添加高亮
@@ -97,7 +117,7 @@ const end = (_draggingNode: { data: ElTreeNode }, dropNode: { data: ElTreeNode }
   // 拖拽时间不允许，拖入节点为空
   if (!dropNode){
     if (!hasAlerted.value) {
-      openNotification({
+      Component.openNotification({
         message: '禁止拖入',
         type: 'error',
         duration: 3000,
@@ -125,40 +145,13 @@ const drop = async (draggingNode: {data: ElTreeNode} , dropNode: {data: ElTreeNo
     return;
   }
 }
-// 节点展开
-const expand = (data: ElTreeNode) => {
-  // 展开的时候添加节点id
-  if(data.uniqueKey){
-    idList.push(data.uniqueKey)
-    console.log(idList)
-    console.log(store.expandedNode)
-  }
-}
-// 节点关闭
-const collapse = (data: ElTreeNode) => {
-  // 递归删除idList中的id，得到收起父节点，子节点直接关闭的效果
-  const removeNodeAndChildren = (node: ElTreeNode) => {
-    if (!node) return
-    if (node.uniqueKey) {
-      const index = idList.indexOf(node.uniqueKey)
-      if (index !== -1) {
-        idList.splice(index, 1)
-      }
-    }
-    if (node.children && node.children.length) {
-      node.children.forEach(child => removeNodeAndChildren(child))
-    }
-  }
-  removeNodeAndChildren(data)
-  load()
-}
 
 
 
 // 页面弹窗
 function contextmenu(e: MouseEvent, data: ElTreeNode) {
   e.preventDefault()
-  openMenu({
+  Component.openMenu({
     isLeaf: data.isLeaf,
     positionX: e.clientX,
     positionY: e.clientY,
@@ -169,10 +162,9 @@ function contextmenu(e: MouseEvent, data: ElTreeNode) {
   treeRef.value?.setCurrentKey(data.uniqueKey)
 }
 
-
 // 快捷节点部分的功能实现
 function workspace(){
-  openDialog({
+  Component.openDialog({
     type: 'switch',
     props: {
     }
@@ -229,8 +221,6 @@ onMounted(()=>{
             @node-drag-end="end"
             @node-drop="drop"
             :default-expanded-keys="store.expandedNode"
-            @node-expand="expand"
-            @node-collapse="collapse"
             :expand-on-click-node="false"
             :highlight-current="false"
             :indent="16">

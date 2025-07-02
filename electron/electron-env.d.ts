@@ -30,6 +30,7 @@ declare global{
   interface Window {
     ipcRenderer: import('electron').IpcRenderer,
     electronAPI: {
+      openFile: (filePath: string) => Promise<string>
       openFileDialog: () => Promise<
           | { canceled: true }
           | {
