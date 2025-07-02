@@ -7,7 +7,7 @@ import VxeUIAll from 'vxe-pc-ui'
 
 import './style/base.css'
 import './style/iconfont.js'
-import './utils/initStorage.ts'
+import './utils/iconMap.ts'
 
 import ElementPlus from 'element-plus'
 import router from '@/router'

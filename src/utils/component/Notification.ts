@@ -8,7 +8,7 @@ interface Options{
     position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left',
 }
 
-export function showNotification({message, duration, position, type}:Options) {
+export function openNotification({message, duration, position, type}:Options) {
     ElNotification({
         position,
         message: h('div', { class: 'noti-wrapper' }, [
@@ -21,7 +21,5 @@ export function showNotification({message, duration, position, type}:Options) {
         type,
         duration,
         customClass: 'noti-with-progress',
-    }
-
-    )
+    })
 }

@@ -6,11 +6,10 @@
             box-shadow 0.2s;/* 添加阴影效果过渡 */
 }
 .animate_button:hover {
-    transform: translateY(-2px);
     box-shadow: rgba(0, 0, 0, 0.4) 0 2px 4px;
 }
 .animate_button:active {
-    transform: translateY(1px) scale(0.97); /* 稍微下移并缩小一点 */
+    transform: translateY(1px) scale(0.995); /* 稍微下移并缩小一点 */
     box-shadow: rgba(0, 0, 0, 0.25) 0 1px 2px; /* 阴影更贴近 */
 }
 .animate_button.router-link-active {

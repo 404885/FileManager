@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 const props = defineProps<{
-  type?: string,
+  type: string,
   isLeaf?: boolean,
   source: string,
 }>()

@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import {ref, watch, onMounted} from 'vue'
+import { nextTick } from 'vue'
 
 import Icon from "@/components/Icon.vue";
-import SwitchDialog from "@/components/Dialog/SwitchDialog.vue";
 
 import { openMenu } from "@/utils/component/Menu.ts";
-import {showNotification} from "@/utils/component/Notification.ts";
-import {ElTreeNode} from "@/utils/type.ts";
-import {useTreeCondition} from "@/pinia/TreeCondition.ts";
-import {openDialogAsync, openDialog} from "@/utils/component/Dialog.ts";
+import { openNotification } from "@/utils/component/Notification.ts";
+import { ElTreeNode } from "@/utils/type.ts";
+import { useTreeCondition } from "@/pinia/TreeCondition.ts";
+import { openDialog } from "@/utils/component/Dialog.ts";
+// import { useHandleClick } from "@/utils/handleClick.ts";
+
+import { Handle } from "@/utils"
+
 
 //pinia初始化
 const store = useTreeCondition()
@@ -28,6 +32,27 @@ const currentWorkspace = ref<number>(1)
 const idList = store.expandedNode
 // 计时器
 let timer: ReturnType<typeof setTimeout> | null = null
+
+
+
+const { handleClick } = Handle.useHandleClick(200)
+
+
+async function onSingleClick(node:any) {
+  console.time('expandTime')
+  node.expanded = !node.expanded
+  await nextTick()    // 等待 DOM 更新完成
+  console.timeEnd('expandTime')
+}
+
+function onDoubleClick(node: any) {
+  console.log('双击事件', node)
+  openDialog({
+    type: "file",
+    props: {}
+  })
+}
+
 
 // el-tree props 配置
 const defaultProps = {
@@ -72,7 +97,7 @@ const end = (_draggingNode: { data: ElTreeNode }, dropNode: { data: ElTreeNode }
   // 拖拽时间不允许，拖入节点为空
   if (!dropNode){
     if (!hasAlerted.value) {
-      showNotification({
+      openNotification({
         message: '禁止拖入',
         type: 'error',
         duration: 3000,
@@ -128,6 +153,8 @@ const collapse = (data: ElTreeNode) => {
   load()
 }
 
+
+
 // 页面弹窗
 function contextmenu(e: MouseEvent, data: ElTreeNode) {
   e.preventDefault()
@@ -142,6 +169,8 @@ function contextmenu(e: MouseEvent, data: ElTreeNode) {
   treeRef.value?.setCurrentKey(data.uniqueKey)
 }
 
+
+// 快捷节点部分的功能实现
 function workspace(){
   openDialog({
     type: 'switch',
@@ -160,13 +189,11 @@ watch(filterText, async (val) => {
     await onSearch(currentWorkspace.value, val);
   }, 300)
 })
-
 // 通过getter监听state值变化后重设为默认值
 watch(()=>store.getChangedFolder, async (_val) => {
   store.setChangedFolder(-1)
   await onSearch(currentWorkspace.value,filterText.value);
 })
-
 
 onMounted(()=>{
   load()
@@ -186,9 +213,6 @@ onMounted(()=>{
         <div class="folders">回收站</div>
         <div class="folders">草稿箱</div>
       </div>
-
-
-
       <div class="folder">
         工作空间
         <el-tree
@@ -207,14 +231,15 @@ onMounted(()=>{
             :default-expanded-keys="store.expandedNode"
             @node-expand="expand"
             @node-collapse="collapse"
+            :expand-on-click-node="false"
             :highlight-current="false"
             :indent="16">
-          <template #default="{ data }">
-            <div class="test">
+          <template #default="{ node, data }">
+            <div class="tree-node" @click="handleClick(node, onSingleClick, onDoubleClick)">
               <Icon :type="data.type" :is-leaf="data.isLeaf" source="tree"/>
               <span :class="{ 'highlight': data.marked }">
                   {{ data.label }}
-                </span>
+              </span>
             </div>
           </template>
         </el-tree>
@@ -225,6 +250,8 @@ onMounted(()=>{
 </template>
 
 <style scoped>
+
+
 
 .window-detail {
   display: flex;
@@ -276,6 +303,10 @@ onMounted(()=>{
   scrollbar-width: none;
   user-select: none;
   --el-tree-node-hover-bg-color: #e6f0ff; /* 轻微悬浮底色 */
+}
+
+.tree-node {
+  width: 100%;
 }
 
 .highlight {

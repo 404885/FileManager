@@ -1,18 +1,20 @@
 // utils/Dialog.ts
 import { createApp, h} from 'vue'
-import FileAddDialog from "@/components/Dialog/FileAddDialog.vue";
+import AddDialog from "@/components/Dialog/AddDialog.vue";
 import EditDialog from "@/components/Dialog/EditDialog.vue";
 import SettingDialog from "@/components/Dialog/SettingDialog.vue";
 import UserDialog from "@/components/Dialog/UserDialog.vue";
 import SwitchDialog from "@/components/Dialog/SwitchDialog.vue";
+import FileDialog from "@/components/Dialog/FileDialog.vue";
 
 
 let DialogMap = {
     switch: SwitchDialog,
-    addFile: FileAddDialog,
+    add: AddDialog,
     edit: EditDialog,
     setting: SettingDialog,
     user: UserDialog,
+    file: FileDialog,
 }
 
 

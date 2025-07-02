@@ -66,7 +66,7 @@ const handleClickOutside = (event: MouseEvent) => {
 
 function open() {
   openDialog({
-    type: "addFile",
+    type: "add",
     props:{
       title: "创建实体"
     }
