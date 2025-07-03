@@ -10,23 +10,13 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="window-detail-wrapper" v-resizable="{ min: 180, max: 600 }">
-    <div class="window-detail">
+    <div class="window-detail" v-resizable="{ min: 180, max: 600 }">
       dsadsad
     </div>
-  </div>
 </template>
 
 <style scoped>
-.window-detail-wrapper {
-  display: flex;
-  background: var(--menu-bg);
-  border-right: 1px solid var(--menu-border);
-  flex-direction: column;
-  width: 180px;
-}
 
-.window-detail {
 
-}
+
 </style>

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { IconMap } from "@/utils";
+
 
 const props = defineProps<{
   type: string,
@@ -7,9 +9,8 @@ const props = defineProps<{
 }>()
 
 
-// const IconSource =
 
-const fileIconMap: Record<string, string> = JSON.parse(localStorage.getItem('customFileIconMap') || '{}')
+const fileIconMap = IconMap.getFileIconMap()
 
 // 动态切换icon
 function iconSwitch(type: string, isLeaf: boolean, source: string) {

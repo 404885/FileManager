@@ -27,3 +27,18 @@
     max-width: 80%;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
 }
+
+/* ======detail-space和tag的容器======= */
+.window-detail {
+    display: flex;
+    flex-direction: column;
+    min-width: 180px;
+    height: 100%;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-radius: 6px;
+    padding: 5px;
+    user-select: none;
+    overflow: hidden;
+}
+

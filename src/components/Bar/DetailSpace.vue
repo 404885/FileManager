@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import {ref, watch, onMounted} from 'vue'
 
-
 import Icon from "@/components/Icon.vue";
-
 
 import { ElTreeNode } from "@/utils/type.ts";
 import { useTreeCondition } from "@/pinia/TreeCondition.ts";
-
-import { Component, Handle } from "@/utils"
+import { Component, Handle, IconData } from "@/utils"
 
 
 //pinia初始化
@@ -33,60 +30,9 @@ let timer: ReturnType<typeof setTimeout> | null = null
 const { handleClick } = Handle.useHandleClick(200)
 // el-tree props 配置
 const defaultProps = {children: 'children', label: 'label', path: 'path',}
+// v-for循环数据
+const sections = IconData.nodeData
 
-
-
-// 单击事件处理
-function onSingleClick(node:any) {
-  if(node.data.isLeaf) return
-  node.expanded = !node.expanded
-  if(node.expanded){
-    if (node.data.uniqueKey && !idList.includes(node.data.uniqueKey)) {
-      idList.push(node.data.uniqueKey)
-    }
-  }
-  else {
-    // 递归删除idList中的id，得到收起父节点，子节点直接关闭的效果
-    const removeNodeAndChildren = (node: ElTreeNode) => {
-      if (!node) return
-      if (node.uniqueKey) {
-        const index = idList.indexOf(node.uniqueKey)
-        if (index !== -1) {
-          idList.splice(index, 1)
-        }
-      }
-      if (node.children && node.children.length) {
-        node.children.forEach(child => removeNodeAndChildren(child))
-      }
-    }
-    removeNodeAndChildren(node.data)
-    load()
-  }
-
-
-
-}
-// 双击事件处理
-function onDoubleClick(node: any) {
-  if(!node.data.isLeaf) return
-  console.log('双击事件', node.data)
-  window.electronAPI.openFile(node.data.file_path)
-  // openDialog({
-  //   type: "file",
-  //   props: {}
-  // })
-}
-
-
-
-
-
-
-async function onSearch(workspace:number,keyword:string){
-  isLoading.value = true
-  data.value = await window.electronAPI.dataOperation.load(workspace,keyword)
-  isLoading.value = false
-}
 
 async function load() {
   try {
@@ -145,9 +91,42 @@ const drop = async (draggingNode: {data: ElTreeNode} , dropNode: {data: ElTreeNo
     return;
   }
 }
+// 节点展开
+const expand = (data: ElTreeNode) => {
+  // 展开的时候添加节点id
+  if(data.uniqueKey){
+    idList.push(data.uniqueKey)
+    console.log(idList)
+    console.log(store.expandedNode)
+  }
+}
+// 节点关闭
+const collapse = (data: ElTreeNode) => {
+  // 递归删除idList中的id，得到收起父节点，子节点直接关闭的效果
+  const removeNodeAndChildren = (node: ElTreeNode) => {
+    if (!node) return
+    if (node.uniqueKey) {
+      const index = idList.indexOf(node.uniqueKey)
+      if (index !== -1) {
+        idList.splice(index, 1)
+      }
+    }
+    if (node.children && node.children.length) {
+      node.children.forEach(child => removeNodeAndChildren(child))
+    }
+  }
+  removeNodeAndChildren(data)
+  load()
+}
 
 
 
+// 搜索功能
+async function onSearch(workspace:number,keyword:string){
+  isLoading.value = true
+  data.value = await window.electronAPI.dataOperation.load(workspace,keyword)
+  isLoading.value = false
+}
 // 页面弹窗
 function contextmenu(e: MouseEvent, data: ElTreeNode) {
   e.preventDefault()
@@ -161,17 +140,59 @@ function contextmenu(e: MouseEvent, data: ElTreeNode) {
   })
   treeRef.value?.setCurrentKey(data.uniqueKey)
 }
+// 快捷节点调用判断
+function nodeClick(section: any){
+  if (section.action === 'workChange') workChange()
+}
 
-// 快捷节点部分的功能实现
-function workspace(){
+// 工作空间切换
+function workChange(){
   Component.openDialog({
     type: 'switch',
     props: {
     }
   })
 }
+// 单击事件处理
+function onSingleClick(node:any) {
+  if(node.data.isLeaf) return
+  node.expanded = !node.expanded
+  if(node.expanded){
+    if (node.data.uniqueKey && !idList.includes(node.data.uniqueKey)) {
+      idList.push(node.data.uniqueKey)
+    }
+  }
+  else {
+    // 递归删除idList中的id，得到收起父节点，子节点直接关闭的效果
+    const removeNodeAndChildren = (node: ElTreeNode) => {
+      if (!node) return
+      if (node.uniqueKey) {
+        const index = idList.indexOf(node.uniqueKey)
+        if (index !== -1) {
+          idList.splice(index, 1)
+        }
+      }
+      if (node.children && node.children.length) {
+        node.children.forEach(child => removeNodeAndChildren(child))
+      }
+    }
+    removeNodeAndChildren(node.data)
+    load()
+  }
 
 
+
+}
+// 双击事件处理
+function onDoubleClick(node: any) {
+  if(!node.data.isLeaf) return
+  console.log('双击事件', node.data)
+  window.electronAPI.openFile(node.data.file_path)
+  // openDialog({
+  //   type: "file",
+  //   props: {}
+  // })
+}
 
 
 // 搜索防抖
@@ -186,7 +207,7 @@ watch(()=>store.getChangedFolder, async (_val) => {
   store.setChangedFolder(-1)
   await onSearch(currentWorkspace.value,filterText.value);
 })
-
+// 挂载的时候默认调用load初始化
 onMounted(()=>{
   load()
 })
@@ -196,22 +217,20 @@ onMounted(()=>{
 <template>
     <div class="window-detail"  v-resizable="{ min: 180, max: 600 }">
       <input class="detail-filter" v-model="filterText" placeholder="Filter keyword"/>
-      <div class="folder">
-        快捷节点
-        <div class="folders">全部文档</div>
-        <div class="folders" @click="workspace">切换空间</div>
-        <div class="folders">搜索结果</div>
-        <div class="folders">收藏夹</div>
-        <div class="folders">回收站</div>
-        <div class="folders">草稿箱</div>
+      <div class="detail-describe">快捷节点</div>
+      <div class="detail-section">
+        <div v-for="(item, index) in sections" :key="index" class="section-item" @click="nodeClick(item)">
+          <span>{{ item.label }}</span>
+          <Icon :type="item.icon"  source="bar"/>
+        </div>
       </div>
-      <div class="folder">
-        工作空间
+      <div class="detail-describe">工作空间</div>
+      <div class="detail-tree">
         <el-tree
             v-loading="isLoading"
             element-loading-text="加载数据中"
             ref="treeRef"
-            class="file-tree"
+            class="tree"
             :data="data"
             node-key="uniqueKey"
             :props="defaultProps"
@@ -221,6 +240,8 @@ onMounted(()=>{
             @node-drag-end="end"
             @node-drop="drop"
             :default-expanded-keys="store.expandedNode"
+            @node-expand="expand"
+            @node-collapse="collapse"
             :expand-on-click-node="false"
             :highlight-current="false"
             :indent="16">
@@ -235,24 +256,12 @@ onMounted(()=>{
         </el-tree>
       </div>
 
-
     </div>
 </template>
 
 <style scoped>
 
 
-
-.window-detail {
-  display: flex;
-  flex-direction: column;
-  background: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  border-radius: 6px;
-  padding: 5px;
-  user-select: none;
-  overflow: hidden;
-}
 
 .detail-filter {
   height: 30px;
@@ -264,35 +273,54 @@ onMounted(()=>{
   border-radius: 4px;
 }
 
-
-.folder{
+.detail-describe{
   font-size: 12px;
   color: grey;
   margin-bottom: 4px;
   margin-top: 4px;
   text-wrap: nowrap;
-  overflow: hidden;
-
 }
 
-.folders{
-  font-size: 14px;
-  color: #444;
-  align-items: center;
-  cursor: pointer;
-  margin-left: 16px;
-}
-
-/* 树背景和字体 */
-.file-tree {
-  font-size: 14px;
+.detail-tree {
   flex: 1;
-  color: #444;
-  width: auto;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.section-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* 关键点：左右分布 */
+  padding: 6px 10px;
+  font-size: 13px;
+  color: #333;
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s;
+  cursor: pointer;
+}
+
+.section-item:hover {
+  background: #dbeafe;
+  color: #1d4ed8;
+  cursor: pointer;
+}
+
+
+.tree {
   overflow: auto;
-  scrollbar-width: none;
+  color: #444;
+  max-width: 100%;
   user-select: none;
-  --el-tree-node-hover-bg-color: #e6f0ff; /* 轻微悬浮底色 */
+  scrollbar-width: none;
 }
 
 .tree-node {

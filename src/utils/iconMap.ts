@@ -24,6 +24,7 @@ const defaultFileIconMap: Record<string, string> = {
     default: '#icon-file',
 }
 
+
 // 初始化图标映射（仅首次写入）
 function initFileIconMap() {
     if (!localStorage.getItem(STORAGE_KEY)) {

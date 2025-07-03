@@ -5,6 +5,7 @@ import { openDialog,openDialogAsync } from "@/utils/component/Dialog.ts"
 import { openMenu } from "@/utils/component/Menu.ts"
 import { openNotification } from "@/utils/component/Notification.ts";
 import { getFileIcon, getFileIconMap, setFileIconMap, clearFileIconMap, defaultFileIconMap } from '@/utils/iconMap.ts'
+import { nodeData,sideTopData,sideBottomData } from "@/utils/iconData.ts";
 
 const Handle = {
     useHandleClick,
@@ -25,10 +26,17 @@ const IconMap = {
     defaultFileIconMap,
 }
 
+const IconData = {
+    nodeData,
+    sideTopData,
+    sideBottomData
+}
+
 
 
 export {
     Handle,
     Component,
     IconMap,
+    IconData,
 }
