@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import {ref, watch, onMounted} from 'vue'
+import {ref, watch, onMounted } from 'vue'
 
 import Icon from "@/components/Icon.vue";
 
 import { ElTreeNode } from "@/utils/type.ts";
 import { useTreeCondition } from "@/pinia/TreeCondition.ts";
-import { Component, Handle, IconData } from "@/utils"
+import { Component, Handle, IconData, Worksapce } from "@/utils"
+import router from "@/router";
 
 
 //pinia初始化
@@ -183,16 +184,31 @@ function onSingleClick(node:any) {
 
 
 }
+
+
+
+
 // 双击事件处理
-function onDoubleClick(node: any) {
-  if(!node.data.isLeaf) return
-  console.log('双击事件', node.data)
-  window.electronAPI.openFile(node.data.file_path)
+async function onDoubleClick(node: any) {
+  if(node.data.isLeaf) {
+    console.log("这是文件")
+    // window.electronAPI.openFile(node.data.file_path)
+  }
+  else {
+    // console.log("这是文件夹", node.data)
+    const pathArray = await Worksapce.idToPath(node.data.associated_folder, node.data.name)
+    const fullPath = '/space' + pathArray.map(encodeURIComponent).join('/')
+    await router.push(fullPath)
+
+
+  }
+
   // openDialog({
   //   type: "file",
   //   props: {}
   // })
 }
+
 
 
 // 搜索防抖

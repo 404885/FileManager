@@ -11,7 +11,7 @@ export default defineComponent({
 
 <template>
     <div class="window-detail" v-resizable="{ min: 180, max: 600 }">
-      <input class="detail-filter" v-model="filterText" placeholder="Filter keyword"/>
+      <input class="detail-filter"  placeholder="Filter keyword"/>
       dsadsad
     </div>
 </template>
