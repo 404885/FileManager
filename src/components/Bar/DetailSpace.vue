@@ -267,8 +267,6 @@ onMounted(()=>{
   height: 30px;
   padding: 5px;
   margin-bottom: 10px;
-  width: 100%;
-  box-sizing: border-box;
   border: 1px solid #ccc;
   border-radius: 4px;
 }

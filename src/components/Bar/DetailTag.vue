@@ -11,12 +11,20 @@ export default defineComponent({
 
 <template>
     <div class="window-detail" v-resizable="{ min: 180, max: 600 }">
+      <input class="detail-filter" v-model="filterText" placeholder="Filter keyword"/>
       dsadsad
     </div>
 </template>
 
 <style scoped>
-
+.detail-filter {
+  height: 30px;
+  padding: 5px;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
 
 
 </style>

@@ -84,7 +84,7 @@ onMounted(() => {
   <el-container>
     <el-header class="workspace-header">
       <h2>工作空间</h2>
-      <button class="newFile" @click="open">新增</button>
+      <button class="border-btn" @click="open">新增</button>
     </el-header>
     <el-main class="workspace-main">
       <vxe-table
@@ -135,9 +135,6 @@ onMounted(() => {
 }
 .dropper .el-dropdown-link {
   cursor: pointer;
-}
-.newFile{
-  height: 36px;
 }
 
 </style>
