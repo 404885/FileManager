@@ -1,3 +1,5 @@
+
+// 一个单双击处理回调函数
 export function useHandleClick(delay = 250) {
     let clickTimer: ReturnType<typeof setTimeout> | null = null
     let lastClickTime = 0

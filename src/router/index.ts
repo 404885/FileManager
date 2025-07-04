@@ -12,7 +12,14 @@ const routers = createRouter({
             component: () => import('../view/IndexView.vue'),
             meta: {
                 DetailBar: 'space',
-            }
+            },
+        },
+        {
+            path: '/space:catchAll(.*)*',
+            component: () => import('../view/Child/IndexView.vue'),
+            meta: {
+                DetailBar: 'space',
+            },
         },
         {
             path: '/user',
@@ -20,7 +27,7 @@ const routers = createRouter({
             component: () => import('../view/UserView.vue'),
         },
         {
-            path: '/',
+            path: '/:catchAll(.*)*',
             name: 'main',
             component: () => import('../view/MainView.vue'),
 

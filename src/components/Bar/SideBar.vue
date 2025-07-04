@@ -2,20 +2,11 @@
 
 
 import Icon from "@/components/Icon.vue";
+import { IconData } from "@/utils";
 
-const dataTop = [
-  { to: '/', icon: '#icon-home' },
-  { to: '/space', icon: '#icon-project' },
-  { to: '/tag', icon: '#icon-tags' },
-  { to: '/recent', icon: '#icon-recent' },
-  { to: '/like', icon: '#icon-star' },
-  { to: '/connect', icon: '#icon-share' }
-]
+const dataTop = IconData.sideTopData
 
-const dataBottom = [
-    { to: '/user', icon: '#icon-user' },
-    { to: '/setting', icon: '#icon-setting' },
-]
+const dataBottom = IconData.sideBottomData
 
 </script>
 
@@ -23,12 +14,12 @@ const dataBottom = [
   <div class="window-sidebar">
     <div class="sidebar-menu">
       <div class="menu-top">
-        <RouterLink v-for="item in dataTop" :to="item.to" class="menu-icon animate_button">
+        <RouterLink v-for="item in dataTop" :to="item.to" class="menu-icon animate_press">
           <Icon :type="item.icon" source="bar"/>
         </RouterLink>
       </div>
       <div class="menu-bottom">
-        <RouterLink v-for="item in dataBottom" :to="item.to" class="menu-icon animate_button">
+        <RouterLink v-for="item in dataBottom" :to="item.to" class="menu-icon animate_press">
           <Icon :type="item.icon" source="bar"/>
         </RouterLink>
       </div>

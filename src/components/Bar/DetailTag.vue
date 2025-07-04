@@ -10,23 +10,21 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="window-detail-wrapper" v-resizable="{ min: 180, max: 600 }">
-    <div class="window-detail">
+    <div class="window-detail" v-resizable="{ min: 180, max: 600 }">
+      <input class="detail-filter"  placeholder="Filter keyword"/>
       dsadsad
     </div>
-  </div>
 </template>
 
 <style scoped>
-.window-detail-wrapper {
-  display: flex;
-  background: var(--menu-bg);
-  border-right: 1px solid var(--menu-border);
-  flex-direction: column;
-  width: 180px;
+.detail-filter {
+  height: 30px;
+  padding: 5px;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
-.window-detail {
 
-}
 </style>

@@ -33,24 +33,29 @@ function cancelDialog() {
 <template>
   <div class="dialog-overlay">
     <div class="dialog-border fadeIn-slide">
-      <div class="dialog-fileEdit">
-        <div class="fileEdit-title">
+
+      <div class="dialog-edit">
+
+        <div class="edit-title">
           <b>{{ props.title || "默认标题" }}</b>
         </div>
-        <div class="fileEdit-edit" v-if="choose === 'edit' ">
+
+        <div class="edit-edit" v-if="choose === 'edit' ">
           <div class="menu-tip">将{{}}命名为：</div>
           <input class="menu-input" type="text" v-model="fileName" placeholder="新建文件夹">
         </div>
 
-        <div class="fileEdit-delete" v-if="choose === 'delete' ">
+        <div class="edit-delete" v-if="choose === 'delete' ">
           <div class="menu-tip">确定要删除吗</div>
         </div>
 
-        <div class="fileEdit-button">
+        <div class="edit-button">
           <button class="menu-button" @click="confirmDialog">确认</button>
           <button class="menu-button" @click="cancelDialog">取消</button>
         </div>
+
       </div>
+
     </div>
   </div>
 
@@ -60,7 +65,7 @@ function cancelDialog() {
 
 
 
-.dialog-fileEdit {
+.dialog-edit {
   width: 300px;
   height: 100px;
   display: flex;
@@ -70,11 +75,11 @@ function cancelDialog() {
   box-sizing: content-box;
 }
 
-.fileEdit-title{
+.edit-title{
   font-size: 14px !important;
 }
 
-.fileEdit-edit {
+.edit-edit {
   display: flex;
   flex-direction: column;
 }

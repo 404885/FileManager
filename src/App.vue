@@ -70,7 +70,7 @@ const currentComponent = computed(() => {
   min-width: 200px;
   flex: 1;
   background: white;
-  margin-left: 10px;
+  margin-left: 6px;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06); /* 内容区也给一点阴影和圆角 */
 }

@@ -72,15 +72,15 @@ async function openAndSaveFolder() {
 <template>
   <div class="dialog-overlay"  @click.self='closeDialog()'>
     <div class="dialog-border fadeIn-slide">
-      <div class="dialog-fileAdd">
-        <div class="fileAdd-title">
+      <div class="dialog-add">
+        <div class="add-title">
           <b>{{ props.title || "默认标题" }}</b>
         </div>
-        <div class="fileAdd-menu">
+        <div class="add-menu">
           <div class="menu-list">
             <div class="list-title">个人笔记</div>
-            <div @click="openAndReadFile" class="list-add animate_button">导入文件</div>
-            <div @click="openAndSaveFolder" class="list-add animate_button">导入文件夹</div>
+            <div @click="openAndReadFile" class="list-add animate_press">导入文件</div>
+            <div @click="openAndSaveFolder" class="list-add animate_press">导入文件夹</div>
           </div>
           <div class="menu-list">
             <div class="list-title">文档管理</div>
@@ -102,7 +102,7 @@ async function openAndSaveFolder() {
 
 <style scoped>
 
-.dialog-fileAdd {
+.dialog-add {
   height: 400px;
   display: flex;
   flex-direction: column;
@@ -111,7 +111,7 @@ async function openAndSaveFolder() {
   box-sizing: content-box;
 }
 
-.fileAdd-menu {
+.add-menu {
   flex: 1;
   display: flex;
   flex-direction: row;
