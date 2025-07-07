@@ -5,7 +5,7 @@ import Icon from "@/components/Icon.vue";
 
 import { ElTreeNode } from "@/utils/type.ts";
 import { useTreeCondition } from "@/pinia/TreeCondition.ts";
-import { Component, Handle, IconData, Worksapce } from "@/utils"
+import { Component, Handle, IconData, Workspace } from "@/utils"
 import router from "@/router";
 
 
@@ -38,7 +38,7 @@ const sections = IconData.nodeData
 async function load() {
   try {
     isLoading.value = true
-    data.value = await window.electronAPI.dataOperation.load(currentWorkspace.value)
+    data.value = await window.electronAPI.dataOperation.loadTree(currentWorkspace.value)
     isLoading.value = false
   } catch (err) {
     console.error('加载目录结构失败:', err)
@@ -125,7 +125,7 @@ const collapse = (data: ElTreeNode) => {
 // 搜索功能
 async function onSearch(workspace:number,keyword:string){
   isLoading.value = true
-  data.value = await window.electronAPI.dataOperation.load(workspace,keyword)
+  data.value = await window.electronAPI.dataOperation.loadTree(workspace,keyword)
   isLoading.value = false
 }
 // 页面弹窗
@@ -196,17 +196,13 @@ async function onDoubleClick(node: any) {
   }
   else {
     // console.log("这是文件夹", node.data)
-    const pathArray = await Worksapce.idToPath(node.data.associated_folder, node.data.name)
+    const pathArray = await Workspace.idToPath(node.data.associated_folder, node.data.name)
     const fullPath = '/space' + pathArray.map(encodeURIComponent).join('/')
     await router.push(fullPath)
 
 
   }
 
-  // openDialog({
-  //   type: "file",
-  //   props: {}
-  // })
 }
 
 
