@@ -8,14 +8,11 @@ import {openDialog} from "@/utils/component/Dialog.ts";
 import {VXETableNode} from "@/utils/type.ts";
 import {useTreeCondition} from "@/pinia/TreeCondition.ts";
 import Icon from "@/components/Icon.vue";
-import {useRoute,useRouter} from 'vue-router'
 
 const timeFormatter: VxeColumnPropTypes.Formatter = ({ cellValue }) => {
   return typeof cellValue === 'number' ? formatter.timeFormatter(cellValue) : '';
 }
 
-const route = useRoute()
-const router = useRouter()
 
 const store =useTreeCondition()
 
@@ -23,27 +20,29 @@ const currentWorkspaceTitle = ref('')  // 存放最终标题
 
 const tableData = ref<VXETableNode[]>([])
 
-watch(() => route.query.workspace, (newWorkspace, oldWorkspace) => {
-  if (newWorkspace && newWorkspace !== oldWorkspace) {
-    initTable()
-  }
-})
+watch(() => store.getCurrentWorkSpace, async (id) => {
+      // 每次工作空间变了，就去查名字
+      try {
+        const row = await window.electronAPI.dataOperation.queryOne(
+            'SELECT name FROM workspace WHERE id = ?',
+            [id]
+        )
+        currentWorkspaceTitle.value = row?.name || '未命名工作空间'
+      } catch (e) {
+        currentWorkspaceTitle.value = '加载失败'
+        console.error(e)
+      }
+    },
+    { immediate: true }
+)
 
-watch(() => route.query.folder, (newFolder, oldFolder) => {
-  if (newFolder && newFolder !== oldFolder) {
-    initTable()
-  }
-})
 
-const initTable = async () => {
-  const workspace = Number(route.query.workspace)
-  const associatedFolder: number | null = Number(route.query.folder)
-
-  const result = await window.electronAPI.dataOperation.queryOne('SELECT name FROM workspace WHERE id = ?', [workspace])
-  currentWorkspaceTitle.value = result?.name || '未命名工作空间'
+const initTable = async (workspace: number) => {
   const types= await window.electronAPI.dataOperation.queryAll('SELECT DISTINCT type FROM file WHERE connected_workspace = ?',[workspace])
   tabs.value.push(...types)
-  tableData.value = await window.electronAPI.dataOperation.loadTable(workspace,associatedFolder)
+  console.log(types)
+  console.log(tabs.value)
+  tableData.value = await window.electronAPI.dataOperation.loadTable(workspace)
 }
 
 const loadTable = async (workspace: number, associatedFolder:number | null = null) => {
@@ -55,13 +54,7 @@ const tabs = ref<any[]>([{type:'全部文件'}])
 const handleDoubleClick: VxeTableEvents.CellClick<VXETableNode> = ({ row }) => {
   console.log(row)
   if(row.type === 'folder'){
-    router.push({
-      path: '/space',
-      query: {
-        workspace: row.connected_workspace,
-        folder: row.id
-      }
-    })
+    loadTable(row.connected_workspace,row.id)
   }else {
     console.log('开发中')
   }
@@ -77,7 +70,7 @@ function handleVisibleChange(visible: boolean) {
 async function handleDropdownClick(index: number) {
   activeTab = tabs.value[index];
   if (activeTab.type === '全部文件'){
-    tableData.value = await window.electronAPI.dataOperation.loadTable(Number(route.query.workspace))
+    tableData.value = await window.electronAPI.dataOperation.loadTable(store.getCurrentWorkSpace)
   }else {
     console.log('开发中')
   }
@@ -120,24 +113,23 @@ onMounted(() => {
 
   updateTableHeight()
   window.addEventListener('resize', updateTableHeight)
-  console.log(route.query)
-  initTable()
+
+  initTable(store.getCurrentWorkSpace)
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateTableHeight)
-  if (route.query.folder!==undefined && route.query.workspace!==undefined){} {
-    localStorage.setItem('lastWorkspace',String(route.query.workspace))
-    localStorage.setItem('lastFolder',String(route.query.folder))
-  }
 })
 </script>
 
 <template>
   <el-container>
     <el-header class="workspace-header">
-      <h2>工作空间</h2>
-      <button class="border-btn" @click="open">新增</button>
+      <el-breadcrumb :separator-icon="ArrowRight">
+        <el-breadcrumb-item :to="{ path: '/' }">{{currentWorkspaceTitle}}</el-breadcrumb-item>
+        <el-breadcrumb-item>实习</el-breadcrumb-item>
+      </el-breadcrumb>
+      <button class="newFile" @click="open">新增</button>
     </el-header>
     <el-main class="workspace-main">
       <vxe-table
@@ -172,7 +164,7 @@ onBeforeUnmount(() => {
             </el-dropdown>
           </template>
           <template #default="{row}">
-            <Icon :type="row.type" :is-leaf="row.type !== 'folder'"/>
+            <Icon :type="row.type" :is-leaf="row.type !== 'folder'" source="tree"/>
             {{row.name}}
           </template>
         </vxe-column>
@@ -203,6 +195,9 @@ onBeforeUnmount(() => {
 }
 .dropper .el-dropdown-link {
   cursor: pointer;
+}
+.newFile{
+  height: 36px;
 }
 
 </style>
