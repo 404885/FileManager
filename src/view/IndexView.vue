@@ -1,67 +1,95 @@
 <script setup lang="ts">
 import {onBeforeUnmount, onMounted, reactive, ref, watch} from "vue";
+import { useRoute } from 'vue-router'
+import router from "@/router";
+
 import {ArrowDown, ArrowRight} from '@element-plus/icons-vue'
-import {VxeTableEvents, VxeTableInstance} from "vxe-pc-ui/types/components/table";
-import {VxeColumnPropTypes} from "vxe-pc-ui/types/components/column";
-import formatter from "@/utils/formatter.ts"
-import {openDialog} from "@/utils/component/Dialog.ts";
-import {VXETableNode} from "@/utils/type.ts";
-import {useTreeCondition} from "@/pinia/TreeCondition.ts";
+
 import Icon from "@/components/Icon.vue";
+import { VxeTableEvents, VxeTableInstance } from "vxe-pc-ui/types/components/table";
+import { VxeColumnPropTypes } from "vxe-pc-ui/types/components/column";
+import { VXETableNode } from "@/utils/type.ts";
+import { useTreeCondition } from "@/pinia/TreeCondition.ts";
 
-const timeFormatter: VxeColumnPropTypes.Formatter = ({ cellValue }) => {
-  return typeof cellValue === 'number' ? formatter.timeFormatter(cellValue) : '';
-}
+import { Component, Util } from "@/utils";
 
 
+
+
+
+
+const route = useRoute()
 const store =useTreeCondition()
-
-const currentWorkspaceTitle = ref('')  // 存放最终标题
-
+// 当前工作区的名称
+// const currentWorkspaceTitle = ref('')
+// 表格展示数据
 const tableData = ref<VXETableNode[]>([])
+const tableRef = ref<VxeTableInstance>()
+// 筛选选项数组（用于生成下拉菜单）
+const tabs = ref<any[]>([{type:'全部文件'}])
+// 当前选中的筛选标签
+let activeTab = reactive({type:'全部文件'})
+// 下拉菜单可见状态
+const dropdownVisible = ref(false)
+// 响应式存储表格高度
+const tableHeight = ref(0)
+// 面包屑路径地址
+const pathArray = ref<any[]>([])
 
-watch(() => store.getCurrentWorkSpace, async (id) => {
-      // 每次工作空间变了，就去查名字
-      try {
-        const row = await window.electronAPI.dataOperation.queryOne(
-            'SELECT name FROM workspace WHERE id = ?',
-            [id]
-        )
-        currentWorkspaceTitle.value = row?.name || '未命名工作空间'
-      } catch (e) {
-        currentWorkspaceTitle.value = '加载失败'
-        console.error(e)
-      }
-    },
-    { immediate: true }
-)
+const idList = store.expandedNode
+// router.push({ path: '/space', query: { w: 1, f: 22 } })
 
 
-const initTable = async (workspace: number) => {
-  const types= await window.electronAPI.dataOperation.queryAll('SELECT DISTINCT type FROM file WHERE connected_workspace = ?',[workspace])
-  tabs.value.push(...types)
-  console.log(types)
-  console.log(tabs.value)
-  tableData.value = await window.electronAPI.dataOperation.loadTable(workspace)
+
+
+// 计算函数
+function updateTableHeight() {
+  tableHeight.value = window.innerHeight - 152
 }
 
+// 时间戳转换为可读的形式
+const timeFormatter: VxeColumnPropTypes.Formatter = ({ cellValue }) => {
+  return typeof cellValue === 'number' ? Util.formatter.timeFormatter(cellValue) : '';
+}
+
+// 读取特定工作空间下面的文件夹中的文件数据
 const loadTable = async (workspace: number, associatedFolder:number | null = null) => {
   tableData.value = await window.electronAPI.dataOperation.loadTable(workspace,associatedFolder)
 }
 
-const tabs = ref<any[]>([{type:'全部文件'}])
+// 表格初始化
+const initTable = async (workspace: number) => {
+  // 进入之前浏览的文件夹中，切换页面保留
+  await router.push({path: '/space', query: {w: store.currentWorkspace, f: store.currentFolder}})
+  // 读取存在的文件类型
+  const types= await window.electronAPI.dataOperation.queryAll('SELECT DISTINCT type FROM file WHERE connected_workspace = ?',[workspace])
+  tabs.value.push(...types)
+  tableData.value = await window.electronAPI.dataOperation.loadTable(workspace)
+}
 
+
+
+// 对列的双击事件
 const handleDoubleClick: VxeTableEvents.CellClick<VXETableNode> = ({ row }) => {
-  console.log(row)
   if(row.type === 'folder'){
-    loadTable(row.connected_workspace,row.id)
+    router.push({ path: '/space', query: { w: row.connected_workspace, f: row.id } })
+    store.setCurrentFolder(row.id)
+    // tree跟随展开
+    store.addExpandedNode("p_"+row.id)
   }else {
     console.log('开发中')
   }
 }
 
-const dropdownVisible = ref(false)
-let activeTab = reactive({type:'全部文件'})
+function handleClick(index: number) {
+  const w = pathArray.value[index].workspace
+  const f = pathArray.value[index].id
+  router.push({path: '/space', query: {w: w, f: f}})
+  store.setCurrentFolder(f)
+
+
+}
+
 
 function handleVisibleChange(visible: boolean) {
   dropdownVisible.value = visible
@@ -76,8 +104,6 @@ async function handleDropdownClick(index: number) {
   }
 }
 
-const tableRef = ref<VxeTableInstance>()
-
 const handleClickOutside = (event: MouseEvent) => {
   if (tableRef.value) {
     const table = tableRef.value
@@ -89,7 +115,7 @@ const handleClickOutside = (event: MouseEvent) => {
 };
 
 function open() {
-  openDialog({
+  Component.openDialog({
     type: "add",
     props:{
       title: "创建实体"
@@ -98,39 +124,63 @@ function open() {
 
 }
 
+watch(() => route.query.f, async () => {
 
-// 响应式存储表格高度
-const tableHeight = ref(0)
+  const f = route.query.f
+  pathArray.value = await Util.idToPathList(store.currentFolder, store.currentWorkspace)
 
-// 计算函数
-function updateTableHeight() {
-  tableHeight.value = window.innerHeight - 152
-}
+  if (route.path === '/space' && f === '-1') {
+    tableData.value = await window.electronAPI.dataOperation.loadTable(store.currentWorkspace)
+  }
+  else{
+    await loadTable(store.currentWorkspace,store.currentFolder)
+  }
+})
 
+//
+
+// watch(() => store.getCurrentWorkSpace, async (id) => {
+//       // 每次工作空间变了，就去查名字
+//       try {
+//         const row = await window.electronAPI.dataOperation.queryOne(
+//             'SELECT name FROM workspace WHERE id = ?',
+//             [id]
+//         )
+//         currentWorkspaceTitle.value = row?.name || '未命名工作空间'
+//       } catch (e) {
+//         currentWorkspaceTitle.value = '加载失败'
+//         console.error(e)
+//       }
+//     },
+//     { immediate: true }
+// )
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside);
-
   updateTableHeight()
   window.addEventListener('resize', updateTableHeight)
-
   initTable(store.getCurrentWorkSpace)
 });
-
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateTableHeight)
 })
+
+
 </script>
 
 <template>
   <el-container>
     <el-header class="workspace-header">
       <el-breadcrumb :separator-icon="ArrowRight">
-        <el-breadcrumb-item :to="{ path: '/' }">{{currentWorkspaceTitle}}</el-breadcrumb-item>
-        <el-breadcrumb-item>实习</el-breadcrumb-item>
+<!--        <el-breadcrumb-item @click="handleWClick">{{currentWorkspaceTitle}}</el-breadcrumb-item>-->
+        <el-breadcrumb-item v-for="(item, index) in pathArray" :key="item.id" @click="handleClick(index)">{{ item.name }}</el-breadcrumb-item>
       </el-breadcrumb>
-      <button class="newFile" @click="open">新增</button>
+      <button class="newFile border-btn" @click="open">新增</button>
     </el-header>
+
+
+
+
     <el-main class="workspace-main">
       <vxe-table
           ref="tableRef"
@@ -170,6 +220,7 @@ onBeforeUnmount(() => {
         </vxe-column>
         <vxe-column field="create_time" title="创建时间" width="150px" :formatter="timeFormatter" fixed="right"/>
         <vxe-column field="last_browse_time" title="上次浏览时间" width="150px" :formatter="timeFormatter" fixed="right"/>
+
         <template #empty>
           你个懒鬼，这个工作空间什么都没有
         </template>

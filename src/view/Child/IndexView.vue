@@ -2,6 +2,7 @@
   <div>
     <h3>我是子路径视图</h3>
     <p>路径参数：{{ route.params.catchAll }}</p>
+    {{ route.fullPath }}
   </div>
 </template>
 

@@ -6,7 +6,7 @@ import { openMenu } from "@/utils/component/Menu.ts"
 import { openNotification } from "@/utils/component/Notification.ts";
 import { getFileIcon, getFileIconMap, setFileIconMap, clearFileIconMap, defaultFileIconMap } from '@/utils/iconMap.ts'
 import { nodeData,sideTopData,sideBottomData } from "@/utils/iconData.ts";
-import { setCurrentInfo, getCurrentInfo, idToPath } from "@/utils/handleWorkspace.ts"
+import { formatter, idToPath,idToPathList  } from "@/utils/util.ts";
 
 const Handle = {
     useHandleClick,
@@ -33,10 +33,10 @@ const IconData = {
     sideBottomData
 }
 
-const Workspace = {
-    setCurrentInfo,
-    getCurrentInfo,
+const Util = {
     idToPath,
+    idToPathList,
+    formatter
 }
 
 
@@ -46,5 +46,5 @@ export {
     Component,
     IconMap,
     IconData,
-    Workspace,
+    Util,
 }

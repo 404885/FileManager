@@ -11,7 +11,7 @@ const nodeData = [
 /* SideBar功能页面跳转 */
 const sideTopData = [
     { to: '/', icon: '#icon-home' },
-    { to: '/space', icon: '#icon-project' },
+    { to: `/space`, icon: '#icon-project' },
     { to: '/tag', icon: '#icon-tags' },
     { to: '/recent', icon: '#icon-time-circle' },
     { to: '/like', icon: '#icon-star' },
