@@ -154,11 +154,14 @@ function workChange(){
 
 // 单击事件处理
 function onSingleClick(node:any) {
+  console.log(node.data.uniqueKey)
   if(node.data.isLeaf) return
+
   node.expanded = !node.expanded
+
   if(node.expanded){
-    if (node.data.uniqueKey && !idList.includes(node.data.uniqueKey)) {
-      idList.push(node.data.uniqueKey)
+    if (node.data.uniqueKey && !store.expandedNode.includes(node.data.uniqueKey)) {
+      store.expandedNode.push(node.data.uniqueKey)
     }
   }
   else {
@@ -166,10 +169,7 @@ function onSingleClick(node:any) {
     const removeNodeAndChildren = (node: ElTreeNode) => {
       if (!node) return
       if (node.uniqueKey) {
-        const index = idList.indexOf(node.uniqueKey)
-        if (index !== -1) {
-          idList.splice(index, 1)
-        }
+        store.removeExpandedNode(node.uniqueKey)
       }
       if (node.children && node.children.length) {
         node.children.forEach(child => removeNodeAndChildren(child))
@@ -178,7 +178,9 @@ function onSingleClick(node:any) {
     removeNodeAndChildren(node.data)
     load()
   }
+  console.log(store.expandedNode)
 }
+
 // 双击事件处理
 async function onDoubleClick(node: any) {
   if(node.data.isLeaf) {
@@ -213,6 +215,7 @@ watch(filterText, async (val) => {
 // 通过getter监听state值变化后重设为默认值
 watch(()=>store.getChangedState, async (_val) => {
   store.setChangedState(-1)
+  console.log("dsa22")
   await onSearch(store.currentWorkspace,filterText.value);
 })
 

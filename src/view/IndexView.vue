@@ -76,6 +76,7 @@ const handleDoubleClick: VxeTableEvents.CellClick<VXETableNode> = ({ row }) => {
     router.push({ path: '/space', query: { w: row.connected_workspace, f: row.id } })
     // tree跟随展开
     store.addExpandedNode("p_"+row.id)
+    console.log(store.expandedNode)
   }else {
     console.log('开发中')
   }

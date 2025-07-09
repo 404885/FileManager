@@ -33,6 +33,10 @@ export const useTreeCondition= defineStore('TreeCondition', {
         addExpandedNode(id: string) {
             this.expandedNode = [...this.expandedNode, id]
         },
+        removeExpandedNode(id: string) {
+            const index = this.expandedNode.indexOf(id)
+            this.expandedNode.splice(index, 1)
+        },
         setCurrentWorkspace(workspace: number){
             this.currentWorkspace = workspace
         }
