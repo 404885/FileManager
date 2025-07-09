@@ -36,7 +36,6 @@ const tableHeight = ref(0)
 // 面包屑路径地址
 const pathArray = ref<any[]>([])
 
-const idList = store.expandedNode
 // router.push({ path: '/space', query: { w: 1, f: 22 } })
 
 
@@ -72,14 +71,18 @@ const initTable = async (workspace: number) => {
 // 对列的双击事件
 const handleDoubleClick: VxeTableEvents.CellClick<VXETableNode> = ({ row }) => {
   if(row.type === 'folder'){
-    router.push({ path: '/space', query: { w: row.connected_workspace, f: row.id } })
+
     store.setCurrentFolder(row.id)
+    router.push({ path: '/space', query: { w: row.connected_workspace, f: row.id } })
     // tree跟随展开
     store.addExpandedNode("p_"+row.id)
+    console.log(store.expandedNode)
   }else {
     console.log('开发中')
   }
 }
+
+
 
 function handleClick(index: number) {
   const w = pathArray.value[index].workspace
@@ -124,36 +127,41 @@ function open() {
 
 }
 
-watch(() => route.query.f, async () => {
 
+
+// watch([() => store.getCurrentWorkSpace, () => store.getCurrentFolder],  async () => {
+//   console.log("changed workspace")
+//
+//   pathArray.value = await Util.idToPathList(store.currentFolder, store.currentWorkspace)
+//
+//   if ( store.currentFolder === -1 ){
+//     tableData.value = await window.electronAPI.dataOperation.loadTable(store.currentWorkspace)
+//     console.log("dsa")
+//   }
+//   else {
+//     await loadTable(store.currentWorkspace,store.currentFolder)
+//   }
+//
+// },{ immediate: true })
+
+
+
+watch([() => route.query.f, () => route.query.w], async () => {
   const f = route.query.f
   pathArray.value = await Util.idToPathList(store.currentFolder, store.currentWorkspace)
-
-  if (route.path === '/space' && f === '-1') {
-    tableData.value = await window.electronAPI.dataOperation.loadTable(store.currentWorkspace)
-  }
-  else{
-    await loadTable(store.currentWorkspace,store.currentFolder)
-  }
+  if (route.path === '/space' && f === '-1') { tableData.value = await window.electronAPI.dataOperation.loadTable(store.currentWorkspace) }
+  else{ await loadTable(store.currentWorkspace,store.currentFolder)}
 })
 
-//
 
-// watch(() => store.getCurrentWorkSpace, async (id) => {
-//       // 每次工作空间变了，就去查名字
-//       try {
-//         const row = await window.electronAPI.dataOperation.queryOne(
-//             'SELECT name FROM workspace WHERE id = ?',
-//             [id]
-//         )
-//         currentWorkspaceTitle.value = row?.name || '未命名工作空间'
-//       } catch (e) {
-//         currentWorkspaceTitle.value = '加载失败'
-//         console.error(e)
-//       }
-//     },
-//     { immediate: true }
-// )
+watch(()=>store.getChangedState, async (_val) => {
+  store.setChangedState(-1)
+  console.log("sss")
+  await router.push({path: '/space', query: {w: store.currentWorkspace, f: -1}})
+  // if (store.currentFolder === -1) { tableData.value = await window.electronAPI.dataOperation.loadTable(store.currentWorkspace) }
+  // else{ await loadTable(store.currentWorkspace,store.currentFolder)}
+})
+
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside);
