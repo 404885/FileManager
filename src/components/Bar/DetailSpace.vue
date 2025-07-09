@@ -5,8 +5,9 @@ import Icon from "@/components/Icon.vue";
 
 import { ElTreeNode } from "@/utils/type.ts";
 import { useTreeCondition } from "@/pinia/TreeCondition.ts";
-import { Component, Handle, IconData } from "@/utils"
+import {Component, Handle, IconData, Util} from "@/utils"
 import router from "@/router";
+import {useRoute} from "vue-router";
 
 
 //pinia初始化
@@ -21,8 +22,6 @@ const data = ref<ElTreeNode[]>([])
 const isLoading = ref<boolean>(false);
 // 设置警告弹窗
 const hasAlerted = ref(false)
-//当前工作空间
-const currentWorkspace = ref<number>(1)
 // 节点展开key
 const idList = store.expandedNode
 // 计时器
@@ -34,11 +33,13 @@ const defaultProps = {children: 'children', label: 'label', path: 'path',}
 // v-for循环数据
 const sections = IconData.nodeData
 
+const route = useRoute()
+
 
 async function load() {
   try {
     isLoading.value = true
-    data.value = await window.electronAPI.dataOperation.loadTree(currentWorkspace.value)
+    data.value = await window.electronAPI.dataOperation.loadTree(store.currentWorkspace)
     isLoading.value = false
   } catch (err) {
     console.error('加载目录结构失败:', err)
@@ -88,7 +89,7 @@ const drop = async (draggingNode: {data: ElTreeNode} , dropNode: {data: ElTreeNo
   // 更新成功
   if (result){
     // 通过pinia设置更新状态
-    store.setChangedFolder(dropNode.data.id)
+    store.setChangedState(dropNode.data.id)
     return;
   }
 }
@@ -135,7 +136,6 @@ function contextmenu(e: MouseEvent, data: ElTreeNode) {
     isLeaf: data.isLeaf,
     positionX: e.clientX,
     positionY: e.clientY,
-    currentWorkspace,
     treeRef,
     data
   })
@@ -145,15 +145,13 @@ function contextmenu(e: MouseEvent, data: ElTreeNode) {
 function nodeClick(section: any){
   if (section.action === 'workChange') workChange()
 }
-
 // 工作空间切换
 function workChange(){
   Component.openDialog({
-    type: 'switch',
-    props: {
-    }
+    type: 'switch'
   })
 }
+
 // 单击事件处理
 function onSingleClick(node:any) {
   if(node.data.isLeaf) return
@@ -181,8 +179,6 @@ function onSingleClick(node:any) {
     load()
   }
 }
-
-
 // 双击事件处理
 async function onDoubleClick(node: any) {
   if(node.data.isLeaf) {
@@ -210,19 +206,26 @@ async function onDoubleClick(node: any) {
 watch(filterText, async (val) => {
   if (timer) clearTimeout(timer)
   timer = setTimeout(async () => {
-    await onSearch(currentWorkspace.value, val);
+    await onSearch(store.currentWorkspace, val);
   }, 300)
 })
+
 // 通过getter监听state值变化后重设为默认值
-watch(()=>store.getChangedFolder, async (_val) => {
-  store.setChangedFolder(-1)
-  await onSearch(currentWorkspace.value,filterText.value);
+watch(()=>store.getChangedState, async (_val) => {
+  store.setChangedState(-1)
+  await onSearch(store.currentWorkspace,filterText.value);
 })
 
 // 监听从table传入的展开状态，并随时更新
-watch(()=>store.getExpanded,  (_val) => {
+watch([() => route.query.f, () => route.query.w], () => {
   load()
 })
+
+// 同时监听工作空间变动，随时刷新
+watch([() => store.getExpanded],  () => {
+  load()
+})
+
 // 挂载的时候默认调用load初始化
 onMounted(()=>{
   load()

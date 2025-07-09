@@ -1,10 +1,15 @@
 <script setup lang="ts">
-import {ref, onMounted } from 'vue'
+import {onMounted, ref} from 'vue'
+import {useTreeCondition} from "@/pinia/TreeCondition.ts";
+import router from "@/router";
+
+const emit = defineEmits(['close','confirm'])
 
 
-const emit = defineEmits(['close'])
-
+//pinia初始化
+const store = useTreeCondition()
 const workspaces = ref<any[]>([]);
+// 设置当前活跃页
 const currentIndex = ref<number>(0)
 
 
@@ -12,15 +17,15 @@ const currentIndex = ref<number>(0)
 // let timer: ReturnType<typeof setTimeout> | null = null
 
 
-
-
-
 function closeDialog() {
-  emit("close")
+  emit('close')
 }
+
+
 
 async function load() {
   workspaces.value = await window.electronAPI.dataOperation.queryAll('SELECT * FROM workspace');
+  currentIndex.value = workspaces.value.findIndex(ws => ws.id === store.currentWorkspace)
 }
 
 async function newWorkSpace(){
@@ -29,7 +34,6 @@ async function newWorkSpace(){
   await window.electronAPI.dataOperation.execute(
       'INSERT INTO workspace (name, create_time) VALUES (?, ?)',
       [name, create_time])
-
   await load()
 }
 
@@ -43,10 +47,7 @@ function mod(n:number, m:number) {
 function set(i: number) {
   currentIndex.value = mod(i, workspaces.value.length);
 }
-// 通过dot设置当前活跃页
-function setCurrent(i: number) {
-  currentIndex.value = i
-}
+
 // 处理点击不同卡片的点击事件，并设置工作空间
 function setWorkSpace(id: number, index: number) {
   const total = workspaces.value.length
@@ -58,10 +59,10 @@ function setWorkSpace(id: number, index: number) {
     set(current - 1)  // 从右滑到中间
   } else if (index === current) {
     // 如果是中间，触发默认逻辑
-    console.log(`选择工作区${id}为当前工作区`)
+    store.setCurrentWorkspace(id);store.setCurrentFolder(-1)
+    router.push({path: '/space', query: {w: id, f: -1}})
   }
   set(index)
-  console.log(id)
 }
 
 
@@ -79,18 +80,23 @@ const getCardClass = (index: number) => {
   // 其他卡片，隐藏
   else return 'card hidden';
 };
+
+
+
 // 获取dot样式
 const getDotClass = (index: number) => {
   const current = currentIndex.value;
   if (index === current) return 'active'
 }
 
+//
+// watch(()=>store.currentWorkspace, async () => {
+//   const index = workspaces.value.findIndex(ws => ws.id === store.currentWorkspace)
+//   setCurrent(index)
+// })
 
-
-
-
-onMounted(async () => {
-  await load()
+onMounted(() => {
+  load()
 });
 
 

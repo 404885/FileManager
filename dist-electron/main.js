@@ -104,7 +104,8 @@ function initDatabase() {
       name TEXT NOT NULL,
       icon TEXT,
       create_time INTEGER,
-      last_browse_time INTEGER
+      last_browse_time INTEGER,
+      description TEXT
     )
   `).run();
   const row = db.prepare(`SELECT COUNT(*) as count FROM workspace`).get();
@@ -120,6 +121,8 @@ function initDatabase() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
       type TEXT NOT NULL DEFAULT 'folder',
+      description TEXT,
+      tag TEXT,
       connected_workspace INTEGER DEFAULT 1,
       associated_folder INTEGER NULL DEFAULT NULL,
       create_time INTEGER,
@@ -139,6 +142,8 @@ function initDatabase() {
       file_size INTEGER NOT NULL,
       file_path TEXT NOT NULL,
       type TEXT NOT NULL,
+      description TEXT,
+      tag TEXT,
       connected_workspace INTEGER DEFAULT 1,
       associated_folder INTEGER NULL DEFAULT NULL,
       create_time INTEGER,

@@ -11,7 +11,6 @@ const props = defineProps<{
   positionX: number
   positionY: number
   treeRef: Ref<any>
-  currentWorkspace: Ref<number>
   data: ElTreeNode
 }>()
 
@@ -36,14 +35,14 @@ async function newFolder(){
   const tableName = 'portfolio'
   const parentId = props.data.id
   const create_time = Date.now()
-  const workspace = props.currentWorkspace.value
+  const workspace = store.currentWorkspace
   const result = await window.electronAPI.dataOperation.execute(
       `INSERT INTO ${tableName} (name, connected_workspace, associated_folder, create_time) VALUES (?, ?, ?, ?)`,
       [name, workspace, parentId, create_time]
   )
   if (result){
     // 通过pinia设置更新状态
-    store.setChangedFolder(props.data.id)
+    store.setChangedState(props.data.id)
     return;
   }
 }
