@@ -5,7 +5,7 @@ import Icon from "@/components/Icon.vue";
 
 import { ElTreeNode } from "@/utils/type.ts";
 import { useTreeCondition } from "@/pinia/TreeCondition.ts";
-import {Component, Handle, IconData, Util} from "@/utils"
+import {Component, Handle, IconData } from "@/utils"
 import router from "@/router";
 import {useRoute} from "vue-router";
 
@@ -340,18 +340,9 @@ onMounted(()=>{
   scrollbar-width: none;
 }
 
-
 .tree-node {
-  max-width: 300px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: inline-block;
-  vertical-align: middle;
-  cursor: default;
-  position: relative;  /* 使其可以被层叠 */
+  width: 100%;
 }
-
 
 .highlight {
   color: #bfbf7b;

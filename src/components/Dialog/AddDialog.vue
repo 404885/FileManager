@@ -24,9 +24,9 @@ async function openAndReadFile() {
     birthtime:result.stats.birthtime,
     atime:result.stats.atime,
   }
-  const callback=await window.electronAPI.dataOperation.saveFileToDb(data,1);
+  const callback=await window.electronAPI.dataOperation.saveFileToDb(data,store.currentWorkspace);
 
-  store.setChangedFolder(0)
+  store.setChangedState(0)
 
   if (callback.success){
     ElNotification.success({
@@ -47,9 +47,9 @@ async function openAndSaveFolder() {
   const result = await window.electronAPI.openDirectoryDialog();
   if (result.canceled) return;
   // 保存结构到数据库
-  const success=await window.electronAPI.dataOperation.saveDirectoryToDb(result.files,1);
+  const success = await window.electronAPI.dataOperation.saveDirectoryToDb(result.files,store.currentWorkspace);
 
-  store.setChangedFolder(0)
+  store.setChangedState(0)
 
   if (success){
     ElNotification.success({
@@ -57,7 +57,8 @@ async function openAndSaveFolder() {
       message:'文件已经导入成功',
       position:'bottom-right'
     })
-  }else {
+  }
+  else {
     ElNotification.error({
       title:'失败',
       message:'文件导入失败',

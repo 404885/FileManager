@@ -47,7 +47,10 @@ function mod(n:number, m:number) {
 function set(i: number) {
   currentIndex.value = mod(i, workspaces.value.length);
 }
-
+// 设置当前活跃卡片
+function setCurrent(i: number) {
+  currentIndex.value = i
+}
 // 处理点击不同卡片的点击事件，并设置工作空间
 function setWorkSpace(id: number, index: number) {
   const total = workspaces.value.length

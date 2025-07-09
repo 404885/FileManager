@@ -153,6 +153,15 @@ watch([() => route.query.f, () => route.query.w], async () => {
 })
 
 
+watch(()=>store.getChangedState, async (_val) => {
+  store.setChangedState(-1)
+  console.log("sss")
+  await router.push({path: '/space', query: {w: store.currentWorkspace, f: -1}})
+  // if (store.currentFolder === -1) { tableData.value = await window.electronAPI.dataOperation.loadTable(store.currentWorkspace) }
+  // else{ await loadTable(store.currentWorkspace,store.currentFolder)}
+})
+
+
 onMounted(() => {
   document.addEventListener('click', handleClickOutside);
   updateTableHeight()
