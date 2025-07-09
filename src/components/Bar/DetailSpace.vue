@@ -5,7 +5,7 @@ import Icon from "@/components/Icon.vue";
 
 import { ElTreeNode } from "@/utils/type.ts";
 import { useTreeCondition } from "@/pinia/TreeCondition.ts";
-import { Component, Handle, IconData, Workspace } from "@/utils"
+import { Component, Handle, IconData } from "@/utils"
 import router from "@/router";
 
 
@@ -180,12 +180,7 @@ function onSingleClick(node:any) {
     removeNodeAndChildren(node.data)
     load()
   }
-
-
-
 }
-
-
 
 
 // 双击事件处理
@@ -196,13 +191,17 @@ async function onDoubleClick(node: any) {
   }
   else {
     // console.log("这是文件夹", node.data)
-    const pathArray = await Workspace.idToPath(node.data.associated_folder, node.data.name)
-    const fullPath = '/space' + pathArray.map(encodeURIComponent).join('/')
-    await router.push(fullPath)
 
-
+    // const pathArray = await Workspace.idToPath(node.data.associated_folder, node.data.name)
+    // const fullPath = '/space/' + pathArray.map(encodeURIComponent).join('/')
+    store.setCurrentFolder(node.data.id)
+    await router.push({ path: '/space', query: { w: node.data.connected_workspace, f: node.data.id } })
   }
 
+  // openDialog({
+  //   type: "file",
+  //   props: {}
+  // })
 }
 
 
@@ -219,6 +218,11 @@ watch(()=>store.getChangedFolder, async (_val) => {
   store.setChangedFolder(-1)
   await onSearch(currentWorkspace.value,filterText.value);
 })
+
+// 监听从table传入的展开状态，并随时更新
+watch(()=>store.getExpanded,  (_val) => {
+  load()
+})
 // 挂载的时候默认调用load初始化
 onMounted(()=>{
   load()
@@ -227,7 +231,7 @@ onMounted(()=>{
 </script>
 
 <template>
-    <div class="window-detail"  v-resizable="{ min: 180, max: 600 }">
+    <div class="window-detail"  v-resizable="{ min: 180, max: 300 }">
       <input class="detail-filter" v-model="filterText" placeholder="Filter keyword"/>
       <div class="detail-describe">快捷节点</div>
       <div class="detail-section">
@@ -260,7 +264,7 @@ onMounted(()=>{
           <template #default="{ node, data }">
             <div class="tree-node" @click="handleClick(node, onSingleClick, onDoubleClick)">
               <Icon :type="data.type" :is-leaf="data.isLeaf" source="tree"/>
-              <span :class="{ 'highlight': data.marked }">
+              <span :title="data.label"  :class="{ 'highlight': data.marked }">
                   {{ data.label }}
               </span>
             </div>
@@ -328,14 +332,23 @@ onMounted(()=>{
 .tree {
   overflow: auto;
   color: #444;
-  max-width: 100%;
+  max-width: 300px;
   user-select: none;
   scrollbar-width: none;
 }
 
+
 .tree-node {
-  width: 100%;
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  vertical-align: middle;
+  cursor: default;
+  position: relative;  /* 使其可以被层叠 */
 }
+
 
 .highlight {
   color: #bfbf7b;

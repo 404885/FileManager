@@ -6,17 +6,17 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 const routers = createRouter({
     history: createWebHashHistory(),
     routes: [
+        // {
+        //     path: '/space',
+        //     name: 'space',
+        //     component: () => import('../view/IndexView.vue'),
+        //     meta: {
+        //         DetailBar: 'space',
+        //     },
+        // },
         {
-            path: '/space',
-            name: 'space',
+            path: '/space/:catchAll(.*)*',
             component: () => import('../view/IndexView.vue'),
-            meta: {
-                DetailBar: 'space',
-            },
-        },
-        {
-            path: '/space:catchAll(.*)*',
-            component: () => import('../view/Child/IndexView.vue'),
             meta: {
                 DetailBar: 'space',
             },
@@ -64,35 +64,35 @@ const routers = createRouter({
     ]
 })
 
-routers.beforeEach((to, _from, next) => {
-    // 假设你想让根路径 '/' 默认带上 workspace 和 folder 参数
-    if (to.path === '/space' && !to.query.workspace && !to.query.folder) {
-        let workspace = 1;
-        let folder = null;
-
-        const lastWorkspace = localStorage.getItem('lastWorkspace');
-        const lastFolder = localStorage.getItem('lastFolder');
-
-        console.log(lastWorkspace, lastFolder);
-        if (lastWorkspace !== undefined){
-            workspace = Number(lastWorkspace);
-        }
-        if (lastFolder !== undefined){
-            folder = Number(lastFolder);
-        }
-
-        console.log(workspace,folder)
-
-        next({
-            path: '/space',
-            query: {
-                workspace,
-                folder,
-            }
-        });
-    } else {
-        next();
-    }
-});
+// routers.beforeEach((to, _from, next) => {
+//     // 假设你想让根路径 '/' 默认带上 workspace 和 folder 参数
+//     if (to.path === '/space' && !to.query.workspace && !to.query.folder) {
+//         let workspace = 1;
+//         let folder = null;
+//
+//         const lastWorkspace = localStorage.getItem('lastWorkspace');
+//         const lastFolder = localStorage.getItem('lastFolder');
+//
+//         console.log(lastWorkspace, lastFolder);
+//         if (lastWorkspace !== undefined){
+//             workspace = Number(lastWorkspace);
+//         }
+//         if (lastFolder !== undefined){
+//             folder = Number(lastFolder);
+//         }
+//
+//         console.log(workspace,folder)
+//
+//         next({
+//             path: '/space',
+//             query: {
+//                 workspace,
+//                 folder,
+//             }
+//         });
+//     } else {
+//         next();
+//     }
+// });
 
 export default routers;
