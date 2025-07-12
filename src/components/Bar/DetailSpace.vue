@@ -7,7 +7,6 @@ import { ElTreeNode } from "@/utils/type.ts";
 import { useTreeCondition } from "@/pinia/TreeCondition.ts";
 import {Component, Handle, IconData } from "@/utils"
 import router from "@/router";
-import {useRoute} from "vue-router";
 
 
 //pinia初始化
@@ -22,8 +21,6 @@ const data = ref<ElTreeNode[]>([])
 const isLoading = ref<boolean>(false);
 // 设置警告弹窗
 const hasAlerted = ref(false)
-// 节点展开key
-const idList = store.expandedNode
 // 计时器
 let timer: ReturnType<typeof setTimeout> | null = null
 // 点击事件并设置双击间隔
@@ -33,7 +30,6 @@ const defaultProps = {children: 'children', label: 'label', path: 'path',}
 // v-for循环数据
 const sections = IconData.nodeData
 
-const route = useRoute()
 
 
 async function load() {
@@ -96,27 +92,24 @@ const drop = async (draggingNode: {data: ElTreeNode} , dropNode: {data: ElTreeNo
 // 节点展开
 const expand = (data: ElTreeNode) => {
   // 展开的时候添加节点id
-  if(data.uniqueKey){
-    idList.push(data.uniqueKey)
+  if (data.uniqueKey && !store.expandedNode.includes(data.uniqueKey)) {
+    store.expandedNode.push(data.uniqueKey)
   }
 }
 // 节点关闭
 const collapse = (data: ElTreeNode) => {
-  // 递归删除idList中的id，得到收起父节点，子节点直接关闭的效果
-  const removeNodeAndChildren = (node: ElTreeNode) => {
-    if (!node) return
-    if (node.uniqueKey) {
-      const index = idList.indexOf(node.uniqueKey)
-      if (index !== -1) {
-        idList.splice(index, 1)
+    // 递归删除idList中的id，得到收起父节点，子节点直接关闭的效果
+    const removeNodeAndChildren = (node: ElTreeNode) => {
+      if (!node) return
+      if (node.uniqueKey) {
+        store.removeExpandedNode(node.uniqueKey)
+      }
+      if (node.children && node.children.length) {
+        node.children.forEach(child => removeNodeAndChildren(child))
       }
     }
-    if (node.children && node.children.length) {
-      node.children.forEach(child => removeNodeAndChildren(child))
-    }
-  }
-  removeNodeAndChildren(data)
-  load()
+    removeNodeAndChildren(data)
+    load()
 }
 
 
@@ -152,46 +145,40 @@ function workChange(){
 
 // 单击事件处理
 function onSingleClick(node:any) {
+  console.log(node.data.uniqueKey)
   if(node.data.isLeaf) return
 
   node.expanded = !node.expanded
 
   if(node.expanded){
     if (node.data.uniqueKey && !store.expandedNode.includes(node.data.uniqueKey)) {
-      store.expandedNode.push(node.data.uniqueKey)
+      store.addExpandedNode(node.data.uniqueKey)
+      // store.expandedNode.push(node.data.uniqueKey)
     }
   }
   else {
     // 递归删除idList中的id，得到收起父节点，子节点直接关闭的效果
-    const removeNodeAndChildren = (node: ElTreeNode) => {
-      if (!node) return
-      if (node.uniqueKey) {
-        store.removeExpandedNode(node.uniqueKey)
+    const removeNodeAndChildren = (data: ElTreeNode) => {
+      if (!data) return
+      if (data.uniqueKey && !data.isLeaf && store.expandedNode.includes(data.uniqueKey)) {
+        store.removeExpandedNode(data.uniqueKey)
       }
-      if (node.children && node.children.length) {
-        node.children.forEach(child => removeNodeAndChildren(child))
+      if (data.children && data.children.length) {
+        data.children.forEach(child => removeNodeAndChildren(child))
       }
     }
     removeNodeAndChildren(node.data)
-    load()
   }
 }
-
 // 双击事件处理
 async function onDoubleClick(node: any) {
   if(node.data.isLeaf) {
     console.log("这是文件")
-    // window.electronAPI.openFile(node.data.file_path)
   }
   else {
-    // console.log("这是文件夹", node.data)
-
-    // const pathArray = await Workspace.idToPath(node.data.associated_folder, node.data.name)
-    // const fullPath = '/space/' + pathArray.map(encodeURIComponent).join('/')
     store.setCurrentFolder(node.data.id)
     await router.push({ path: '/space', query: { w: node.data.connected_workspace, f: node.data.id } })
   }
-
   // openDialog({
   //   type: "file",
   //   props: {}
@@ -208,21 +195,18 @@ watch(filterText, async (val) => {
   }, 300)
 })
 
-// 通过getter监听state值变化后重设为默认值
-watch(()=>store.getChangedState, async (_val) => {
-  store.setChangedState(-1)
-  await onSearch(store.currentWorkspace,filterText.value);
+
+
+
+store.$subscribe(async(mutation, _state) => {
+  const events = mutation.events
+  console.log(mutation)
+  if ((Array.isArray(events) && events.some(e => e.key === 'changedState')) || (!Array.isArray(events) && events.key === 'changedState')) {
+    await onSearch(store.currentWorkspace,filterText.value);
+    store.setChangedState(-1)
+  }
 })
 
-// 监听从table传入的展开状态，并随时更新
-watch([() => route.query.f, () => route.query.w], () => {
-  load()
-})
-
-// 同时监听工作空间变动，随时刷新
-watch([() => store.getExpanded],  () => {
-  load()
-})
 
 // 挂载的时候默认调用load初始化
 onMounted(()=>{

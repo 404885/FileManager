@@ -6,20 +6,20 @@ import { openMenu } from "@/utils/component/Menu.ts"
 import { openNotification } from "@/utils/component/Notification.ts";
 import { getFileIcon, getFileIconMap, setFileIconMap, clearFileIconMap, defaultFileIconMap } from '@/utils/iconMap.ts'
 import { nodeData,sideTopData,sideBottomData } from "@/utils/iconData.ts";
-import { formatter, idToPath,idToPathList  } from "@/utils/util.ts";
+import { formatter,idToPath,idToPathList,setAndJump  } from "@/utils/util.ts";
 
-const Handle = {
+export const Handle = {
     useHandleClick,
 }
 
-const Component = {
+export const Component = {
     openDialog,
     openDialogAsync,
     openNotification,
     openMenu
 }
 
-const IconMap = {
+export const IconMap = {
     getFileIcon,
     getFileIconMap,
     setFileIconMap,
@@ -27,24 +27,15 @@ const IconMap = {
     defaultFileIconMap,
 }
 
-const IconData = {
+export const IconData = {
     nodeData,
     sideTopData,
     sideBottomData
 }
 
-const Util = {
+export const Util = {
     idToPath,
     idToPathList,
-    formatter
-}
-
-
-
-export {
-    Handle,
-    Component,
-    IconMap,
-    IconData,
-    Util,
+    formatter,
+    setAndJump
 }
