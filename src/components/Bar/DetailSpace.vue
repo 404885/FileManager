@@ -172,17 +172,11 @@ function onSingleClick(node:any) {
 async function onDoubleClick(node: any) {
   if(node.data.isLeaf) {
     console.log("这是文件")
-    // window.electronAPI.openFile(node.data.file_path)
   }
   else {
-    // console.log("这是文件夹", node.data)
-
-    // const pathArray = await Workspace.idToPath(node.data.associated_folder, node.data.name)
-    // const fullPath = '/space/' + pathArray.map(encodeURIComponent).join('/')
     store.setCurrentFolder(node.data.id)
     await router.push({ path: '/space', query: { w: node.data.connected_workspace, f: node.data.id } })
   }
-
   // openDialog({
   //   type: "file",
   //   props: {}
@@ -204,13 +198,7 @@ watch(filterText, async (val) => {
 
 store.$subscribe(async(mutation, _state) => {
   const events = mutation.events
-
   console.log(mutation)
-
-  if ((Array.isArray(events) && events.some(e => e.key === 'expandedNode')) || (!Array.isArray(events) && events.key === 'expandedNode')) {
-    console.log("变化了")
-  }
-
   if ((Array.isArray(events) && events.some(e => e.key === 'changedState')) || (!Array.isArray(events) && events.key === 'changedState')) {
     await onSearch(store.currentWorkspace,filterText.value);
     store.setChangedState(-1)
