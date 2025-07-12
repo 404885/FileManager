@@ -366,6 +366,9 @@ function createWindow() {
   win = new BrowserWindow({
     width: 1280,
     height: 800,
+    minWidth: 960,
+    minHeight: 600,
+    resizable: true,
     // 从public文件中找静态图片和图标等文件
     icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
     frame: false,

@@ -21,6 +21,9 @@ html, body, #app {
     width: 100vw;
     height: 100vh;
     overflow: hidden;
+    min-width: 640px;
+    min-height: 400px;
+    background: #f5f5f5;
 }
 
 /* ========== btn样式 ========== */

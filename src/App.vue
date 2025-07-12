@@ -55,10 +55,12 @@ const currentComponent = computed(() => {
 .window-main{
   display: flex;
   flex-direction: row;
+  width: 100vw;
   height: calc(100vh - 32px);
   padding: 0 12px 12px;
   background: #f5f5f5; /* 更柔和的灰色 */
 }
+
 .window-bar {
   display: flex;
   flex-direction: row;
@@ -66,11 +68,10 @@ const currentComponent = computed(() => {
 }
 
 .window-content{
-  padding: 10px;
   flex: 1;
-  background: white;
+  background: #f5f5f5;
   margin-left: 6px;
   border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06); /* 内容区也给一点阴影和圆角 */
+  min-width: 400px;
 }
 </style>
