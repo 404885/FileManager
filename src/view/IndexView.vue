@@ -61,7 +61,7 @@ const initTable = async (workspace: number) => {
   // 进入之前浏览的文件夹中，切换页面保留
   await router.push({path: '/space', query: {w: store.currentWorkspace, f: store.currentFolder}})
   // 读取存在的文件类型
-  const types= await window.electronAPI.dataOperation.queryAll('SELECT DISTINCT type FROM file WHERE connected_workspace = ?',[workspace])
+  const types= await window.electronAPI.dataOperation.queryAll('SELECT DISTINCT type FROM file WHERE connected_workspace = ? LIMIT 5',[workspace])
   tabs.value.push(...types)
   tableData.value = await window.electronAPI.dataOperation.loadTable(workspace)
 }
@@ -129,23 +129,6 @@ function open() {
 
 
 
-// watch([() => store.getCurrentWorkSpace, () => store.getCurrentFolder],  async () => {
-//   console.log("changed workspace")
-//
-//   pathArray.value = await Util.idToPathList(store.currentFolder, store.currentWorkspace)
-//
-//   if ( store.currentFolder === -1 ){
-//     tableData.value = await window.electronAPI.dataOperation.loadTable(store.currentWorkspace)
-//     console.log("dsa")
-//   }
-//   else {
-//     await loadTable(store.currentWorkspace,store.currentFolder)
-//   }
-//
-// },{ immediate: true })
-
-
-
 watch([() => route.query.f, () => route.query.w], async () => {
   const f = route.query.f
   pathArray.value = await Util.idToPathList(store.currentFolder, store.currentWorkspace)
@@ -202,7 +185,7 @@ onBeforeUnmount(() => {
           :height="tableHeight"
           @cell-dblclick="handleDoubleClick"
           style="--vxe-ui-table-header-background-color:white;">
-        <vxe-column field="name" title="文件名" fixed="left">
+        <vxe-column field="name" title="文件名" fixed="left" min-width="100px">
           <template #header>
             <el-dropdown class="dropper" trigger="click" @visible-change="handleVisibleChange" @command="handleDropdownClick">
               <span :class="['el-dropdown-link',]">
@@ -226,8 +209,8 @@ onBeforeUnmount(() => {
             {{row.name}}
           </template>
         </vxe-column>
-        <vxe-column field="create_time" title="创建时间" width="150px" :formatter="timeFormatter" fixed="right"/>
-        <vxe-column field="last_browse_time" title="上次浏览时间" width="150px" :formatter="timeFormatter" fixed="right"/>
+        <vxe-column field="create_time" title="创建时间" width="150px" :formatter="timeFormatter"/>
+        <vxe-column field="last_browse_time" title="上次浏览时间" width="150px" :formatter="timeFormatter"/>
 
         <template #empty>
           你个懒鬼，这个工作空间什么都没有

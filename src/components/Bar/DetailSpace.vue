@@ -98,8 +98,6 @@ const expand = (data: ElTreeNode) => {
   // 展开的时候添加节点id
   if(data.uniqueKey){
     idList.push(data.uniqueKey)
-    console.log(idList)
-    console.log(store.expandedNode)
   }
 }
 // 节点关闭
@@ -154,7 +152,6 @@ function workChange(){
 
 // 单击事件处理
 function onSingleClick(node:any) {
-  console.log(node.data.uniqueKey)
   if(node.data.isLeaf) return
 
   node.expanded = !node.expanded
@@ -178,7 +175,6 @@ function onSingleClick(node:any) {
     removeNodeAndChildren(node.data)
     load()
   }
-  console.log(store.expandedNode)
 }
 
 // 双击事件处理
@@ -215,7 +211,6 @@ watch(filterText, async (val) => {
 // 通过getter监听state值变化后重设为默认值
 watch(()=>store.getChangedState, async (_val) => {
   store.setChangedState(-1)
-  console.log("dsa22")
   await onSearch(store.currentWorkspace,filterText.value);
 })
 
@@ -237,7 +232,7 @@ onMounted(()=>{
 </script>
 
 <template>
-    <div class="window-detail"  v-resizable="{ min: 180, max: 300 }">
+    <div class="window-detail"  v-resizable="{ storageKey: 'my-panel-width' }">
       <input class="detail-filter" v-model="filterText" placeholder="Filter keyword"/>
       <div class="detail-describe">快捷节点</div>
       <div class="detail-section">
