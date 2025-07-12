@@ -1,3 +1,5 @@
+import { useTreeCondition } from '@/pinia/TreeCondition'
+
 /*  递归查询父文件夹，得到一个路径列表。
 *
 *   @param id 查询文件夹的Id
@@ -5,8 +7,7 @@
 *
 *   @returns 返回一个路径列表
 */
-
-async function idToPath(id: number): Promise<string[]> {
+export async function idToPath(id: number): Promise<string[]> {
     // 定义一个路径列表
     const path: string[] = []
     // 递归函数
@@ -34,33 +35,7 @@ async function idToPath(id: number): Promise<string[]> {
 }
 
 
-// async function idToPathList(id: number): Promise<any[]> {
-//     const path: any[] = []
-//
-//     async function recurse(currentId: number) {
-//         const rows = await window.electronAPI.dataOperation.queryAll(
-//             'SELECT * FROM portfolio WHERE id = ? LIMIT 1',
-//             [currentId]
-//         )
-//         const data = rows[0]
-//         if (!data) return
-//
-//         path.unshift({
-//             id: data.id,
-//             name: data.name,
-//             workspace: data.connected_workspace
-//         })
-//
-//         if (data.associated_folder !== null) {
-//             await recurse(data.associated_folder)
-//         }
-//     }
-//
-//     await recurse(id)
-//     return path
-// }
-
-async function idToPathList(id: number, workspaceId: number): Promise<any[]> {
+export async function idToPathList(id: number, workspaceId: number): Promise<any[]> {
     const path: any[] = []
 
     // 如果是根层级，仅返回工作空间节点
@@ -121,11 +96,23 @@ async function idToPathList(id: number, workspaceId: number): Promise<any[]> {
     return path
 }
 
+// 设置当前活跃的w和f，并跳转刷新页面数据（因为监听的是地址）
+export async function setAndJump(workspaceId: number, folderId: number, router: any): Promise<void> {
+    const store = useTreeCondition()
+// 获取当前的路由参数
+    const currentWorkspace = store.currentWorkspace
+    const currentFolder = store.currentFolder
+
+    if (workspaceId !== currentWorkspace || folderId !== currentFolder) {
+        store.setCurrentWorkspace(workspaceId)
+        store.setCurrentFolder(folderId)
+        await router.push({ path: '/space', query: { w: workspaceId, f: folderId } })
+    }
+
+}
 
 
-
-
-const formatter ={
+export const formatter ={
     timeFormatter(timestamp: number): string {
         const now = Date.now();
         const diffMs = now - timestamp;
@@ -141,10 +128,4 @@ const formatter ={
         return `${year}年${month}月${day}日`;
     }
 
-}
-
-export {
-    idToPath,
-    idToPathList,
-    formatter,
 }

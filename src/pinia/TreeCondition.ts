@@ -31,11 +31,12 @@ export const useTreeCondition= defineStore('TreeCondition', {
             this.currentFolder = currentFolder
         },
         addExpandedNode(id: string) {
-            this.expandedNode = [...this.expandedNode, id]
+            if (!this.expandedNode.includes(id)) {
+                this.expandedNode = [...this.expandedNode, id]
+            }
         },
         removeExpandedNode(id: string) {
-            const index = this.expandedNode.indexOf(id)
-            this.expandedNode.splice(index, 1)
+            this.expandedNode = this.expandedNode.filter(i => i !== id)
         },
         setCurrentWorkspace(workspace: number){
             this.currentWorkspace = workspace

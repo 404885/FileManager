@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ElNotification } from "element-plus";
 import { useTreeCondition } from "@/pinia/TreeCondition.ts";
+import router from "@/router";
 
 const emit = defineEmits(['close'])
 const props = defineProps({
@@ -48,8 +49,10 @@ async function openAndSaveFolder() {
   if (result.canceled) return;
   // 保存结构到数据库
   const success = await window.electronAPI.dataOperation.saveDirectoryToDb(result.files,store.currentWorkspace);
+  console.log(store.changedState)
 
   store.setChangedState(0)
+  await router.push({path: '/space', query: {w: store.currentWorkspace, f: -1}})
 
   if (success){
     ElNotification.success({

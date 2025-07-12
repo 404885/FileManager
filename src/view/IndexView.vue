@@ -59,7 +59,9 @@ const loadTable = async (workspace: number, associatedFolder:number | null = nul
 // 表格初始化
 const initTable = async (workspace: number) => {
   // 进入之前浏览的文件夹中，切换页面保留
+
   await router.push({path: '/space', query: {w: store.currentWorkspace, f: store.currentFolder}})
+
   // 读取存在的文件类型
   const types= await window.electronAPI.dataOperation.queryAll('SELECT DISTINCT type FROM file WHERE connected_workspace = ?',[workspace])
   tabs.value.push(...types)
@@ -72,11 +74,9 @@ const initTable = async (workspace: number) => {
 const handleDoubleClick: VxeTableEvents.CellClick<VXETableNode> = ({ row }) => {
   if(row.type === 'folder'){
 
-    store.setCurrentFolder(row.id)
-    router.push({ path: '/space', query: { w: row.connected_workspace, f: row.id } })
+    Util.setAndJump(row.connected_workspace, row.id, router)
     // tree跟随展开
     store.addExpandedNode("p_"+row.id)
-    console.log(store.expandedNode)
   }else {
     console.log('开发中')
   }
@@ -87,10 +87,8 @@ const handleDoubleClick: VxeTableEvents.CellClick<VXETableNode> = ({ row }) => {
 function handleClick(index: number) {
   const w = pathArray.value[index].workspace
   const f = pathArray.value[index].id
-  router.push({path: '/space', query: {w: w, f: f}})
-  store.setCurrentFolder(f)
 
-
+  Util.setAndJump(w, f, router)
 }
 
 
@@ -128,39 +126,25 @@ function open() {
 }
 
 
-
-// watch([() => store.getCurrentWorkSpace, () => store.getCurrentFolder],  async () => {
-//   console.log("changed workspace")
-//
-//   pathArray.value = await Util.idToPathList(store.currentFolder, store.currentWorkspace)
-//
-//   if ( store.currentFolder === -1 ){
-//     tableData.value = await window.electronAPI.dataOperation.loadTable(store.currentWorkspace)
-//     console.log("dsa")
-//   }
-//   else {
-//     await loadTable(store.currentWorkspace,store.currentFolder)
-//   }
-//
-// },{ immediate: true })
-
-
-
 watch([() => route.query.f, () => route.query.w], async () => {
-  const f = route.query.f
   pathArray.value = await Util.idToPathList(store.currentFolder, store.currentWorkspace)
-  if (route.path === '/space' && f === '-1') { tableData.value = await window.electronAPI.dataOperation.loadTable(store.currentWorkspace) }
-  else{ await loadTable(store.currentWorkspace,store.currentFolder)}
+  if (route.path === '/space' && route.query.f === '-1') { tableData.value = await window.electronAPI.dataOperation.loadTable(store.currentWorkspace) }
+  else{ await loadTable(store.currentWorkspace, store.currentFolder)}
 })
 
 
-watch(()=>store.getChangedState, async (_val) => {
-  store.setChangedState(-1)
-  console.log("sss")
-  await router.push({path: '/space', query: {w: store.currentWorkspace, f: -1}})
-  // if (store.currentFolder === -1) { tableData.value = await window.electronAPI.dataOperation.loadTable(store.currentWorkspace) }
-  // else{ await loadTable(store.currentWorkspace,store.currentFolder)}
+store.$subscribe(async(mutation, _state) => {
+  const events = mutation.events
+  if ((Array.isArray(events) && events.some(e => e.key === 'changedState')) || (!Array.isArray(events) && events.key === 'changedState')) {
+    tableData.value = await window.electronAPI.dataOperation.loadTable(store.currentWorkspace)
+    await Util.setAndJump(store.currentWorkspace, -1, router)
+    store.setChangedState(-1)
+  }
 })
+
+
+
+
 
 
 onMounted(() => {
