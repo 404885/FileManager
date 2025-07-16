@@ -19,8 +19,7 @@
 }
 
 
-/* ---------------------------------------------------- */
-/* el tree组件修改 */
+/* -----------------el tree组件修改------------------ */
 .el-tree__drop-indicator {
     display: none !important;
 }
@@ -46,6 +45,16 @@
     border-radius: 4px;
     box-shadow: none;
     transition: all 0.2s ease;
+}
+
+/* -----------------el popover组件修改------------------ */
+.el-popper {
+    min-width: 0 !important;
+    height: 36px !important;
+
+    display: flex;
+    justify-content: center; /* 水平居中 */
+    align-items: center;     /* 垂直居中 */
 }
 
 

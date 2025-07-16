@@ -16,18 +16,31 @@ const dataBottom = IconData.sideBottomData
   <div class="window-sidebar">
     <div class="sidebar-menu">
       <div class="menu-top">
-        <RouterLink v-for="item in dataTop" :to="item.to" class="menu-icon animate_press">
-          <Icon :type="item.icon" source="bar"/>
-        </RouterLink>
+        <div v-for="item in dataTop">
+          <el-popover placement="right" :width="60" trigger="hover" :content = 'item.text' popper-class="popover" :hide-after="0">
+            <template #reference>
+              <RouterLink  :to="item.to" class="menu-icon animate_press">
+                <Icon  :type="item.icon" source="bar"/>
+              </RouterLink>
+            </template>
+          </el-popover>
+        </div>
       </div>
       <div class="menu-bottom">
-        <RouterLink v-for="item in dataBottom" :to="item.to" class="menu-icon animate_press">
-          <Icon :type="item.icon" source="bar"/>
-        </RouterLink>
+        <div v-for="item in dataBottom">
+          <el-popover placement="right" :width="60" trigger="hover" :content = 'item.text' popper-class="popover" :hide-after="0">
+            <template #reference>
+              <RouterLink  :to="item.to" class="menu-icon animate_press">
+                <Icon  :type="item.icon" source="bar"/>
+              </RouterLink>
+            </template>
+          </el-popover>
+        </div>
       </div>
     </div>
   </div>
 </template>
+
 
 <style scoped>
 /* ========== side-bar ========== */
@@ -52,7 +65,6 @@ const dataBottom = IconData.sideBottomData
   gap: 6px;
 }
 
-
 .menu-icon {
   width: 30px;
   height: 30px;
@@ -67,5 +79,6 @@ const dataBottom = IconData.sideBottomData
   height: 24px;
   pointer-events: none;
 }
+
 
 </style>

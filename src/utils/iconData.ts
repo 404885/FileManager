@@ -10,18 +10,18 @@ const nodeData = [
 
 /* SideBar功能页面跳转 */
 const sideTopData = [
-    { to: '/', icon: '#icon-home' },
-    { to: `/space`, icon: '#icon-project' },
-    { to: '/tag', icon: '#icon-tags' },
-    { to: '/recent', icon: '#icon-time-circle' },
-    { to: '/like', icon: '#icon-star' },
-    { to: '/connect', icon: '#icon-share' }
+    { to: '/', icon: '#icon-home', text: '主页'},
+    { to: `/space`, icon: '#icon-project', text: '文档'},
+    { to: '/tag', icon: '#icon-tags', text: '标签'},
+    { to: '/recent', icon: '#icon-time-circle', text: '最近'},
+    { to: '/like', icon: '#icon-star', text: '收藏'},
 ]
 
 /* SideBar设置页面跳转 */
 const sideBottomData = [
-    { to: '/user', icon: '#icon-user' },
-    { to: '/setting', icon: '#icon-setting' },
+    { to: '/connect', icon: '#icon-share', text: ''},
+    { to: '/user', icon: '#icon-user' , text: '用户'},
+    { to: '/setting', icon: '#icon-setting' , text: '设置'},
 ]
 
 export {

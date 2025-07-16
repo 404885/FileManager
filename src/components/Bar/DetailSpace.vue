@@ -5,8 +5,9 @@ import Icon from "@/components/Icon.vue";
 
 import { ElTreeNode } from "@/utils/type.ts";
 import { useTreeCondition } from "@/pinia/TreeCondition.ts";
-import {Component, Handle, IconData } from "@/utils"
+import {Component, Handle, IconData, Util} from "@/utils"
 import router from "@/router";
+import { useRoute } from "vue-router";
 
 
 //pinia初始化
@@ -29,6 +30,7 @@ const { handleClick } = Handle.useHandleClick(200)
 const defaultProps = {children: 'children', label: 'label', path: 'path',}
 // v-for循环数据
 const sections = IconData.nodeData
+const route = useRoute();
 
 
 
@@ -51,10 +53,10 @@ const allowDrop = (draggingNode: { data: ElTreeNode }, dropNode: { data: ElTreeN
   if(draggingNode.data.uniqueKey == dropNode.data.uniqueKey) {
     return false
   }
-  if (dropType === 'inner' && dropNode.data.isLeaf) {
-    return false
-  }
-  return dropType === 'inner'
+  // if (dropType === 'inner' && dropNode.data.isLeaf) {
+  //   return false
+  // }
+  return dropType
 }
 // 拖拽事件结束（未完成则返回未定义）
 const end = (_draggingNode: { data: ElTreeNode }, dropNode: { data: ElTreeNode }, _e: any, _el:any) => {
@@ -86,6 +88,7 @@ const drop = async (draggingNode: {data: ElTreeNode} , dropNode: {data: ElTreeNo
   if (result){
     // 通过pinia设置更新状态
     store.setChangedState(dropNode.data.id)
+    await Util.setAndJump(dropNode.data.connected_workspace, dropNode.data.id!, router)
     return;
   }
 }
@@ -109,7 +112,6 @@ const collapse = (data: ElTreeNode) => {
       }
     }
     removeNodeAndChildren(data)
-    load()
 }
 
 
@@ -120,6 +122,8 @@ async function onSearch(workspace:number,keyword:string){
   data.value = await window.electronAPI.dataOperation.loadTree(workspace,keyword)
   isLoading.value = false
 }
+
+
 // 页面弹窗
 function contextmenu(e: MouseEvent, data: ElTreeNode) {
   e.preventDefault()
@@ -153,7 +157,6 @@ function onSingleClick(node:any) {
   if(node.expanded){
     if (node.data.uniqueKey && !store.expandedNode.includes(node.data.uniqueKey)) {
       store.addExpandedNode(node.data.uniqueKey)
-      // store.expandedNode.push(node.data.uniqueKey)
     }
   }
   else {
@@ -176,13 +179,8 @@ async function onDoubleClick(node: any) {
     console.log("这是文件")
   }
   else {
-    store.setCurrentFolder(node.data.id)
-    await router.push({ path: '/space', query: { w: node.data.connected_workspace, f: node.data.id } })
+    await Util.setAndJump(node.data.connected_workspace, node.data.id, router)
   }
-  // openDialog({
-  //   type: "file",
-  //   props: {}
-  // })
 }
 
 
@@ -196,13 +194,18 @@ watch(filterText, async (val) => {
 })
 
 
+watch([() => route.query.f, () => route.query.w], async () => {
+  if (route.path === '/space' && route.query.f === '-1') {
+    await load()
+  }
+})
 
 
 store.$subscribe(async(mutation, _state) => {
   const events = mutation.events
-  console.log(mutation)
+
   if ((Array.isArray(events) && events.some(e => e.key === 'changedState')) || (!Array.isArray(events) && events.key === 'changedState')) {
-    await onSearch(store.currentWorkspace,filterText.value);
+    await load()
     store.setChangedState(-1)
   }
 })
@@ -267,9 +270,11 @@ onMounted(()=>{
 .detail-filter {
   height: 30px;
   padding: 5px;
-  margin-bottom: 10px;
+  margin: 5px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06); /* 更柔和的内阴影 */
+  transition: border-color 0.25s ease-in-out, box-shadow 0.25s ease-in-out; /* 平滑过渡时间略长 */
 }
 
 .detail-describe{

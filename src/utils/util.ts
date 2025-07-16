@@ -37,7 +37,6 @@ export async function idToPath(id: number): Promise<string[]> {
 
 export async function idToPathList(id: number, workspaceId: number): Promise<any[]> {
     const path: any[] = []
-
     // 如果是根层级，仅返回工作空间节点
     if (id === -1) {
         const ws = await window.electronAPI.dataOperation.queryOne(
@@ -53,6 +52,8 @@ export async function idToPathList(id: number, workspaceId: number): Promise<any
         }
         return path
     }
+
+
 
     let workspaceInfo: any = null
 

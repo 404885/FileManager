@@ -122,7 +122,6 @@ function open() {
       title: "创建实体"
     }
   })
-
 }
 
 
@@ -248,9 +247,7 @@ onBeforeUnmount(() => {
   padding: 12px 16px;
 }
 
-.vex-table{
-  height: 100%;
-}
+
 
 
 .dropper .el-dropdown-link {

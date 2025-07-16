@@ -1,0 +1,342 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, collection, addDoc, onSnapshot, doc, getDoc } from 'firebase/firestore';
+
+// Firebase配置 (由Canvas环境提供)
+const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+// 应用ID (由Canvas环境提供)
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+// 初始认证令牌 (由Canvas环境提供)
+const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+// 主应用组件
+const App = () => {
+// Firebase实例
+const [db, setDb] = useState(null);
+const [auth, setAuth] = useState(null);
+const [userId, setUserId] = useState(null);
+const [isAuthReady, setIsAuthReady] = useState(false); // 认证是否完成
+
+// 存储导入的HTML内容 (用于当前导入会话)
+const [currentHtmlContent, setCurrentHtmlContent] = useState('');
+// 存储导入过程中的状态消息
+const [statusMessage, setStatusMessage] = useState('请选择一个HTML文件进行导入。');
+// 存储文件名称 (用于当前导入会话)
+const [currentFileName, setCurrentFileName] = useState('');
+// 导入状态，用于控制UI显示
+const [isImporting, setIsImporting] = useState(false);
+// 文件输入元素的引用
+const fileInputRef = useRef(null);
+
+// 视图状态: 'importer' (导入器), 'homepage' (主页列表), 'viewer' (文档查看器)
+const [currentView, setCurrentView] = useState('homepage');
+// 已导入文档列表
+const [documents, setDocuments] = useState([]);
+// 当前查看的文档
+const [selectedDocument, setSelectedDocument] = useState(null);
+
+// 初始化Firebase和认证
+useEffect(() => {
+try {
+const app = initializeApp(firebaseConfig);
+const authInstance = getAuth(app);
+const firestoreInstance = getFirestore(app);
+
+setDb(firestoreInstance);
+setAuth(authInstance);
+
+// 监听认证状态变化
+const unsubscribe = onAuthStateChanged(authInstance, async (user) => {
+if (user) {
+setUserId(user.uid);
+console.log("Authenticated user ID:", user.uid);
+} else {
+// 如果没有用户，尝试使用初始令牌登录或匿名登录
+if (initialAuthToken) {
+try {
+await signInWithCustomToken(authInstance, initialAuthToken);
+setUserId(authInstance.currentUser?.uid);
+console.log("Signed in with custom token.");
+} catch (error) {
+console.error("Error signing in with custom token:", error);
+await signInAnonymously(authInstance);
+setUserId(authInstance.currentUser?.uid);
+console.log("Signed in anonymously due to custom token failure.");
+}
+} else {
+await signInAnonymously(authInstance);
+setUserId(authInstance.currentUser?.uid);
+console.log("Signed in anonymously.");
+}
+}
+setIsAuthReady(true); // 认证准备就绪
+});
+
+return () => unsubscribe(); // 清理监听器
+} catch (error) {
+console.error("Failed to initialize Firebase:", error);
+setStatusMessage("Firebase初始化失败，请检查配置。");
+}
+}, []);
+
+// 实时监听文档列表
+useEffect(() => {
+if (db && isAuthReady && userId) {
+const documentsCollectionRef = collection(db, `artifacts/${appId}/public/data/documents`);
+const unsubscribe = onSnapshot(documentsCollectionRef, (snapshot) => {
+const docsData = snapshot.docs.map(doc => ({
+id: doc.id,
+...doc.data()
+}));
+setDocuments(docsData);
+console.log("Documents fetched:", docsData);
+}, (error) => {
+console.error("Error fetching documents:", error);
+setStatusMessage("加载文档列表失败。");
+});
+
+return () => unsubscribe(); // 清理监听器
+}
+}, [db, isAuthReady, userId]); // 依赖于db和认证状态
+
+// 将导入的HTML保存到Firestore
+const saveDocumentToFirestore = async (fileName, htmlContent) => {
+if (!db || !userId) {
+console.error("Firestore或用户ID未准备好，无法保存文档。");
+setStatusMessage("系统未准备好，无法保存文档。");
+return;
+}
+
+try {
+const documentsCollectionRef = collection(db, `artifacts/${appId}/public/data/documents`);
+await addDoc(documentsCollectionRef, {
+fileName: fileName,
+htmlContent: htmlContent,
+timestamp: new Date().toISOString(),
+userId: userId, // 存储创建文档的用户ID
+});
+console.log("Document saved to Firestore successfully!");
+setStatusMessage(`文件 "${fileName}" 导入并保存成功！`);
+} catch (error) {
+console.error("Error saving document to Firestore:", error);
+setStatusMessage(`文件 "${fileName}" 保存失败: ${error.message}`);
+}
+};
+
+// 处理文件选择
+const handleFileChange = (event) => {
+const file = event.target.files[0];
+if (file) {
+setCurrentFileName(file.name);
+setIsImporting(true);
+setCurrentHtmlContent(''); // 清空之前的HTML内容
+simulateImportProcess(file); // 模拟导入过程
+}
+};
+
+// 模拟导入过程
+const simulateImportProcess = (file) => {
+setStatusMessage('正在读取文件...');
+const reader = new FileReader();
+
+reader.onload = (e) => {
+const content = e.target.result;
+
+// 步骤1: 处理HTML内容
+setTimeout(() => {
+setStatusMessage('正在解析HTML结构...');
+// 实际应用中，您会在这里对HTML进行更复杂的解析和清理
+// 例如：使用DOMParser或服务器端库来提取元数据、清理不安全标签
+// 为了演示，我们只是简单地存储内容
+setCurrentHtmlContent(content);
+
+// 步骤2: 模拟资产提取
+setTimeout(() => {
+setStatusMessage('正在提取和处理相关资产（如图片、样式）...');
+// 实际应用中，您会在这里处理图片、CSS、JS文件
+// 例如：下载外部资源，将其转换为内部链接，或嵌入Base64编码的图片
+// 这里我们只是模拟这个步骤
+setTimeout(() => {
+setStatusMessage('正在将内容整合到文档管理系统...');
+// 步骤3: 模拟内容整合并保存到Firestore
+saveDocumentToFirestore(file.name, content).then(() => {
+setIsImporting(false); // 导入完成
+setCurrentView('homepage'); // 导入成功后跳转到主页
+}).catch(error => {
+console.error("保存文档时发生错误:", error);
+setStatusMessage(`导入失败: ${error.message}`);
+setIsImporting(false);
+});
+}, 1000);
+}, 1000);
+}, 1000);
+};
+
+reader.onerror = () => {
+setStatusMessage('文件读取失败。');
+setIsImporting(false);
+};
+
+reader.readAsText(file); // 读取文件为文本
+};
+
+// 触发文件输入点击
+const triggerFileInput = () => {
+fileInputRef.current.click();
+};
+
+// 打开文档查看器
+const openDocument = (doc) => {
+setSelectedDocument(doc);
+setCurrentView('viewer');
+};
+
+// 渲染导入器视图
+const renderImporterView = () => (
+<div className="bg-white shadow-xl rounded-xl p-8 max-w-4xl w-full">
+    <h1 className="text-3xl font-extrabold text-gray-900 mb-6 text-center">
+        文档管理系统 - HTML导入器
+    </h1>
+
+    <div className="flex flex-col items-center mb-8">
+        <input
+                type="file"
+                accept=".html"
+                onChange={handleFileChange}
+                ref={fileInputRef}
+                className="hidden" // 隐藏默认文件输入
+        />
+        <button
+                onClick={triggerFileInput}
+                disabled={isImporting || !isAuthReady}
+                className={`
+                px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300
+                ${isImporting || !isAuthReady
+                ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
+        : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-1'
+        }
+        `}
+        >
+        {isImporting ? '正在导入...' : (isAuthReady ? '选择HTML文件导入' : '正在加载...') }
+        </button>
+        {currentFileName && (
+        <p className="mt-4 text-gray-600 text-sm">
+            已选择文件: <span className="font-medium text-gray-800">{currentFileName}</span>
+        </p>
+        )}
+    </div>
+
+    <div className="bg-blue-50 border border-blue-200 text-blue-800 px-6 py-4 rounded-lg mb-8 text-center text-md font-medium">
+        {statusMessage}
+    </div>
+
+    {currentHtmlContent && (
+    <div className="mt-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">
+            导入内容预览
+        </h2>
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 overflow-auto max-h-96">
+            {/*
+            警告: 使用 dangerouslySetInnerHTML 存在 XSS 风险。
+            在生产环境中，务必在显示用户提供的HTML之前对其进行严格的清理和消毒。
+            例如，使用DOMPurify等库来移除不安全的内容。
+            */}
+            <div
+                    className="prose max-w-none" // Tailwind Typography plugin for basic prose styling
+            dangerouslySetInnerHTML={{ __html: currentHtmlContent }}
+            />
+        </div>
+        <p className="mt-4 text-sm text-red-600 text-center">
+            注意：此预览直接渲染HTML。在实际应用中，您需要对导入的HTML进行严格的安全清理，以防止潜在的跨站脚本（XSS）攻击。
+        </p>
+    </div>
+    )}
+</div>
+);
+
+// 渲染主页视图
+const renderHomepageView = () => (
+<div className="bg-white shadow-xl rounded-xl p-8 max-w-4xl w-full">
+    <h1 className="text-3xl font-extrabold text-gray-900 mb-6 text-center">
+        我的文档 (用户ID: {userId || '加载中...'})
+    </h1>
+    <div className="flex justify-center mb-6">
+        <button
+                onClick={() => setCurrentView('importer')}
+        className="px-6 py-3 rounded-full bg-green-600 hover:bg-green-700 text-white font-semibold shadow-md transition-all duration-300 transform hover:-translate-y-0.5 mr-4"
+        >
+        导入新文档
+        </button>
+    </div>
+
+    {documents.length === 0 ? (
+    <p className="text-center text-gray-600 text-lg">
+        暂无已导入文档。请导入您的第一个HTML文档！
+    </p>
+    ) : (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {documents.map((doc) => (
+        <div key={doc.id} className="bg-gray-50 border border-gray-200 rounded-lg p-4 shadow-sm flex flex-col justify-between">
+            <div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2 truncate">
+                    {doc.fileName}
+                </h3>
+                <p className="text-sm text-gray-500 mb-3">
+                    导入时间: {new Date(doc.timestamp).toLocaleString()}
+                </p>
+            </div>
+            <button
+                    onClick={() => openDocument(doc)}
+            className="mt-auto px-4 py-2 rounded-md bg-purple-600 hover:bg-purple-700 text-white font-medium transition-all duration-200 self-end"
+            >
+            打开文档
+            </button>
+        </div>
+        ))}
+    </div>
+    )}
+</div>
+);
+
+// 渲染文档查看器视图
+const renderDocumentViewer = () => (
+<div className="bg-white shadow-xl rounded-xl p-8 max-w-4xl w-full">
+    <h1 className="text-3xl font-extrabold text-gray-900 mb-6 text-center">
+        {selectedDocument?.fileName}
+    </h1>
+    <div className="flex justify-center mb-6">
+        <button
+                onClick={() => setCurrentView('homepage')}
+        className="px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md transition-all duration-300 transform hover:-translate-y-0.5"
+        >
+        返回我的文档
+        </button>
+    </div>
+    {selectedDocument?.htmlContent ? (
+    <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 overflow-auto max-h-[70vh]">
+        {/* 再次强调：这里也需要对内容进行清理 */}
+        <div
+                className="prose max-w-none"
+                dangerouslySetInnerHTML={{ __html: selectedDocument.htmlContent }}
+        />
+    </div>
+    ) : (
+    <p className="text-center text-gray-600">文档内容加载失败或为空。</p>
+    )}
+    <p className="mt-4 text-sm text-red-600 text-center">
+        注意：此预览直接渲染HTML。在实际应用中，您需要对导入的HTML进行严格的安全清理，以防止潜在的跨站脚本（XSS）攻击。
+    </p>
+</div>
+);
+
+return (
+<div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4 font-sans">
+    {currentView === 'importer' && renderImporterView()}
+    {currentView === 'homepage' && renderHomepageView()}
+    {currentView === 'viewer' && renderDocumentViewer()}
+</div>
+);
+};
+
+export default App;

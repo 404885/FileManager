@@ -100,8 +100,6 @@ async function openAndSaveFolder() {
       </div>
     </div>
   </div>
-
-
 </template>
 
 <style scoped>
