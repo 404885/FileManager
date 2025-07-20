@@ -24,8 +24,19 @@ const sideBottomData = [
     { to: '/setting', icon: '#icon-setting' , text: '设置'},
 ]
 
+const headData = [
+    { label: '打开', key: 'open' },
+    { label: '重命名', key: 'rename' },
+    { label: '复制', key: 'copy' },
+    { label: '剪切', key: 'cut' },
+    { label: '移动', key: 'move' },
+    { label: '属性', key: 'property' },
+    { label: '删除', key: 'delete', danger: true }
+]
+
 export {
     nodeData,
     sideTopData,
-    sideBottomData
+    sideBottomData,
+    headData
 }

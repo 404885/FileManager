@@ -1,23 +1,11 @@
 <script setup lang="ts">
-import {computed} from 'vue'
-import { RouterView, useRoute } from 'vue-router'
+import { RouterView } from 'vue-router'
 import TitleBar from "@/components/Bar/TitleBar.vue";
-import SideBar from "@/components/Bar/SideBar.vue";
+import Icon from "@/components/Container/Icon.vue";
+import {IconData} from "@/utils";
 
-import DetailSpace from "@/components/Bar/DetailSpace.vue";
-import DetailTag from "@/components/Bar/DetailTag.vue";
 
-const route = useRoute()
-
-const componentMap = {
-  space: DetailSpace,
-  tag: DetailTag,
-}
-
-const currentComponent = computed(() => {
-  const key = route.meta.DetailBar as keyof typeof componentMap
-  return componentMap[key] || null
-})
+const dataTop = IconData.sideTopData
 
 </script>
 
@@ -25,21 +13,31 @@ const currentComponent = computed(() => {
   <div class="window-title">
     <TitleBar/>
   </div>
-  <div class="window-main">
-    <div class="window-bar">
-      <SideBar/>
-      <component :is="currentComponent" v-if="currentComponent"/>
-    </div>
-    <div class="window-content">
-      <RouterView/>
+  <div class="window-home">
+    <div class="window-view">
+      <RouterLink v-for="item in dataTop" :to="item.to" class="menu-icon">
+        <Icon  :type="item.icon" source="bar"/>
+      </RouterLink>
+      <router-view/>
     </div>
   </div>
-
-
-
 </template>
 
 <style scoped>
+.window-home {
+  display: flex;
+  background: white;
+  height: 100%;
+  background: linear-gradient(to bottom right, #a1c4fd, #c2e9fb);
+  overflow: hidden;
+
+  border-radius: 6px;
+  margin: 0 8px 8px;
+  box-shadow:
+      inset 0 0 1px rgba(255, 255, 255, 0.4), /* 非常轻微的高光 */
+      0 4px 12px rgba(0, 0, 0, 0.06);           /* 原本阴影保持 */
+}
+
 .window-title {
   height: 32px;
   background: #f5f5f5;;
@@ -52,26 +50,12 @@ const currentComponent = computed(() => {
   -webkit-app-region: drag;
 }
 
-.window-main{
-  display: flex;
-  flex-direction: row;
-  width: 100vw;
-  height: calc(100vh - 32px);
-  padding: 0 12px 12px;
-  background: #f5f5f5; /* 更柔和的灰色 */
+.window-view {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: url('https://picsum.photos/1200/800') center center / cover no-repeat;
 }
 
-.window-bar {
-  display: flex;
-  flex-direction: row;
-  gap: 6px;
-}
 
-.window-content{
-  flex: 1;
-  background: #f5f5f5;
-  margin-left: 6px;
-  border-radius: 6px;
-  min-width: 400px;
-}
 </style>

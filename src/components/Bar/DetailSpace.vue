@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import {ref, watch, onMounted } from 'vue'
 
-import Icon from "@/components/Icon.vue";
+import Icon from "@/components/Container/Icon.vue";
 
 import { ElTreeNode } from "@/utils/type.ts";
 import { useTreeCondition } from "@/pinia/TreeCondition.ts";
 import {Component, Handle, IconData, Util} from "@/utils"
 import router from "@/router";
 import { useRoute } from "vue-router";
+
 
 
 //pinia初始化
@@ -146,7 +147,6 @@ function workChange(){
     type: 'switch'
   })
 }
-
 // 单击事件处理
 function onSingleClick(node:any) {
   console.log(node.data.uniqueKey)
@@ -219,7 +219,7 @@ onMounted(()=>{
 </script>
 
 <template>
-    <div class="window-detail"  v-resizable="{ storageKey: 'my-panel-width' }">
+    <div class="mainView-detail" v-resizable="{ storageKey: 'my-panel-width' }">
       <input class="detail-filter" v-model="filterText" placeholder="Filter keyword"/>
       <div class="detail-describe">快捷节点</div>
       <div class="detail-section">

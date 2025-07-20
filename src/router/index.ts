@@ -16,10 +16,10 @@ const routers = createRouter({
         // },
         {
             path: '/space/:catchAll(.*)*',
-            component: () => import('../view/IndexView.vue'),
-            meta: {
-                DetailBar: 'space',
-            },
+            component: () => import('../view/TestView.vue'),
+            // meta: {
+            //     DetailBar: 'space',
+            // },
         },
         {
             path: '/user',

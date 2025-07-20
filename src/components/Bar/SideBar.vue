@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 
 
-import Icon from "@/components/Icon.vue";
+import Icon from "@/components/Container/Icon.vue";
 import { IconData } from "@/utils";
 
 
@@ -19,7 +19,7 @@ const dataBottom = IconData.sideBottomData
         <div v-for="item in dataTop">
           <el-popover placement="right" :width="60" trigger="hover" :content = 'item.text' popper-class="popover" :hide-after="0">
             <template #reference>
-              <RouterLink  :to="item.to" class="menu-icon animate_press">
+              <RouterLink v-for="item in dataTop" :to="item.to" class="menu-icon animate_press">
                 <Icon  :type="item.icon" source="bar"/>
               </RouterLink>
             </template>

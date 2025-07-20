@@ -5,17 +5,21 @@ import router from "@/router";
 
 import {ArrowDown, ArrowRight} from '@element-plus/icons-vue'
 
-import Icon from "@/components/Icon.vue";
+import Icon from "@/components/Container/Icon.vue";
 import { VxeTableEvents, VxeTableInstance } from "vxe-pc-ui/types/components/table";
 import { VxeColumnPropTypes } from "vxe-pc-ui/types/components/column";
 import { VXETableNode } from "@/utils/type.ts";
 import { useTreeCondition } from "@/pinia/TreeCondition.ts";
 
 import { Component, Util } from "@/utils";
+import ViewContainer from "@/components/Container/ViewContainer.vue";
+import DetailSpace from "@/components/Bar/DetailSpace.vue";
 
 
 
-
+const props = defineProps({
+  isComponent: Boolean,
+})
 
 
 const route = useRoute()
@@ -59,9 +63,7 @@ const loadTable = async (workspace: number, associatedFolder:number | null = nul
 // 表格初始化
 const initTable = async (workspace: number) => {
   // 进入之前浏览的文件夹中，切换页面保留
-
   await router.push({path: '/space', query: {w: store.currentWorkspace, f: store.currentFolder}})
-
   // 读取存在的文件类型
   const types= await window.electronAPI.dataOperation.queryAll('SELECT DISTINCT type FROM file WHERE connected_workspace = ? LIMIT 5',[workspace])
   tabs.value.push(...types)
@@ -150,8 +152,17 @@ onMounted(() => {
   document.addEventListener('click', handleClickOutside);
   updateTableHeight()
   window.addEventListener('resize', updateTableHeight)
-  initTable(store.getCurrentWorkSpace)
+  if(props.isComponent){
+    console.log("dsa")
+  }
+  else {
+    initTable(store.getCurrentWorkSpace)
+  }
+
 });
+
+
+
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateTableHeight)
 })
@@ -160,67 +171,69 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="window-table">
-    <div class="table-title">
-      <el-breadcrumb :separator-icon="ArrowRight">
-        <el-breadcrumb-item v-for="(item, index) in pathArray" :key="item.id" @click="handleClick(index)">{{ item.name }}</el-breadcrumb-item>
-      </el-breadcrumb>
-      <button class="newFile border-btn" @click="open">新增</button>
-    </div>
-    <div class="table-content">
-      <div class="vxe-table">
-        <vxe-table
-            ref="tableRef"
-            border="none"
-            :data="tableData"
-            :show-header="true"
-            show-overflow
-            :row-config="{isCurrent: true, isHover: true}"
-            :column-config="{resizable: true}"
-            :virtual-y-config="{enabled: true, gt: 0}"
-            :height="tableHeight"
-            @cell-dblclick="handleDoubleClick"
-            style="--vxe-ui-table-header-background-color:white;">
-          <vxe-column field="name" title="文件名" fixed="left">
-            <template #header>
-              <el-dropdown class="dropper" trigger="click" @visible-change="handleVisibleChange" @command="handleDropdownClick">
+  <ViewContainer>
+    <DetailSpace></DetailSpace>
+    <div class="mainView-table">
+      <div class="mainView-bread">
+        <el-breadcrumb :separator-icon="ArrowRight">
+          <el-breadcrumb-item v-for="(item, index) in pathArray" :key="item.id" @click="handleClick(index)">{{ item.name }}</el-breadcrumb-item>
+        </el-breadcrumb>
+        <button class="newFile border-btn" @click="open">新增</button>
+      </div>
+      <div class="table-content">
+        <div class="vxe-table">
+          <vxe-table
+              ref="tableRef"
+              border="none"
+              :data="tableData"
+              :show-header="true"
+              show-overflow
+              :row-config="{isCurrent: true, isHover: true}"
+              :column-config="{resizable: true}"
+              :virtual-y-config="{enabled: true, gt: 0}"
+              :height="tableHeight"
+              @cell-dblclick="handleDoubleClick"
+              style="--vxe-ui-table-header-background-color:white;">
+            <vxe-column field="name" title="文件名" fixed="left">
+              <template #header>
+                <el-dropdown class="dropper" trigger="click" @visible-change="handleVisibleChange" @command="handleDropdownClick">
               <span :class="['el-dropdown-link',]">
                 {{activeTab.type}}
                 <el-icon class="el-icon--right"><arrow-down /></el-icon>
               </span>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item
-                        v-for="(tab,index) in tabs"
-                        :key="index"
-                        :command="index">
-                      {{tab.type}}
-                    </el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </template>
-            <template #default="{row}">
-              <Icon :type="row.type" :is-leaf="row.type !== 'folder'" source="tree"/>
-              {{row.name}}
-            </template>
-          </vxe-column>
-          <vxe-column field="create_time" title="创建时间" width="150px" :formatter="timeFormatter" fixed="right"/>
-          <vxe-column field="last_browse_time" title="上次浏览时间" width="150px" :formatter="timeFormatter" fixed="right"/>
+                  <template #dropdown>
+                    <el-dropdown-menu>
+                      <el-dropdown-item
+                          v-for="(tab,index) in tabs"
+                          :key="index"
+                          :command="index">
+                        {{tab.type}}
+                      </el-dropdown-item>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+              </template>
+              <template #default="{row}">
+                <Icon :type="row.type" :is-leaf="row.type !== 'folder'" source="tree"/>
+                {{row.name}}
+              </template>
+            </vxe-column>
+            <vxe-column field="create_time" title="创建时间" width="150px" :formatter="timeFormatter" fixed="right"/>
+            <vxe-column field="last_browse_time" title="上次浏览时间" width="150px" :formatter="timeFormatter" fixed="right"/>
 
-          <template #empty>
-            你个懒鬼，这个工作空间什么都没有
-          </template>
-        </vxe-table>
+            <template #empty>
+              你个懒鬼，这个工作空间什么都没有
+            </template>
+          </vxe-table>
+        </div>
       </div>
     </div>
-  </div>
+  </ViewContainer>
 </template>
 
 <style scoped>
 
-
-.window-table {
+.mainView-table {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -228,7 +241,7 @@ onBeforeUnmount(() => {
   height: 100%;
 }
 
-.table-title {
+.mainView-bread {
   background: #fff;
   height: 42px;
   border-radius: 6px;

@@ -20,6 +20,15 @@
 
 
 /* -----------------el tree组件修改------------------ */
+.el-tree {
+    margin: 0 8px 8px;
+    background: transparent;
+}
+
+.el-tree-node {
+    background: transparent;
+}
+
 .el-tree__drop-indicator {
     display: none !important;
 }
@@ -49,17 +58,25 @@
 
 /* -----------------el popover组件修改------------------ */
 .el-popper {
+
     min-width: 0 !important;
-    height: 36px !important;
+    padding: 0 !important;
 
     display: flex;
     justify-content: center; /* 水平居中 */
     align-items: center;     /* 垂直居中 */
 }
 
-
-
-
+/* ----------------- vxe 组件修改------------------ */
+.vxe-table--scroll-y-virtual {
+    display: none;
+}
+.vxe-table {
+    width: 100%;
+}
+.vxe-table--render-wrapper {
+    width: 100%;
+}
 
 
 

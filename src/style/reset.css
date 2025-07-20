@@ -7,6 +7,7 @@
     --icon-color: #f9fbfd;               /* 柔和灰色图标背景 */
     /* SVG Icon Fill Colors */
     --svg-color: #818181;                 /* 默认图标：深灰色 */
+
 }
 
 
@@ -15,6 +16,10 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    will-change: transform;
+    -webkit-font-smoothing: antialiased; /* Chrome / Safari */
+    -moz-osx-font-smoothing: grayscale;  /* macOS Firefox */
+    text-rendering: optimizeLegibility;  /* 启用更好的字形/连字 */
 }
 
 html, body, #app {

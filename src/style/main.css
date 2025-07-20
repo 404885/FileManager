@@ -29,7 +29,7 @@
 }
 
 /* ======detail-space和tag的容器======= */
-.window-detail {
+.mainView-detail {
     display: flex;
     flex-direction: column;
     min-width: 180px;

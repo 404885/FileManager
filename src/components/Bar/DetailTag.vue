@@ -10,7 +10,7 @@ export default defineComponent({
 </script>
 
 <template>
-    <div class="window-detail" v-resizable="{ min: 180, max: 600 }">
+    <div class="mainView-detail" v-resizable="{ min: 180, max: 600 }">
       <input class="detail-filter"  placeholder="Filter keyword"/>
       dsadsad
     </div>

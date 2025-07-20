@@ -165,7 +165,7 @@ watch(() => [props.positionX, props.positionY], async () => {
 
 <style scoped>
 .menu-context {
-  position: absolute;
+
   width: 180px;
   padding: 10px;
   border-radius: 8px;

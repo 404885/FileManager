@@ -26,10 +26,10 @@ let win: BrowserWindow | null
 // 创建窗口，初始为null，创建时为对象
 function createWindow() {
   win = new BrowserWindow({
-    width: 1280,
-    height: 800,
-    minWidth: 960,
-    minHeight: 600,
+    width: 960,
+    height: 600,
+    minWidth: 720,
+    minHeight: 450,
     resizable: true,
     // 从public文件中找静态图片和图标等文件
     icon: path.join(process.env.VITE_PUBLIC!, 'electron-vite.svg'),
