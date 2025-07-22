@@ -12,8 +12,15 @@ import './utils/iconMap.ts'
 import ElementPlus from 'element-plus'
 import router from '@/router'
 
+import { appendVideoIframe} from '@/utils/VideoPopUp.ts'
+
 
 const pinia = createPinia()
+
+
+window.addEventListener('click', () => {
+    appendVideoIframe()
+})
 
 export const app = createApp(App) // 直接将创建的 app 实例赋值给导出的 app 变量
     .use(ElementPlus)
