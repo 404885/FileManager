@@ -1,33 +1,48 @@
 <script setup lang="ts">
 
+import ViewContainer from "@/components/Container/ViewContainer.vue";
+import { ref } from 'vue'
+
 const emit = defineEmits(['close'])
 const props = defineProps<{
   title: string,
 }>()
 
-function close(){
-  emit('close', "dsadsa")
-}
 
-import { vDrag } from '@/directives/drag';
+const show = ref(true)
 
 </script>
 
 <template>
-    <div class="view-container" v-drag="{ handle: '.title-bar', initialCenter: true, exclude: '.non-drag'}">
-      <div class="title-bar" >
-        <div class="traffic-lights">
-          <div class="traffic-light red non-drag" @click="close" title="关闭"></div>
-          <div class="traffic-light yellow non-drag" data-action="minimize" title="最小化"></div>
-          <div class="traffic-light green" data-action="maximize" title="最大化"></div>
-        </div>
-        <span class="title">{{ props.title || '默认应用'}}</span>
-      </div>
-      <slot/>
-    </div>
+  <teleport to="#app" v-if="show">
+    <ViewContainer :title="props.title" @close="show = false">
+    </ViewContainer>
+  </teleport>
 </template>
 
-<style scoped>
+
+<style>
+
+.info-dialog {
+  position: fixed;
+  top: 220px;
+  left: 220px;
+  width: 400px;   /* 固定宽度 */
+  height: 300px;  /* 固定高度 */
+  background: #f9f9f9;
+  border-radius: 12px;
+  box-shadow: 0 0 14px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+  z-index: 9999; /* 确保在最上层 */
+}
+
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  gap: 16px;
+}
 
 .view-container {
   border-radius: 6px;
@@ -105,3 +120,4 @@ import { vDrag } from '@/directives/drag';
 }
 
 </style>
+

@@ -5,7 +5,7 @@ import Icon from "@/components/Container/Icon.vue";
 
 import { ElTreeNode } from "@/utils/type.ts";
 import { useTreeCondition } from "@/pinia/TreeCondition.ts";
-import {Component, Handle, IconData, Util} from "@/utils"
+import {Component, IconData, Util} from "@/utils"
 import router from "@/router";
 import { useRoute } from "vue-router";
 
@@ -26,7 +26,7 @@ const hasAlerted = ref(false)
 // 计时器
 let timer: ReturnType<typeof setTimeout> | null = null
 // 点击事件并设置双击间隔
-const { handleClick } = Handle.useHandleClick(200)
+const { handleClick } = Util.useHandleClick(200)
 // el-tree props 配置
 const defaultProps = {children: 'children', label: 'label', path: 'path',}
 // v-for循环数据
@@ -128,13 +128,13 @@ async function onSearch(workspace:number,keyword:string){
 // 页面弹窗
 function contextmenu(e: MouseEvent, data: ElTreeNode) {
   e.preventDefault()
-  Component.openMenu({
-    isLeaf: data.isLeaf,
-    positionX: e.clientX,
-    positionY: e.clientY,
-    treeRef,
-    data
-  })
+  // Component.openMenu({
+  //   isLeaf: data.isLeaf,
+  //   positionX: e.clientX,
+  //   positionY: e.clientY,
+  //   treeRef,
+  //   data
+  // })
   treeRef.value?.setCurrentKey(data.uniqueKey)
 }
 // 快捷节点调用判断

@@ -17,7 +17,7 @@ import ViewContainer from "@/components/Container/ViewContainer.vue";
 
 import { ElTreeNode } from "@/utils/type.ts";
 import { useTreeCondition } from "@/pinia/TreeCondition.ts";
-import {Component, Handle, IconData, Util} from "@/utils"
+import {Component, Data, IconData, Util} from "@/utils"
 import TableContainer from "@/components/Container/TableContainer.vue";
 
 
@@ -54,7 +54,7 @@ const hasAlerted = ref(false)
 // 计时器
 let timer: ReturnType<typeof setTimeout> | null = null
 // 点击事件并设置双击间隔
-const { handleClick } = Handle.useHandleClick(200)
+const { handleClick } = Util.useHandleClick(200)
 // el-tree props 配置
 const defaultProps = {children: 'children', label: 'label', path: 'path',}
 // v-for循环数据
@@ -145,13 +145,17 @@ const collapse = (data: ElTreeNode) => {
 // 页面弹窗
 function contextmenu(e: MouseEvent, data: ElTreeNode) {
   e.preventDefault()
-  Component.openMenu({
-    isLeaf: data.isLeaf,
-    positionX: e.clientX,
-    positionY: e.clientY,
-    treeRef,
-    data
-  })
+  // Component.openMenu({
+  //   type: "contextMenu",
+  //   props: {
+  //     isLeaf: data.isLeaf,
+  //     positionX: e.clientX,
+  //     positionY: e.clientY,
+  //     treeRef,
+  //     data
+  //   }
+  // })
+
   treeRef.value?.setCurrentKey(data.uniqueKey)
 }
 // 快捷节点调用判断
@@ -332,13 +336,14 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', updateTableHeight)
 })
 
+import { vResize } from "@/directives/resizable";
 
 </script>
 
 <template>
   <ViewContainer>
     <div class="mainView">
-      <div class="mainView-sidebar" v-resizable="{ storageKey: 'my-panel-width' }">
+      <div class="mainView-sidebar" v-resize="{ storageKey: 'my-panel-width' }">
         <div class="mainView-sidebar-title">快捷节点</div>
         <div class="mainView-sidebar-section">
           <div v-for="(item, index) in sections" :key="index" class="mainView-sidebar-section-item" @click="nodeClick(item)">
@@ -381,16 +386,26 @@ onBeforeUnmount(() => {
 
       <div class="mainView-container">
         <div class="mainView-container-bread">
-          <el-breadcrumb :separator-icon="ArrowRight">
-            <el-breadcrumb-item v-for="(item, index) in pathArray" :key="item.id" @click="breadClick(index)">{{ item.name }}</el-breadcrumb-item>
+
+
+
+
+          <el-breadcrumb :separator-icon="ArrowRight" class="mainView-container-bread-path">
+            <el-breadcrumb-item
+                v-for="(item, index) in pathArray"
+                :key="item.id" @click="breadClick(index)"
+                class="mainView-container-bread-path-item"
+            >
+              {{ item.name }}
+            </el-breadcrumb-item>
           </el-breadcrumb>
-<!--          <input class="detail-filter" v-model="filterText" placeholder="Filter keyword"/>-->
-          <button class="newFile border-btn" @click="open">新增</button>
+
+
+
+          <div class="mainView-container-bread-button animate_press" @click="open">新增</div>
         </div>
         <div class="mainView-container-table">
-          <div class="mainView-container-table-content">
-            <TableContainer></TableContainer>
-          </div>
+          <TableContainer :data="tableData"></TableContainer>
         </div>
       </div>
     </div>
@@ -463,25 +478,49 @@ onBeforeUnmount(() => {
   padding: 0 12px 12px;
   background: transparent;
 }
-
 .mainView-container-table {
   flex: 1;
   min-width: 0;
   overflow: hidden;
   border-radius: 6px;
-  border: 1px solid #D2D2D7;
   background: transparent;
+  overflow-x: auto;
 }
 .mainView-container-bread {
+  min-height: 46px;
+  min-width: 450px;
   width: 100%;
   display: flex;
+
+
   align-items: center;
   justify-content: space-between;
-  padding: 6px 12px;
+  padding: 6px 0;
   background: transparent;
   font-size: 14px;
 }
+.mainView-container-bread-path{
+  text-decoration: 1px underline;
 
+  height: 100%;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 3px;
+  padding: 0 12px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.mainView-container-bread-button{
+  height: 100%;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 3px;
+  padding: 0 12px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
 
 

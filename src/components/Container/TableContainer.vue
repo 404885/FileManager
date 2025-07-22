@@ -1,104 +1,232 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import TheadMenu from "@/components/Menu/TheadMenu.vue";
+import { ref, onMounted } from 'vue'
+import {Component, Data, Util} from "@/utils";
+import Icon from "@/components/Container/Icon.vue";
+
+const prop = defineProps<{
+  data: any;
+}>()
 
 const Fields = ref([
   { label: '名称', key: 'name' },
-  { label: '创建事件', key: 'name' },
-  { label: '上次浏览', key: 'name' }
+  { label: '创建时间', key: 'create_time' },
+  { label: '上次浏览', key: 'last_browser-time' },
 ])
 
 
-function itemReceive(item: any) {
-  console.log('父组件接收到点击：', item)
-  // 判断当前 item.key 是否已经存在，避免重复添加
-  const exists = Fields.value.some(field => field.key === item.key)
-  if (!exists) {
-    Fields.value.push(item) // 如果没有重复，添加字段
+async function fieldContext(e: MouseEvent, index: any) {
+  const data = [{ label: '属性', key: 'distribution' ,disabled: false}, { label: '删除', key: 'delete', disabled: false},]
+  if (Fields.value[index].key === 'name') {
+    data.find(i => i.key === 'delete')!.disabled = true
+  }
+
+  const result = await Component.openMenuAsync({
+    type: 'contextMenuV1',
+    props: {
+      x: e.x,
+      y: e.y,
+      data: data,
+      title: Fields.value[index].key
+    }
+  })
+
+  if (result && result.key === 'delete') {
+    if (Fields.value[index].key === 'name') {
+      return
+    }
+    Fields.value.splice(index, 1)  // 删除字段
   }
 }
+
+
+
+function fieldClick(index: number) {
+  Fields.value.splice(index, 1)
+}
+
+
+
+function itemClick(item: any) {
+  if (!Fields.value.some(f => f.key === item.key)) {
+    Fields.value.push(item)
+  }
+}
+function isClicked(item: any) {
+  return Fields.value.some(f => f.key === item.key)
+}
+
+onMounted(() => {
+})
 
 </script>
 
 <template>
-  <table class="table-container">
-
-    <thead>
-      <tr class="table--container-header">
-        <th v-for="item of Fields">{{item.label}}</th>
-        <el-popover class="box-item" placement="right">
-          <template #reference>
-            <th @click="">+</th>
+  <div class="table-container">
+    <div class="table-container-head" :style="{ gridTemplateColumns: `repeat(${Fields.length}, 1fr) 60px` }">
+      <div class="table-container-head-item" v-for="(item,index) of Fields" @contextmenu="fieldContext($event, index)" @click="fieldClick(index)">{{item.label}}</div>
+      <el-popover placement="right-end" >
+        <template #reference>
+          <div class="table-container-head-item">+</div>
+        </template>
+        <template #default>
+          <div class="context-menu" ref="container">
+            <div class="context-menu-item" v-for="item of Data.headData" @click="itemClick(item)" :class="{ disabled: isClicked(item) }">{{item.label}}</div>
+          </div>
+        </template>
+      </el-popover>
+    </div>
+    <div class="table-container-body">
+      <div class="table-container-body-row" :style="{ gridTemplateColumns: `repeat(${Fields.length}, 1fr) 60px` }" v-for="row of prop.data">
+        <div class="table-container-body-row-cell" v-for="item of Fields">
+          <template v-if="item.key === 'name'">
+            <Icon :type=row.type  source="bar"/>
+            <span>{{ row[item.key] }}</span>
           </template>
-          <template #default>
-            <TheadMenu @select="itemReceive" />
+          <template v-if="item.key === 'create_time'">
+            {{ Util.formatter.timeFormatter(Number(row[item.key])) }}
           </template>
-        </el-popover>
-      </tr>
-    </thead>
-
-
-    <tbody>
-<!--    <tr v-for="(row, index) in tableData" :key="index" @dblclick="handleDoubleClick(row)">-->
-<!--      <td class="name-cell">-->
-<!--        <Icon :type="row.type" :is-leaf="row.type !== 'folder'" source="tree" />-->
-<!--        {{ row.name }}-->
-<!--      </td>-->
-<!--      <td>{{ timeFormatter(row.create_time) }}</td>-->
-<!--      <td>{{ timeFormatter(row.last_browse_time) }}</td>-->
-<!--    </tr>-->
-<!--    <tr v-if="tableData.length === 0">-->
-<!--      <td colspan="3" class="empty-cell">你个懒鬼，工作空间什么都没有</td>-->
-<!--    </tr>-->
-    </tbody>
-
-  </table>
+          <template v-else>
+            {{ row[item.key] }}
+          </template>
+        </div>
+        <div class="table-container-body-row-cell"></div>
+      </div>
+      <div class="table-container-body-fill"></div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
 .table-container {
-  width: 100%;
-  border: none;
-  border-collapse: collapse;
+  height: 100%;
+
+  min-width: 100%;
+  max-width: 100%;
+
   background: transparent;
   overflow: hidden;
   font-size: 14px;
-}
-
-.table-container th,
-.table-container td {
-  padding: 10px 16px;
-  text-align: left;
-  background: rgba(255, 255, 255, 0.1);
-  color: #333;
-}
-
-.table-container th {
-  background: rgba(255, 255, 255, 0.2);
-  font-weight: bold;
-}
-
-.name-cell {
   display: flex;
+  flex-direction: column;
+
+}
+
+.table-container-head {
+  background: transparent;
+  min-height: 40px;
+  display: grid;
+}
+.table-container-head-item{
+  flex: 1;
+  flex: 1 auto;
+  background: rgba(255, 255, 255, 0.4);
+  padding: 10px;
+  font-size: 15px;
+
+
+  display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 6px;
+}
+.table-container-head-item:hover {
+  background: rgba(0, 0, 0, 0.06);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+.table-container-head-item:active {
+  transform: scale(0.95);
+  background: rgba(0, 0, 0, 0.08);
+}
+.table-container-head-item:first-child{
+  border-top-left-radius: 6px;
+}
+.table-container-head-item:last-child{
+  border-top-right-radius: 6px;
 }
 
-.empty-cell {
-  text-align: center;
-  font-style: italic;
-  color: #999;
-  padding: 20px;
+.table-container-body{
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  overflow: auto;
+  scrollbar-width: none;
+}
+.table-container-body-row{
+  background: rgba(255, 255, 255, 0.3);
+  display: grid;
+}
+.table-container-body-row:hover {
+  background: rgba(0, 0, 0, 0.03);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+.table-container-body-fill{
+  flex: 1;
+  background: rgba(255, 255, 255, 0.3);
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+.table-container-body-row-cell {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 10px;
+  position: relative;
+
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.table-container-body-row-cell:hover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(0, 0, 0, 0.2); /* 较深的边框 */
+  border-radius: 4px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.1); /* 轻微光晕 */
+  background-color: rgba(0, 0, 0, 0.02); /* 微微深色背景 */
+  pointer-events: none;
 }
 
-.table-container tr {
-  transition: background-color 0.25s ease-out, box-shadow 0.25s ease-out;
-  box-shadow: 0 0 0 rgba(0, 0, 0, 0); /* 初始就有个透明阴影 */
-}
 
-.table-container tr:hover {
-  background-color: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+
+
+
+
+
+.context-menu {
+  width: 100%;
+  border-radius: 6px;
+  padding-left: 4px;
+  padding-right: 4px;
+  font-size: 14px;
+  user-select: none;
+  z-index: 1000;
+  transition: box-shadow 0.3s ease;
+}
+.context-menu-item {
+  padding: 6px 6px 6px 10px;
+  margin: 4px 0;
+  border-radius: 3px;
+  font-size: 13px;
   cursor: pointer;
+  color: #000000;
+  background: transparent;
+  transition: background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+  user-select: none;
 }
+.context-menu-item:hover {
+  background-color: #ebebeb; /* 浅灰色背景 */
+  color: #000000; /* 保持文字颜色不变，或换成 #333 更柔和 */
+}
+.context-menu-item.disabled {
+  background-color: #f0f0f0;
+  color: #aaa;
+  cursor: not-allowed;
+  opacity: 0.7;
+  box-shadow: none;
+  font-style: italic;
+}
+
 </style>

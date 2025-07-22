@@ -136,6 +136,7 @@ watch(() => [props.positionX, props.positionY], async () => {
 
 
 <template>
+  <Teleport to="body">
     <div
         class="menu-context"
         :style="{ top: `${computedY}px`, left: `${computedX}px` }"
@@ -158,9 +159,8 @@ watch(() => [props.positionX, props.positionY], async () => {
         <div class="context-item">属性</div>
         <div class="context-item danger" @click="deleteNode">删除</div>
       </div>
-
-
     </div>
+  </Teleport>
 </template>
 
 <style scoped>

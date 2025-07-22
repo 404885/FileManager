@@ -23,7 +23,7 @@ function iconSwitch(type: string, isLeaf: boolean, source: string) {
     }
   }
   else if (source === 'bar') {
-    return type
+    return fileIconMap[type]
   }
 
 }

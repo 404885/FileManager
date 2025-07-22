@@ -108,7 +108,7 @@ onMounted(() => {
 </script>
 
 <template>
-
+  <Teleport to="body">
 
     <div class="dialog-overlay" @click.self='closeDialog()'>
         <div class="dialog-switch">
@@ -137,6 +137,7 @@ onMounted(() => {
 
         </div>
     </div>
+  </Teleport>
 </template>
 
 <style scoped>

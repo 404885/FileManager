@@ -15,7 +15,7 @@ interface ElWithResize extends HTMLElement {
     _saveOnUnload?: () => void
 }
 
-export default {
+export const vResize =  {
     mounted(el: ElWithResize, binding: DirectiveBinding<Options>) {
         const { min = 50, max = 800, storageKey, persist = true } = binding.value || {}
 

@@ -74,32 +74,36 @@ async function openAndSaveFolder() {
 </script>
 
 <template>
-  <div class="dialog-overlay"  @click.self='closeDialog()'>
-    <div class="dialog-border fadeIn-slide">
-      <div class="dialog-add">
-        <div class="add-title">
-          <b>{{ props.title || "默认标题" }}</b>
-        </div>
-        <div class="add-menu">
-          <div class="menu-list">
-            <div class="list-title">个人笔记</div>
-            <div @click="openAndReadFile" class="list-add animate_press">导入文件</div>
-            <div @click="openAndSaveFolder" class="list-add animate_press">导入文件夹</div>
+
+  <Teleport to="body">
+    <div class="dialog-overlay"  @click.self='closeDialog()'>
+      <div class="dialog-border fadeIn-slide">
+        <div class="dialog-add">
+          <div class="add-title">
+            <b>{{ props.title || "默认标题" }}</b>
           </div>
-          <div class="menu-list">
-            <div class="list-title">文档管理</div>
-            <div @click="" class="list-add">dianji</div>
-            <div @click="" class="list-add">dianji</div>
-            <div @click="" class="list-add">dianji</div>
-            <div @click="" class="list-add">dianji</div>
-          </div>
-          <div class="menu-list">
-            <div class="list-title">其余操作</div>
+          <div class="add-menu">
+            <div class="menu-list">
+              <div class="list-title">个人笔记</div>
+              <div @click="openAndReadFile" class="list-add animate_press">导入文件</div>
+              <div @click="openAndSaveFolder" class="list-add animate_press">导入文件夹</div>
+            </div>
+            <div class="menu-list">
+              <div class="list-title">文档管理</div>
+              <div @click="" class="list-add">dianji</div>
+              <div @click="" class="list-add">dianji</div>
+              <div @click="" class="list-add">dianji</div>
+              <div @click="" class="list-add">dianji</div>
+            </div>
+            <div class="menu-list">
+              <div class="list-title">其余操作</div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </Teleport>
+
 </template>
 
 <style scoped>

@@ -6,7 +6,7 @@ import Icon from "@/components/Container/Icon.vue";
 
 import { ElTreeNode } from "@/utils/type.ts";
 import { useTreeCondition } from "@/pinia/TreeCondition.ts";
-import {Component, Handle, IconData, Util} from "@/utils"
+import {Component, IconData, Util} from "@/utils"
 import router from "@/router";
 import { useRoute } from "vue-router";
 

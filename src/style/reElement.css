@@ -58,7 +58,6 @@
 
 /* -----------------el popover组件修改------------------ */
 .el-popper {
-
     min-width: 0 !important;
     padding: 0 !important;
 
@@ -66,6 +65,11 @@
     justify-content: center; /* 水平居中 */
     align-items: center;     /* 垂直居中 */
 }
+/* ----------------- breadcrumb 组件修改------------------ */
+.el-breadcrumb__inner{
+    height: 100%;
+}
+
 
 /* ----------------- vxe 组件修改------------------ */
 .vxe-table--scroll-y-virtual {

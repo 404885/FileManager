@@ -25,13 +25,17 @@ const sideBottomData = [
 ]
 
 const headData = [
-    { label: '打开', key: 'open' },
-    { label: '重命名', key: 'rename' },
-    { label: '复制', key: 'copy' },
-    { label: '剪切', key: 'cut' },
-    { label: '移动', key: 'move' },
-    { label: '属性', key: 'property' },
-    { label: '删除', key: 'delete', danger: true }
+    { label: '名称', key: 'name' },
+    { label: '创建时间', key: 'create_time' },
+    { label: '上次浏览', key: 'last_browser-time' },
+    { label: '文本', key: 'txt'},
+    { label: '数字', key: 'num' },
+    { label: '链接', key: 'link' },
+    { label: '日期', key: 'date' },
+    { label: '单选框', key: 'choose' },
+    { label: '附件', key: 'attach' },
+    { label: '描述', key: 'describe' },
+    { label: '标签', key: 'key' }
 ]
 
 export {
