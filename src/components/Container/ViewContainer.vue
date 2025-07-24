@@ -42,7 +42,7 @@ import { vDrag } from '@/utils/directives/drag';
   overflow: hidden;
   resize: both;
 
-  min-width: 720px;
+  min-width: 600px;
   min-height: 500px;
   will-change: transform;
 

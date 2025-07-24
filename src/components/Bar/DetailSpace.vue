@@ -141,6 +141,7 @@ function contextmenu(e: MouseEvent, data: ElTreeNode) {
 function nodeClick(section: any){
   if (section.action === 'workChange') workChange()
 }
+
 // 工作空间切换
 function workChange(){
   Component.openDialog({

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Util } from "@/utils";
-import {onMounted, ref} from "vue";
+import {onMounted, ref, computed} from "vue";
 import {VXETableNode} from "@/utils/type.ts";
 import {useTreeCondition} from "@/pinia/TreeCondition.ts";
 
@@ -13,6 +13,12 @@ const breadData = ref<VXETableNode[]>([])
 const initData = async () => {
   breadData.value = await Util.idToPathList(store.currentFolder, store.currentWorkspace)
 }
+// 点击面包屑实现跳转
+const breadClick = (id: number) => {
+  store.setCurrentFolder(id)
+}
+
+
 
 onMounted(() =>  {
   initData()
@@ -23,16 +29,38 @@ store.$subscribe((mutation, state) => {
   initData()
 })
 
+
+
+
+const visibleBreadData = computed(() => {
+  const list = breadData.value
+  if (list.length <= 4) return list
+
+  return [
+    list[0],
+    { name: '...', id: 'ellipsis' },
+    ...list.slice(-2)
+  ]
+})
+
+
 </script>
 
+
 <template>
+
   <div class="breadCrumb">
-    <nav v-for="(item, index) of breadData" class="breadCrumbItem">
-      <div class="navItem">{{ item.name }}</div>
-      <span v-if="index < breadData.length - 1" class="separator">></span>
-    </nav>
+    <template v-for="(item, index) in visibleBreadData" :key="index">
+      <div class="breadCrumbItem">
+        <div class="navItem" :style="{ cursor: item.name === '...' ? 'default' : 'pointer' }" @click="breadClick(item.id)">
+          {{ item.name }}
+        </div>
+      </div>
+      <span v-if="index < visibleBreadData.length - 1" class="separator">/</span>
+    </template>
   </div>
 </template>
+
 
 <style scoped>
 
@@ -40,6 +68,9 @@ store.$subscribe((mutation, state) => {
   display: flex;
   flex-direction: row;
   gap: 5px;
+
+  justify-content: center; /* 水平居中 */
+  align-items: center;
 }
 .breadCrumbItem {
   display: flex;

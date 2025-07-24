@@ -14,13 +14,10 @@ const testw = ref<number>(1)
 const store =useTreeCondition()
 
 function aaa(){
-  store.setCurrentWorkspace(1);store.setCurrentFolder(-1)
+  // store.setCurrentWorkspace(1);store.setCurrentFolder(-1)
   Util.openComponent(ResourceFolder, { title: '资源管理器' })
 }
-function open(){
-  store.setCurrentFolder(testf.value)
-  store.setCurrentWorkspace(testw.value)
-}
+
 
 watch(testf, (newVal) => {
   store.setCurrentFolder(newVal)
@@ -39,7 +36,6 @@ watch(testw, (newVal) => {
   </div>
   <div class="window-home">
     <div class="window-view">
-      <div class="menu-icon" @dblclick="open">dsadas</div>
       <div class="menu-icon" @dblclick="aaa">dsadas</div>
       <input type="text" v-model.number="testf">
       <input type="text" v-model.number="testw">

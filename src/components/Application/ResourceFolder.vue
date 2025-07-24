@@ -41,7 +41,7 @@ onMounted(() =>  {
         <div class="resource-sidebar" v-resize="{ storageKey: 'my-panel-width' }">
           <div class="resource-sidebar-title">快捷节点</div>
           <div class="resource-sidebar-section">
-            <div v-for="(item, index) in Data.nodeData" :key="index" class="mainView-sidebar-section-item">
+            <div v-for="(item, index) in Data.nodeData" :key="index" class="resource-sidebar-section-item">
               <Icon :type="item.icon"  source="bar"/>
               <span>{{ item.label }}</span>
             </div>
@@ -52,7 +52,7 @@ onMounted(() =>  {
           </div>
         </div>
         <div class="resource-container">
-          <div class="mainView-container-bread">
+          <div class="resource-container-bread">
 
             <div class="resource-container-bread-path">
               <PathContainer></PathContainer>
@@ -64,6 +64,7 @@ onMounted(() =>  {
             <TableContainer></TableContainer>
           </div>
         </div>
+
       </div>
     </ViewContainer>
   </teleport>
@@ -98,7 +99,7 @@ onMounted(() =>  {
   margin-right: 8px;
   font-size: 14px;
 }
-.mainView-sidebar-section-item {
+.resource-sidebar-section-item {
   display: flex;
   flex-direction: row;
   gap: 16px;
@@ -109,17 +110,18 @@ onMounted(() =>  {
   cursor: pointer;
   transition: background 0.2s;
 }
-.mainView-sidebar-section-item:hover {
+.resource-sidebar-section-item:hover {
   background-color: rgba(0, 0, 0, 0.05);
 }
-.mainView-sidebar-tree{
+
+.resource-sidebar-tree{
   flex: 1;
-  overflow: auto;
+  overflow-x: auto;
 }
-.mainView-sidebar-tree::-webkit-scrollbar {
+.resource-sidebar-tree::-webkit-scrollbar {
   display: none;
 }
-.mainView-sidebar-tree-node {
+.resource-sidebar-tree-node {
   display: flex;
   gap: 4px;
   width: 100%;
@@ -131,7 +133,7 @@ onMounted(() =>  {
   display: flex;
   flex-direction: column;
   flex: 1;
-  width: 100%;
+  min-width: 408px;
   padding: 0 12px 12px;
   background: transparent;
 }
@@ -143,12 +145,10 @@ onMounted(() =>  {
   background: transparent;
   overflow-x: auto;
 }
-.mainView-container-bread {
+.resource-container-bread {
   min-height: 46px;
-  min-width: 450px;
   width: 100%;
   display: flex;
-
 
   align-items: center;
   justify-content: space-between;

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import {Component, Data, Util} from "@/utils";
+import { ref, onMounted,computed } from 'vue'
+import {Component, Data, Util } from "@/utils";
 import Icon from "@/components/Container/Icon.vue";
 import { ElPopover } from 'element-plus'
 import {VXETableNode} from "@/utils/type.ts";
@@ -10,12 +10,11 @@ import {useTreeCondition} from "@/pinia/TreeCondition.ts";
 const store = useTreeCondition()
 const tableData = ref<VXETableNode[]>([])
 
-
 const Fields = ref([
   { label: '名称', key: 'name' },
   { label: '创建时间', key: 'create_time' },
   { label: '上次浏览', key: 'last_browser-time' },
-])
+] as { label: string; key: string; width?: number }[])
 
 
 async function fieldContext(e: MouseEvent, index: any) {
@@ -43,12 +42,8 @@ async function fieldContext(e: MouseEvent, index: any) {
 }
 
 // 表格初始化
-const initTable = async () => {
-  tableData.value = await window.electronAPI.dataOperation.loadTable(store.currentWorkspace)
-}
-
-function test(path:string){
-  console.log(path)
+const initData = async () => {
+  tableData.value = await window.electronAPI.dataOperation.loadTable(store.currentWorkspace, store.currentFolder)
 }
 
 function itemClick(item: any) {
@@ -60,30 +55,98 @@ function isClicked(item: any) {
   return Fields.value.some(f => f.key === item.key)
 }
 
-onMounted(() => {
-  initTable()
+store.$subscribe((mutation, state) => {
+  console.log('变化了！', mutation, state)
+  initData()
 })
+
+
+// const columnStyle = computed(() => {
+//   const cols = Fields.value.map(f => f.width ? `${f.width}px` : '1fr')
+//   return cols.join(' ') + ' 60px'
+// })
+
+
+
+
+
+
+const columnStyle = computed(() => {
+  // 先加上 60px 列宽，再处理其它列
+  const cols = ['60px', ...Fields.value.map(f => (f.width ? `${f.width}px` : '1fr'))];
+  cols.push('1fr');
+  // 返回合并后的列宽设置
+  return cols.join(' ');
+});
+
+
+function startResize(e: MouseEvent, index: number) {
+  e.preventDefault()
+  const startX = e.clientX
+  const el = (e.target as HTMLElement).parentElement!
+  const startWidth = el.offsetWidth
+
+  const onMouseMove = (ev: MouseEvent) => {
+    const delta = ev.clientX - startX
+    Fields.value[index].width = Math.max(112, startWidth + delta)
+  }
+
+  const onMouseUp = () => {
+    window.removeEventListener('mousemove', onMouseMove)
+    window.removeEventListener('mouseup', onMouseUp)
+
+    console.log(Fields.value[index].width)
+    const head = document.querySelector('.table-container-head') as HTMLElement
+    const headWidth = head.offsetWidth
+    const items = document.querySelectorAll('.table-container-head-item')
+    const total = Array.from(items).reduce((sum, el) => sum + (el as HTMLElement).offsetWidth, 0)
+
+
+
+    const gap = headWidth - total
+    console.log("head", headWidth,"total",total, gap)
+  }
+
+
+  window.addEventListener('mousemove', onMouseMove)
+  window.addEventListener('mouseup', onMouseUp)
+}
+
+onMounted(() => {
+  initData()
+})
+
+
+
 
 </script>
 
 <template>
   <div class="table-container">
-    <div class="table-container-head" :style="{ gridTemplateColumns: `repeat(${Fields.length}, 1fr) 60px` }">
-      <div class="table-container-head-item" v-for="(item,index) of Fields" @contextmenu="fieldContext($event, index)">{{item.label}}</div>
-      <el-popover placement="right-end" >
+    <div class="table-container-head">
+      <div class="table-container-head-item "></div>
+      <div class="table-container-head-item"
+           v-for="(item,index) of Fields"
+           @contextmenu="fieldContext($event, index)">
+        <div class="table-container-head-item-cell">{{item.label}}</div>
+        <div class="table-container-head-item-resizeHandle" @mousedown.stop.prevent="startResize($event, index)"></div>
+      </div>
+      <div class="table-container-head-fill">
+        <el-popover placement="right-end" >
         <template #reference>
-          <div class="table-container-head-item">+</div>
+          <div class="table-container-head-menu">+</div>
         </template>
         <template #default>
           <div class="context-menu" ref="container">
             <div class="context-menu-item" v-for="item of Data.headData" @click="itemClick(item)" :class="{ disabled: isClicked(item) }">{{item.label}}</div>
           </div>
         </template>
-      </el-popover>
+      </el-popover></div>
     </div>
     <div class="table-container-body">
-      <div class="table-container-body-row" :style="{ gridTemplateColumns: `repeat(${Fields.length}, 1fr) 60px` }" v-for="row of tableData">
-        <div class="table-container-body-row-cell" v-for="item of Fields" @click="test(row)">
+      <div class="table-container-body-row" v-for="(row, index) of tableData">
+        <div class="table-container-body-row-cell">{{ index+1 }}</div>
+        <div class="table-container-body-row-cell" v-for="item of Fields">
           <template v-if="item.key === 'name'" >
             <Icon :type=row.type  source="bar"/>
             <span>{{ row[item.key] }}</span>
@@ -91,8 +154,9 @@ onMounted(() => {
           <template v-if="item.key === 'create_time'">
             {{ Util.formatter.timeFormatter(Number(row[item.key])) }}
           </template>
+          <div class="table-container-head-item-resizeHandle" @mousedown.stop.prevent="startResize($event, index)"></div>
         </div>
-        <div class="table-container-body-row-cell"></div>
+        <div class="table-container-body-row-fill"></div>
       </div>
       <div class="table-container-body-fill"></div>
     </div>
@@ -100,32 +164,40 @@ onMounted(() => {
 </template>
 
 <style scoped>
+/* 样式：拖动手柄 */
+.table-container-head-item-resizeHandle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  cursor: col-resize;
+  user-select: none;
+  z-index: 10;
+}
+
+
 .table-container {
   height: 100%;
-
-  min-width: 100%;
-  max-width: 100%;
-
   background: transparent;
   overflow: hidden;
   font-size: 14px;
   display: flex;
   flex-direction: column;
-
 }
 
 .table-container-head {
   background: transparent;
   min-height: 40px;
-  display: grid;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
 }
 .table-container-head-item{
-  flex: 1;
-  flex: 1 auto;
+  position: relative;
   background: rgba(255, 255, 255, 0.4);
   padding: 10px;
   font-size: 15px;
-
 
   display: flex;
   justify-content: center;
@@ -140,10 +212,28 @@ onMounted(() => {
   background: rgba(0, 0, 0, 0.08);
 }
 .table-container-head-item:first-child{
+  width: 40px;
   border-top-left-radius: 6px;
 }
 .table-container-head-item:last-child{
   border-top-right-radius: 6px;
+}
+.table-container-head-menu{
+  width: 40px;
+  padding: 10px;
+  font-size: 15px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.table-container-head-menu:hover {
+  background: rgba(0, 0, 0, 0.06);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+.table-container-head-fill{
+  flex: 1;
+  background: rgba(255, 255, 255, 0.4);
 }
 
 .table-container-body{
@@ -151,12 +241,12 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   background: transparent;
-  overflow: auto;
-  scrollbar-width: none;
+  overflow-x: auto;
 }
 .table-container-body-row{
-  background: rgba(255, 255, 255, 0.3);
-  display: grid;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
 }
 .table-container-body-row:hover {
   background: rgba(0, 0, 0, 0.03);
@@ -169,10 +259,10 @@ onMounted(() => {
   border-bottom-right-radius: 6px;
 }
 .table-container-body-row-cell {
-  flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
+  background: rgba(255, 255, 255, 0.3);
 
   padding: 10px;
   position: relative;
@@ -180,6 +270,13 @@ onMounted(() => {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+.table-container-body-row-cell:first-child{
+  width: 40px;
+}
+.table-container-body-row-fill{
+  flex: 1;
+  background: rgba(255, 255, 255, 0.3);
 }
 .table-container-body-row-cell:hover::after {
   content: '';
