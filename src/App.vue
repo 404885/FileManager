@@ -1,18 +1,34 @@
 <script setup lang="ts">
-import {ref} from 'vue'
-import { RouterView } from 'vue-router'
 import TitleBar from "@/components/Bar/TitleBar.vue";
-import Icon from "@/components/Container/Icon.vue";
-import {IconData, Util} from "@/utils";
-import TestView1 from "@/view/TestView1.vue";
+import { Util } from "@/utils";
+import ResourceFolder from "@/components/Application/ResourceFolder.vue";
+import { ref,watch } from "vue";
 
-const dataTop = IconData.sideTopData
-const componentContainer = ref(null)
+import {useTreeCondition} from "@/pinia/TreeCondition.ts";
+
+
+const testf = ref<number>(1)
+const testw = ref<number>(1)
+
+
+const store =useTreeCondition()
 
 function aaa(){
-  Util.openComponent(TestView1, { title: '作为测试的资源管理器' }, false)
-  console.log(TestView1)     // 确认组件不是 undefined
+  store.setCurrentWorkspace(1);store.setCurrentFolder(-1)
+  Util.openComponent(ResourceFolder, { title: '资源管理器' })
 }
+function open(){
+  store.setCurrentFolder(testf.value)
+  store.setCurrentWorkspace(testw.value)
+}
+
+watch(testf, (newVal) => {
+  store.setCurrentFolder(newVal)
+})
+
+watch(testw, (newVal) => {
+  store.setCurrentWorkspace(newVal)
+})
 
 
 </script>
@@ -23,12 +39,13 @@ function aaa(){
   </div>
   <div class="window-home">
     <div class="window-view">
-      <RouterLink v-for="item in dataTop" :to="item.to" class="menu-icon">
-        <Icon  :type="item.icon" source="bar"/>
-      </RouterLink>
-      <router-view/>
-      <div ref="componentContainer">dsadas</div>
+      <div class="menu-icon" @dblclick="open">dsadas</div>
       <div class="menu-icon" @dblclick="aaa">dsadas</div>
+      <input type="text" v-model.number="testf">
+      <input type="text" v-model.number="testw">
+
+
+
     </div>
   </div>
 </template>

@@ -58,7 +58,7 @@ const { handleClick } = Util.useHandleClick(200)
 // el-tree props 配置
 const defaultProps = {children: 'children', label: 'label', path: 'path',}
 // v-for循环数据
-const sections = IconData.nodeData
+const sections = Data.nodeData
 
 
 
@@ -336,7 +336,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', updateTableHeight)
 })
 
-import { vResize } from "@/directives/resizable";
+import { vResize } from "@/utils/directives/resizable";
 
 </script>
 
@@ -344,14 +344,14 @@ import { vResize } from "@/directives/resizable";
   <ViewContainer>
     <div class="mainView">
       <div class="mainView-sidebar" v-resize="{ storageKey: 'my-panel-width' }">
-        <div class="mainView-sidebar-title">快捷节点</div>
-        <div class="mainView-sidebar-section">
+        <div class="resource-sidebar-title">快捷节点</div>
+        <div class="resource-sidebar-section">
           <div v-for="(item, index) in sections" :key="index" class="mainView-sidebar-section-item" @click="nodeClick(item)">
             <Icon :type="item.icon"  source="bar"/>
             <span>{{ item.label }}</span>
           </div>
         </div>
-        <div class="mainView-sidebar-title">工作空间</div>
+        <div class="resource-sidebar-title">工作空间</div>
         <div class="mainView-sidebar-tree">
           <el-tree
               v-loading="isLoading"
@@ -387,10 +387,7 @@ import { vResize } from "@/directives/resizable";
       <div class="mainView-container">
         <div class="mainView-container-bread">
 
-
-
-
-          <el-breadcrumb :separator-icon="ArrowRight" class="mainView-container-bread-path">
+          <el-breadcrumb :separator-icon="ArrowRight" class="resource-container-bread-path">
             <el-breadcrumb-item
                 v-for="(item, index) in pathArray"
                 :key="item.id" @click="breadClick(index)"
@@ -402,9 +399,9 @@ import { vResize } from "@/directives/resizable";
 
 
 
-          <div class="mainView-container-bread-button animate_press" @click="open">新增</div>
+          <div class="resource-container-bread-button animate_press" @click="open">新增</div>
         </div>
-        <div class="mainView-container-table">
+        <div class="resource-container-table">
           <TableContainer :data="tableData"></TableContainer>
         </div>
       </div>
@@ -430,13 +427,13 @@ import { vResize } from "@/directives/resizable";
   height: 100%;
   border-right: 1px solid #D2D2D7;
 }
-.mainView-sidebar-title {
+.resource-sidebar-title {
   margin: 8px;
   font-weight: 600;
   font-size: 14px;
   color: #6E6E73;
 }
-.mainView-sidebar-section {
+.resource-sidebar-section {
   margin-left: 8px;
   margin-right: 8px;
   font-size: 14px;
@@ -478,7 +475,7 @@ import { vResize } from "@/directives/resizable";
   padding: 0 12px 12px;
   background: transparent;
 }
-.mainView-container-table {
+.resource-container-table {
   flex: 1;
   min-width: 0;
   overflow: hidden;
@@ -499,7 +496,7 @@ import { vResize } from "@/directives/resizable";
   background: transparent;
   font-size: 14px;
 }
-.mainView-container-bread-path{
+.resource-container-bread-path{
   text-decoration: 1px underline;
 
   height: 100%;
@@ -511,7 +508,7 @@ import { vResize } from "@/directives/resizable";
   justify-content: center;
   align-items: center;
 }
-.mainView-container-bread-button{
+.resource-container-bread-button{
   height: 100%;
   background: rgba(255, 255, 255, 0.4);
   border-radius: 3px;

@@ -13,7 +13,7 @@ import { useTreeCondition } from "@/pinia/TreeCondition.ts";
 
 import { Component, Util } from "@/utils";
 import ViewContainer from "@/components/Container/ViewContainer.vue";
-import DetailSpace from "@/components/Bar/DetailSpace.vue";
+import TreeContainer from "@/components/Container/TreeContainer.vue";
 
 
 
@@ -172,7 +172,7 @@ onBeforeUnmount(() => {
 
 <template>
   <ViewContainer>
-    <DetailSpace></DetailSpace>
+    <TreeContainer></TreeContainer>
     <div class="mainView-table">
       <div class="mainView-bread">
         <el-breadcrumb :separator-icon="ArrowRight">

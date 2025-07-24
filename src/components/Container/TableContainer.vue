@@ -2,10 +2,14 @@
 import { ref, onMounted } from 'vue'
 import {Component, Data, Util} from "@/utils";
 import Icon from "@/components/Container/Icon.vue";
+import { ElPopover } from 'element-plus'
+import {VXETableNode} from "@/utils/type.ts";
+import {useTreeCondition} from "@/pinia/TreeCondition.ts";
 
-const prop = defineProps<{
-  data: any;
-}>()
+
+const store = useTreeCondition()
+const tableData = ref<VXETableNode[]>([])
+
 
 const Fields = ref([
   { label: '名称', key: 'name' },
@@ -38,13 +42,14 @@ async function fieldContext(e: MouseEvent, index: any) {
   }
 }
 
-
-
-function fieldClick(index: number) {
-  Fields.value.splice(index, 1)
+// 表格初始化
+const initTable = async () => {
+  tableData.value = await window.electronAPI.dataOperation.loadTable(store.currentWorkspace)
 }
 
-
+function test(path:string){
+  console.log(path)
+}
 
 function itemClick(item: any) {
   if (!Fields.value.some(f => f.key === item.key)) {
@@ -56,6 +61,7 @@ function isClicked(item: any) {
 }
 
 onMounted(() => {
+  initTable()
 })
 
 </script>
@@ -63,7 +69,7 @@ onMounted(() => {
 <template>
   <div class="table-container">
     <div class="table-container-head" :style="{ gridTemplateColumns: `repeat(${Fields.length}, 1fr) 60px` }">
-      <div class="table-container-head-item" v-for="(item,index) of Fields" @contextmenu="fieldContext($event, index)" @click="fieldClick(index)">{{item.label}}</div>
+      <div class="table-container-head-item" v-for="(item,index) of Fields" @contextmenu="fieldContext($event, index)">{{item.label}}</div>
       <el-popover placement="right-end" >
         <template #reference>
           <div class="table-container-head-item">+</div>
@@ -76,17 +82,14 @@ onMounted(() => {
       </el-popover>
     </div>
     <div class="table-container-body">
-      <div class="table-container-body-row" :style="{ gridTemplateColumns: `repeat(${Fields.length}, 1fr) 60px` }" v-for="row of prop.data">
-        <div class="table-container-body-row-cell" v-for="item of Fields">
-          <template v-if="item.key === 'name'">
+      <div class="table-container-body-row" :style="{ gridTemplateColumns: `repeat(${Fields.length}, 1fr) 60px` }" v-for="row of tableData">
+        <div class="table-container-body-row-cell" v-for="item of Fields" @click="test(row)">
+          <template v-if="item.key === 'name'" >
             <Icon :type=row.type  source="bar"/>
             <span>{{ row[item.key] }}</span>
           </template>
           <template v-if="item.key === 'create_time'">
             {{ Util.formatter.timeFormatter(Number(row[item.key])) }}
-          </template>
-          <template v-else>
-            {{ row[item.key] }}
           </template>
         </div>
         <div class="table-container-body-row-cell"></div>

@@ -9,7 +9,7 @@ function close(){
   emit('close', "dsadsa")
 }
 
-import { vDrag } from '@/directives/drag';
+import { vDrag } from '@/utils/directives/drag';
 
 </script>
 

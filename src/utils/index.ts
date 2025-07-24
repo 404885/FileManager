@@ -7,6 +7,14 @@ import { getFileIcon, getFileIconMap, setFileIconMap, clearFileIconMap, defaultF
 import { nodeData,sideTopData,sideBottomData,headData } from "@/utils/Data.ts";
 import { formatter,idToPath,idToPathList,setAndJump,openComponent,asyncOpenComponent,useHandleClick  } from "@/utils/util.ts";
 
+import { vDrag } from "@/utils/directives/drag.ts";
+import { vResize } from "@/utils/directives/resizable.ts";
+
+export {
+    vDrag,
+    vResize
+}
+
 export const Data = {
     nodeData,
     sideTopData,
@@ -28,12 +36,6 @@ export const IconMap = {
     setFileIconMap,
     clearFileIconMap,
     defaultFileIconMap,
-}
-
-export const IconData = {
-    nodeData,
-    sideTopData,
-    sideBottomData
 }
 
 export const Util = {

@@ -5,7 +5,7 @@ import Icon from "@/components/Container/Icon.vue";
 
 import { ElTreeNode } from "@/utils/type.ts";
 import { useTreeCondition } from "@/pinia/TreeCondition.ts";
-import {Component, IconData, Util} from "@/utils"
+import {Component, Data, Util} from "@/utils"
 import router from "@/router";
 import { useRoute } from "vue-router";
 
@@ -30,7 +30,7 @@ const { handleClick } = Util.useHandleClick(200)
 // el-tree props 配置
 const defaultProps = {children: 'children', label: 'label', path: 'path',}
 // v-for循环数据
-const sections = IconData.nodeData
+const sections = Data.nodeData
 const route = useRoute();
 
 

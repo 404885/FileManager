@@ -138,6 +138,7 @@ export const formatter ={
 }
 
 
+// 同步调用openComponent，返回 Promise，可以获取组件传出的数据
 export function openComponent(ComponentCtor: Component, props: ComponentProps, singleton = true): void {
     console.log('openComponent called with props:', props, 'singleton:', singleton)
 
@@ -149,6 +150,7 @@ export function openComponent(ComponentCtor: Component, props: ComponentProps, s
     if (singleton && currentSyncInstance) {
         currentSyncInstance.unmount()
         const old = document.querySelector('.sync-component-container')
+        container.dataset.id = Date.now().toString()
         old?.remove()
         currentSyncInstance = null
     }
@@ -173,36 +175,6 @@ export function openComponent(ComponentCtor: Component, props: ComponentProps, s
         currentSyncInstance = app
     }
 }
-
-// 同步调用openComponent，返回 Promise，可以获取组件传出的数据
-// export function openComponent(ComponentCtor: Component, props: ComponentProps){
-//     console.log('asyncOpenComponent called with props:', props)
-//
-//     if (currentSyncInstance) {
-//         currentSyncInstance.unmount()
-//         document.getElementById('sync-component')?.remove()
-//     }
-//
-//     const container = document.createElement('div')
-//     container.id = 'sync-component'
-//     document.body.appendChild(container)
-//
-//
-//     const app = createApp({
-//         render() {
-//             return h(ComponentCtor, {
-//                 ...props,
-//                 onClose: () => {
-//                     app.unmount()  // 组件关闭时卸载
-//                     container.remove()  // 移除容器
-//                     currentSyncInstance = null
-//                 }
-//             })
-//         }
-//     })
-//     app.mount(container)
-//     currentSyncInstance = app
-// }
 // 异步调用的 openComponent，返回 Promise，可以获取组件传出的数据
 export function asyncOpenComponent<T = any>(ComponentCtor: Component, props: ComponentProps = {}): Promise<T> {
     return new Promise((resolve) => {
