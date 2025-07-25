@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { vResize, vDrag } from '@/utils'
 
 const emit = defineEmits(['close'])
 const props = defineProps<{
@@ -9,12 +10,13 @@ function close(){
   emit('close', "dsadsa")
 }
 
-import { vDrag } from '@/utils/directives/drag';
 
 </script>
 
 <template>
-    <div class="view-container" v-drag="{ handle: '.title-bar', initialCenter: true, exclude: '.non-drag'}">
+    <div class="view-container"
+         v-drag="{ handle: '.title-bar', initialCenter: true, exclude: '.non-drag'}"
+         v-resize="{ storageKey: 'my-view-width' }">
       <div class="title-bar" >
         <div class="traffic-lights">
           <div class="traffic-light red non-drag" @click="close" title="关闭"></div>
