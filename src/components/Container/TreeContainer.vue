@@ -4,7 +4,7 @@ import { ElTree } from 'element-plus'
 import { useTreeCondition } from "@/pinia/TreeCondition.ts";
 import { ElTreeNode } from "@/utils/type.ts";
 import { Util } from "@/utils";
-import Icon from "@/components/Container/Icon.vue";
+import IconContainer from "@/components/Container/IconContainer.vue";
 
 
 
@@ -85,10 +85,8 @@ onMounted( () =>{
             :indent="16">
       <template #default="{ node, data }">
         <div class="tree-node" @click="handleClick(node, onSingleClick, onDoubleClick)">
-          <Icon :type="data.type" :is-leaf="data.isLeaf" source="tree"/>
-          <span :title="data.label"  :class="{ 'highlight': data.marked }">
-                  {{ data.label }}
-              </span>
+          <IconContainer :file-type="data.type" size="16px"></IconContainer>
+          <span :title="data.label"  :class="{ 'highlight': data.marked }">{{ data.label }}</span>
         </div>
       </template>
     </el-tree>
@@ -117,10 +115,16 @@ onMounted( () =>{
 
 .tree-node {
   width: 100%;
+  display: flex;
+  align-items: center;
 }
 
 .highlight {
   color: #bfbf7b;
+}
+
+::v-deep(.svg-icon){
+  margin-right: 4px;
 }
 
 </style>

@@ -39,6 +39,7 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.mjs'),
       contextIsolation: true,
       nodeIntegration: false,
+      webviewTag: true,
     },
   })
   // Test active push message to Renderer-process.

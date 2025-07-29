@@ -224,6 +224,9 @@ onMounted( async () => {
 .align-right {
   justify-content: flex-end !important;
 }
+:deep(.svg-icon){
+  margin-right: 10px;
+}
 
 
 

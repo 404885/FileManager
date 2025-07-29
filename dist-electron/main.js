@@ -376,7 +376,8 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, "preload.mjs"),
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: false,
+      webviewTag: true
     }
   });
   win.webContents.on("did-finish-load", () => {

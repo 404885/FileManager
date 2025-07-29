@@ -14,9 +14,7 @@ function close(){
 </script>
 
 <template>
-    <div class="view-container"
-         v-drag="{ handle: '.title-bar', initialCenter: true, exclude: '.non-drag'}"
-         v-resize="{ storageKey: 'my-view-width' }">
+    <div class="view-container" v-drag="{ handle: '.title-bar', initialCenter: true, exclude: '.non-drag'}" v-resize="{ storageKey: 'my-view-width' }">
       <div class="title-bar" >
         <div class="traffic-lights">
           <div class="traffic-light red non-drag" @click="close" title="关闭"></div>
@@ -24,6 +22,7 @@ function close(){
           <div class="traffic-light green" data-action="maximize" title="最大化"></div>
         </div>
         <span class="title">{{ props.title || '默认应用'}}</span>
+        <slot name="title-slot" />
       </div>
       <slot/>
     </div>
@@ -103,7 +102,6 @@ function close(){
   left: 50%;
   transform: translate(-50%, -50%);
   pointer-events: none;
-
 }
 
 </style>

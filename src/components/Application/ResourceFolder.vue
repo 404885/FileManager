@@ -38,34 +38,33 @@ onMounted(() =>  {
   <teleport to="#app" v-if="show">
     <ViewContainer :title="props.title" @close="show = false">
       <div class="resource">
-        <div class="resource-sidebar" v-resize="{ storageKey: 'my-panel-width' }">
-          <div class="resource-sidebar-title">快捷节点</div>
-          <div class="resource-sidebar-section">
-            <div v-for="(item, index) in Data.nodeData" :key="index" class="resource-sidebar-section-item">
-              <Icon :type="item.icon"  source="bar"/>
-              <span>{{ item.label }}</span>
+          <div class="resource-sidebar" v-resize="{ storageKey: 'my-panel-width' }">
+            <div class="resource-sidebar-title">快捷节点</div>
+            <div class="resource-sidebar-section">
+              <div v-for="(item, index) in Data.nodeData" :key="index" class="resource-sidebar-section-item">
+                <Icon :type="item.icon"  source="bar"/>
+                <span>{{ item.label }}</span>
+              </div>
+            </div>
+            <div class="resource-sidebar-title">工作空间</div>
+            <div class="resource-sidebar-tree">
+              <TreeContainer></TreeContainer>
             </div>
           </div>
-          <div class="resource-sidebar-title">工作空间</div>
-          <div class="resource-sidebar-tree">
-            <TreeContainer></TreeContainer>
-          </div>
-        </div>
-        <div class="resource-container">
-          <div class="resource-container-bread">
+          <div class="resource-container">
+            <div class="resource-container-bread">
 
-            <div class="resource-container-bread-path">
-              <PathContainer></PathContainer>
+              <div class="resource-container-bread-path">
+                <PathContainer></PathContainer>
+              </div>
+
+              <div class="resource-container-bread-button animate_press" @click="open">新增</div>
             </div>
-
-            <div class="resource-container-bread-button animate_press" @click="open">新增</div>
-          </div>
-          <div class="resource-container-table">
-            <TableContainer></TableContainer>
+            <div class="resource-container-table">
+              <TableContainer></TableContainer>
+            </div>
           </div>
         </div>
-
-      </div>
     </ViewContainer>
   </teleport>
 </template>

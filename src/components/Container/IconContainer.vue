@@ -5,6 +5,8 @@ const props = defineProps<{
   fileType?: string     // 传入文件后缀名，如 pdf、doc、mp3
   size?: string         // 尺寸，如 '24px'
   customClass?: string  // 额外样式 class
+  linkMode: boolean
+  name: string
 }>()
 
 const size = props.size || '20px'
@@ -43,9 +45,17 @@ const resolvedIcon = computed(() => {
 
 <!-- src/components/SvgFileIcon.vue -->
 <template>
-  <svg class="svg-icon" :style="{ width: size, height: size }" :class="customClass" aria-hidden="true">
-    <use :href="`#icon-${resolvedIcon}`" />
-  </svg>
+  <template v-if="linkMode">
+    <svg class="svg-icon" :style="{ width: size, height: size }" :class="customClass" aria-hidden="true">
+      <use :href="`#icon-${resolvedIcon}`" />
+    </svg>
+  </template>
+  <template v-else>
+    <svg class="svg-icon" :style="{ width: size, height: size }" :class="customClass" aria-hidden="true">
+      <use :href="`#icon-${name}`" />
+    </svg>
+  </template>
+
 </template>
 
 <style scoped>
@@ -56,6 +66,5 @@ const resolvedIcon = computed(() => {
   vertical-align: middle;
   transition: color 0.2s, fill 0.2s;
   color: #424141; /* 默认图标颜色 */
-  margin-right: 10px;
 }
 </style>

@@ -2,6 +2,7 @@
 import TitleBar from "@/components/Bar/TitleBar.vue";
 import { Util } from "@/utils";
 import ResourceFolder from "@/components/Application/ResourceFolder.vue";
+import WebBrowser from "@/components/Application/WebBrowser.vue";
 import { ref,watch } from "vue";
 
 import {useTreeCondition} from "@/pinia/TreeCondition.ts";
@@ -15,7 +16,8 @@ const store =useTreeCondition()
 
 function aaa(){
   // store.setCurrentWorkspace(1);store.setCurrentFolder(-1)
-  Util.openComponent(ResourceFolder, { title: '资源管理器' })
+  // Util.openComponent(ResourceFolder, { title: '资源管理器' })
+  Util.openComponent(WebBrowser, { title: '浏览器' })
 }
 
 
@@ -39,9 +41,6 @@ watch(testw, (newVal) => {
       <div class="menu-icon" @dblclick="aaa">dsadas</div>
       <input type="text" v-model.number="testf">
       <input type="text" v-model.number="testw">
-
-
-
     </div>
   </div>
 </template>
@@ -101,5 +100,10 @@ watch(testw, (newVal) => {
   transition: transform 0.2s ease;
 }
 
+
+.test{
+  width: 50%;
+  height: 50%;
+}
 
 </style>
