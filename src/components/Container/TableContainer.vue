@@ -2,7 +2,7 @@
 import { ref, onMounted, watch } from 'vue'
 import {Component, Data, Util } from "@/utils";
 import { ElPopover } from 'element-plus'
-import {VXETableNode} from "@/utils/type.ts";
+import {ElTreeNode, VXETableNode} from "@/utils/type.ts";
 import {useTreeCondition} from "@/pinia/TreeCondition.ts";
 import IconContainer from "@/components/Container/IconContainer.vue";
 
@@ -70,6 +70,21 @@ function isClicked(item: any) {
 const saveField = () => {
 
 }
+
+const cellClick = async (row: ElTreeNode, key:string) => {
+  if (key === 'name') {
+    if (row.type !== 'folder'){
+      console.log('打开文件')
+      await window.electronAPI.openFile(row.file_path as string)
+    }
+    else {
+      console.log('设置文件夹')
+      store.setCurrentFolder(row.id)
+    }
+  }
+}
+
+
 
 
 function saveWidths() {
@@ -139,9 +154,6 @@ watch(() => [store.currentFolder, store.currentWorkspace], async () => {
   }
 })
 
-
-
-
 onMounted( async () => {
   tableData.value = await window.electronAPI.dataOperation.loadTable(store.currentWorkspace)
   loadWidths()
@@ -181,7 +193,8 @@ onMounted( async () => {
         <div class="table-container-body-row-cell"
              v-for="item of Fields"
              :style="{ width: item.width + 'px' }"
-             :class="'align-' + item.align">
+             :class="'align-' + item.align"
+             @dblclick="cellClick(row as any, item.key)">
           <template v-if="item.key === 'name'">
             <IconContainer :file-type="row.type"></IconContainer>
             <span>{{ row[item.key] }}</span>
