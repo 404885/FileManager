@@ -4,9 +4,9 @@ import {createPinia} from "pinia";
 
 import VxeUITable from 'vxe-table'
 import VxeUIAll from 'vxe-pc-ui'
+import 'virtual:svg-icons-register'
 
 import './style/base.css'
-import './style/iconfont.js'
 import './utils/iconMap.ts'
 
 import ElementPlus from 'element-plus'

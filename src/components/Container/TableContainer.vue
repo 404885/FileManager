@@ -1,19 +1,20 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import {Component, Data, Util } from "@/utils";
-import Icon from "@/components/Container/Icon.vue";
 import { ElPopover } from 'element-plus'
 import {VXETableNode} from "@/utils/type.ts";
 import {useTreeCondition} from "@/pinia/TreeCondition.ts";
+import IconContainer from "@/components/Container/IconContainer.vue";
 
 
 const store = useTreeCondition()
 const tableData = ref<VXETableNode[]>([])
+const alignOrder = ['left', 'center', 'right']
 
 const Fields = ref([
-  { key: 'name', label: '名称', width: 180 },
-  { key: 'type', label: '类型', width: 140 },
-  { key: 'create_time', label: '创建时间', width: 160 },
+  { key: 'name', label: '名称', width: 180, align: 'left'},
+  { key: 'type', label: '类型', width: 140, align: 'center'},
+  { key: 'create_time', label: '创建时间', width: 160, align: 'center'},
 ])
 
 
@@ -45,7 +46,9 @@ async function fieldContext(e: MouseEvent, index: any) {
     Fields.value.splice(index, 1)  // 删除字段
   }
   if (result && result.key === 'align'){
-
+    const current = Fields.value[index]
+    const i = alignOrder.indexOf(current.align)
+    current.align = alignOrder[(i + 1) % alignOrder.length]
   }
 }
 
@@ -175,13 +178,19 @@ onMounted( async () => {
     <div class="table-container-body">
       <div class="table-container-body-row" v-for="(row, index) of tableData">
         <div class="table-container-body-row-cell">{{ index+1 }}</div>
-        <div class="table-container-body-row-cell" v-for="item of Fields" :style="{ width: item.width + 'px' }">
-          <template v-if="item.key === 'name'" >
-            <Icon :type=row.type  source="bar"/>
+        <div class="table-container-body-row-cell"
+             v-for="item of Fields"
+             :style="{ width: item.width + 'px' }"
+             :class="'align-' + item.align">
+          <template v-if="item.key === 'name'">
+            <IconContainer :file-type="row.type"></IconContainer>
             <span>{{ row[item.key] }}</span>
           </template>
-          <template v-if="item.key === 'create_time'">
+          <template v-else-if="item.key === 'create_time'">
             {{ Util.formatter.timeFormatter(Number(row[item.key])) }}
+          </template>
+          <template v-else>
+            {{ (row as any)[item.key] }}
           </template>
         </div>
         <div class="table-container-body-row-fill"></div>
@@ -193,6 +202,15 @@ onMounted( async () => {
 
 <style scoped>
 /* 样式：拖动手柄 */
+.align-left {
+  justify-content: flex-start !important;
+}
+.align-center {
+  justify-content: center !important;
+}
+.align-right {
+  justify-content: flex-end !important;
+}
 
 
 
