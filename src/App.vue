@@ -2,10 +2,11 @@
 import TitleBar from "@/components/Bar/TitleBar.vue";
 import { Util } from "@/utils";
 import ResourceFolder from "@/components/Application/ResourceFolder.vue";
-import WebBrowser from "@/components/Application/WebBrowser.vue";
 import { ref,watch } from "vue";
 
 import {useTreeCondition} from "@/pinia/TreeCondition.ts";
+import DeskTopIcon from "@/components/Icon/DeskTopIcon.vue";
+import WebBrowser from "@/components/Application/WebBrowser.vue";
 
 
 const testf = ref<number>(1)
@@ -16,8 +17,11 @@ const store =useTreeCondition()
 
 function aaa(){
   // store.setCurrentWorkspace(1);store.setCurrentFolder(-1)
-  // Util.openComponent(ResourceFolder, { title: '资源管理器' })
-  Util.openComponent(WebBrowser, { title: '浏览器' })
+  Util.openComponent(ResourceFolder, { title: '资源管理器' })
+}
+
+function openBrowser(){
+  Util.openComponent(WebBrowser,{ title: '浏览器' ,url : 'https://www.bing.com' },false)
 }
 
 
@@ -37,10 +41,11 @@ watch(testw, (newVal) => {
     <TitleBar/>
   </div>
   <div class="window-home">
-    <div class="window-view">
-      <div class="menu-icon" @dblclick="aaa">dsadas</div>
-      <input type="text" v-model.number="testf">
-      <input type="text" v-model.number="testw">
+    <div id="window-view" class="window-view">
+      <DeskTopIcon :name="'资源管理器'" :icon="'file_explorer'" @dblclick="aaa"/>
+      <DeskTopIcon :name="'浏览器'" :icon="'chrome'" @dblclick='openBrowser'/>
+<!--      <input type="text" v-model.number="testf">-->
+<!--      <input type="text" v-model.number="testw">-->
     </div>
   </div>
 </template>
@@ -100,10 +105,5 @@ watch(testw, (newVal) => {
   transition: transform 0.2s ease;
 }
 
-
-.test{
-  width: 50%;
-  height: 50%;
-}
 
 </style>

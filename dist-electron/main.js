@@ -1,4 +1,4 @@
-import { ipcMain, BrowserWindow, dialog, shell, app } from "electron";
+import { ipcMain, BrowserWindow, webContents, dialog, shell, app } from "electron";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import fs from "fs/promises";
@@ -20,6 +20,14 @@ function RegisterIpcEvent() {
   ipcMain.on("window-pinned", (event, isPinned) => {
     const win2 = BrowserWindow.fromWebContents(event.sender);
     win2 == null ? void 0 : win2.setAlwaysOnTop(isPinned);
+  });
+  ipcMain.on("webview-id", (_event, id) => {
+    const wc = webContents.fromId(id);
+    wc == null ? void 0 : wc.setWindowOpenHandler(({ url }) => {
+      console.log(url);
+      wc.loadURL(url);
+      return { action: "deny" };
+    });
   });
   ipcMain.handle("open-file-dialog", async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog({

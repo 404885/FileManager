@@ -3,7 +3,7 @@ import { vResize, vDrag } from '@/utils'
 
 const emit = defineEmits(['close'])
 const props = defineProps<{
-  title: string,
+  title?: string,
 }>()
 
 function close(){

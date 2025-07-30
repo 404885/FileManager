@@ -1,21 +1,35 @@
 <script setup lang="ts">
-
-import ViewContainer from "@/components/Container/ViewContainer.vue";
-import {ref} from "vue";
+//import ViewContainer from "@/components/Container/ViewContainer.vue";
+import {onMounted, ref} from "vue";
 import IconContainer from "@/components/Container/IconContainer.vue";
+import ViewContainerV2 from "@/components/Container/ViewContainerV2.vue";
 
+const emit = defineEmits(['close'])
 const props = defineProps<{
   title: string,
+  url: string,
 }>()
 
 const show = ref(true)
 
+const browser = ref()
 
+onMounted(() => {
+  const webview = document.getElementById('browser') as Electron.WebviewTag
+
+  webview.addEventListener('dom-ready', () => {
+    const id = webview.getWebContentsId?.()
+    if (id) {
+      window.electronAPI.windowControls.getWebViewId(id)
+      console.log(id)
+    }
+  })
+})
 </script>
 
 <template>
-  <teleport to="#app" v-if="show">
-    <ViewContainer :title="props.title" @close="show = false">
+  <teleport to="#window-view" v-if="show">
+    <ViewContainerV2 :title="props.title" @close="show = false">
       <template #title-slot>
         <div class="icons">
           <IconContainer size="18px" :link-mode="false" name="back" class="non-drag" @click="console.log('das')"/>
@@ -35,10 +49,10 @@ const show = ref(true)
         </div>
       </template>
 
-      <div class="browser">
-        <webview src="https://www.bing.com" style="width:100%; height:100%;"/>
+      <div class="browser-wrapper">
+        <webview id="browser" class="browser" ref="browser" :src="props.url" allowpopups/>
       </div>
-    </ViewContainer>
+    </ViewContainerV2>
   </teleport>
 </template>
 
@@ -47,6 +61,10 @@ const show = ref(true)
   display: none;
 }
 
+.browser-wrapper{
+  width: 100%;
+  height: 100%;
+}
 .browser{
   width: 100%;
   height: 100%;

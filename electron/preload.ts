@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     maximize: () => ipcRenderer.send('window-maximize'),
     close: () => ipcRenderer.send('window-close'),
     pinned: (isPinned: boolean) => ipcRenderer.send('window-pinned', isPinned),
+    getWebViewId: (id:number) => ipcRenderer.send('webview-id', id),
   },
   dataOperation: {
     queryAll: (sql: string, params: any[] = []) =>

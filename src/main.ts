@@ -12,6 +12,8 @@ import './utils/iconMap.ts'
 import ElementPlus from 'element-plus'
 import router from '@/router'
 
+import 'virtual:svg-icons-register'
+
 
 const pinia = createPinia()
 

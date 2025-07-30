@@ -19,7 +19,7 @@ function iconSwitch(type: string, isLeaf: boolean, source: string) {
       return  fileIconMap[type] || fileIconMap.default
     }
     else{
-      return '#icon-morenwenjianjia'
+      return '#Icon-morenwenjianjia'
     }
   }
   else if (source === 'bar') {

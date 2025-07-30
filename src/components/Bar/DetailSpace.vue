@@ -266,8 +266,6 @@ onMounted(()=>{
 
 <style scoped>
 
-
-
 .detail-filter {
   height: 30px;
   padding: 5px;

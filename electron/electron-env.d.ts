@@ -1,6 +1,7 @@
 /// <reference types="vite-plugin-electron/electron-env" />
 
 import {ElTreeNode, FileNode, VXETableNode} from "@/utils/type.ts";
+import {ipcRenderer} from "electron";
 
 export {};
 
@@ -54,6 +55,7 @@ declare global{
         maximize: () => void;
         close: () => void;
         pinned: (isPinned: boolean) => void;
+        getWebViewId:(id:number) => void;
       },
       dataOperation: {
         queryOne: (sql: string, params?: any[]) => Promise<any>,

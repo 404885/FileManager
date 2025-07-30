@@ -1,7 +1,6 @@
-import {BrowserWindow, dialog, ipcMain, shell} from 'electron';
+import {BrowserWindow, dialog, ipcMain, shell,webContents} from 'electron';
 import fs from "fs/promises";
 import path from "node:path";
-
 
 export function RegisterIpcEvent() {
     ipcMain.on('window-minimize', (event) => {
@@ -19,6 +18,15 @@ export function RegisterIpcEvent() {
     ipcMain.on("window-pinned", (event, isPinned: boolean) => {
         const win = BrowserWindow.fromWebContents(event.sender);
         win?.setAlwaysOnTop(isPinned);
+    })
+    ipcMain.on('webview-id', (_event, id:number) => {
+        const wc = webContents.fromId(id)
+        // 拦截 new-window 事件
+        wc?.setWindowOpenHandler(({ url }) => {
+            console.log(url);
+            wc.loadURL(url) // 当前 webview 内打开
+            return { action: 'deny' }
+        })
     })
 
     ipcMain.handle('open-file-dialog', async () => {

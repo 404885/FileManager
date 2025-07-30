@@ -39,3 +39,11 @@ export interface VXETableNode {
     tag?:string,
     description?: string,
 }
+
+export interface ViewContainer {
+    id: number;
+    x:number;
+    y:number;
+    width:number;
+    height:number;
+}

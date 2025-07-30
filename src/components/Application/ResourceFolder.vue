@@ -1,12 +1,13 @@
 <script setup lang="ts">
 
-import ViewContainer from "@/components/Container/ViewContainer.vue";
+// import ViewContainer from "@/components/Container/ViewContainer.vue";
 import {onMounted, ref} from 'vue'
 import Icon from "@/components/Container/Icon.vue";
 import {Component, Data, vResize} from "@/utils";
 import TableContainer from "@/components/Container/TableContainer.vue";
 import PathContainer from "@/components/Container/PathContainer.vue";
 import TreeContainer from "@/components/Container/TreeContainer.vue";
+import ViewContainerV2 from "@/components/Container/ViewContainerV2.vue";
 
 const emit = defineEmits(['close'])
 const props = defineProps<{
@@ -35,8 +36,8 @@ onMounted(() =>  {
 </script>
 
 <template>
-  <teleport to="#app" v-if="show">
-    <ViewContainer :title="props.title" @close="show = false">
+  <teleport to="#window-view" v-if="show">
+    <ViewContainerV2 :title="props.title" @close="show = false">
       <div class="resource">
           <div class="resource-sidebar" v-resize="{ storageKey: 'my-panel-width' }">
             <div class="resource-sidebar-title">快捷节点</div>
@@ -65,7 +66,7 @@ onMounted(() =>  {
             </div>
           </div>
         </div>
-    </ViewContainer>
+    </ViewContainerV2>
   </teleport>
 </template>
 

@@ -3,7 +3,7 @@ import {onBeforeUnmount, onMounted, reactive, ref, watch} from "vue";
 import { useRoute } from 'vue-router'
 import router from "@/router";
 
-import {ArrowDown, ArrowRight} from '@element-plus/icons-vue'
+import { ArrowRight} from '@element-plus/icons-vue'
 
 import Icon from "@/components/Container/Icon.vue";
 import { VxeTableEvents, VxeTableInstance } from "vxe-pc-ui/types/components/table";
@@ -17,7 +17,7 @@ import ViewContainer from "@/components/Container/ViewContainer.vue";
 
 import { ElTreeNode } from "@/utils/type.ts";
 import { useTreeCondition } from "@/pinia/TreeCondition.ts";
-import {Component, Data, IconData, Util} from "@/utils"
+import {Component, Data, Util} from "@/utils"
 import TableContainer from "@/components/Container/TableContainer.vue";
 
 
@@ -210,9 +210,9 @@ function updateTableHeight() {
   tableHeight.value = window.innerHeight - 152
 }
 // 时间戳转换为可读的形式
-const timeFormatter: VxeColumnPropTypes.Formatter = ({ cellValue }) => {
-  return typeof cellValue === 'number' ? Util.formatter.timeFormatter(cellValue) : '';
-}
+// const timeFormatter: VxeColumnPropTypes.Formatter = ({ cellValue }) => {
+//   return typeof cellValue === 'number' ? Util.formatter.timeFormatter(cellValue) : '';
+// }
 // 读取特定工作空间下面的文件夹中的文件数据
 const loadTable = async (workspace: number, associatedFolder:number | null = null) => {
   tableData.value = await window.electronAPI.dataOperation.loadTable(workspace,associatedFolder)
@@ -227,35 +227,35 @@ const initTable = async (workspace: number) => {
   tableData.value = await window.electronAPI.dataOperation.loadTable(workspace)
 }
 // 对列的双击事件
-const handleDoubleClick: VxeTableEvents.CellClick<VXETableNode> = ({ row }) => {
-  if(row.type === 'folder'){
-
-    Util.setAndJump(row.connected_workspace, row.id, router)
-    // tree跟随展开
-    store.addExpandedNode("p_"+row.id)
-  }else {
-    console.log('开发中')
-  }
-}
-
-function breadClick(index: number) {
-  const w = pathArray.value[index].workspace
-  const f = pathArray.value[index].id
-  Util.setAndJump(w, f, router)
-}
-
-function handleVisibleChange(visible: boolean) {
-  dropdownVisible.value = visible
-}
-
-async function handleDropdownClick(index: number) {
-  activeTab = tabs.value[index];
-  if (activeTab.type === '全部文件'){
-    tableData.value = await window.electronAPI.dataOperation.loadTable(store.getCurrentWorkSpace)
-  }else {
-    console.log('开发中')
-  }
-}
+// const handleDoubleClick: VxeTableEvents.CellClick<VXETableNode> = ({ row }) => {
+//   if(row.type === 'folder'){
+//
+//     Util.setAndJump(row.connected_workspace, row.id, router)
+//     // tree跟随展开
+//     store.addExpandedNode("p_"+row.id)
+//   }else {
+//     console.log('开发中')
+//   }
+// }
+//
+// function breadClick(index: number) {
+//   const w = pathArray.value[index].workspace
+//   const f = pathArray.value[index].id
+//   Util.setAndJump(w, f, router)
+// }
+//
+// function handleVisibleChange(visible: boolean) {
+//   dropdownVisible.value = visible
+// }
+//
+// async function handleDropdownClick(index: number) {
+//   activeTab = tabs.value[index];
+//   if (activeTab.type === '全部文件'){
+//     tableData.value = await window.electronAPI.dataOperation.loadTable(store.getCurrentWorkSpace)
+//   }else {
+//     console.log('开发中')
+//   }
+// }
 
 const handleClickOutside = (event: MouseEvent) => {
   if (tableRef.value) {

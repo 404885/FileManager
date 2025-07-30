@@ -10,7 +10,8 @@ electron.contextBridge.exposeInMainWorld("electronAPI", {
     minimize: () => electron.ipcRenderer.send("window-minimize"),
     maximize: () => electron.ipcRenderer.send("window-maximize"),
     close: () => electron.ipcRenderer.send("window-close"),
-    pinned: (isPinned) => electron.ipcRenderer.send("window-pinned", isPinned)
+    pinned: (isPinned) => electron.ipcRenderer.send("window-pinned", isPinned),
+    getWebViewId: (id) => electron.ipcRenderer.send("webview-id", id)
   },
   dataOperation: {
     queryAll: (sql, params = []) => electron.ipcRenderer.invoke("queryAll", sql, params),
