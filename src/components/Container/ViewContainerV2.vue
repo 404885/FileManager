@@ -101,10 +101,12 @@ function close(){
 <template>
   <div class="view-container" ref="viewContainer">
     <div class="title-bar" >
-      <div class="traffic-lights">
-        <div class="traffic-light red non-drag" @click="close" title="关闭"></div>
-        <div class="traffic-light yellow non-drag" data-action="minimize" title="最小化"></div>
-        <div class="traffic-light green" data-action="maximize" title="最大化"></div>
+      <div class="traffic-lights-wrapper">
+        <div class="traffic-lights">
+          <div class="traffic-light red non-drag" @click="close" title="关闭"></div>
+          <div class="traffic-light yellow non-drag" data-action="minimize" title="最小化"></div>
+          <div class="traffic-light green" data-action="maximize" title="最大化"></div>
+        </div>
       </div>
       <span class="title">{{ props.title || '默认应用'}}</span>
       <slot name="title-slot" />
@@ -151,16 +153,19 @@ function close(){
   align-items: center;
   padding: 0 12px;
   position: relative;
-  cursor: grab;
   border-bottom: 1px solid #e0e0e0; /* Subtle separator */
   will-change: transform;
   background: transparent;
 }
-
+.traffic-lights-wrapper{
+  height: 100%;
+}
 .traffic-lights {
   display: flex;
   gap: 8px;
+  cursor: default;
   z-index: 100000;
+  height: 100%;
 }
 .traffic-light {
   width: 12px;
@@ -168,6 +173,7 @@ function close(){
   border-radius: 50%;
   border: 1px solid rgba(0, 0, 0, 0.08);
   cursor: pointer;
+  margin: auto 0;
   transition: all 0.1s ease-in-out;
 }
 .traffic-light.red {

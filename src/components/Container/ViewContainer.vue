@@ -79,7 +79,6 @@ function close(){
   height: 12px;
   border-radius: 50%;
   border: 1px solid rgba(0, 0, 0, 0.08);
-  cursor: pointer;
   transition: all 0.1s ease-in-out;
 }
 .traffic-light.red {
