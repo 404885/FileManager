@@ -85,7 +85,7 @@ onMounted( () =>{
             :indent="16">
       <template #default="{ node, data }">
         <div class="tree-node" @click="handleClick(node, onSingleClick, onDoubleClick)">
-          <IconContainer :file-type="data.type" size="16px"></IconContainer>
+          <IconContainer :file-type="data.type" size="16px" :link-mode="true"></IconContainer>
           <span :title="data.label"  :class="{ 'highlight': data.marked }">{{ data.label }}</span>
         </div>
       </template>

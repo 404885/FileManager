@@ -3,27 +3,35 @@ import {onMounted, ref} from "vue";
 import interact from 'interactjs'
 import {ViewContainer} from "@/utils/type.ts";
 
+
+
 const props = defineProps<{
   title?: string,
   width?: number,
   height?: number,
 }>()
+const emit = defineEmits(['close'])
+
+
 
 const viewContainer = ref<HTMLElement | null>(null);
+const ratio = window.devicePixelRatio
+console.log(ratio)
+
 
 const containerProperty = ref<ViewContainer>({
   id: Date.now(),
   x: 0,
   y: 0,
-  width: props.width || 600,
-  height: props.height || 450,
+  width: props.width || 800,
+  height: props.height || 600,
 })
 
 function updateTransform() {
   if (!viewContainer.value) return
   const el = viewContainer.value
-  el.style.transform = `translate(${containerProperty.value.x}px, ${containerProperty.value.y}px)`
-  el.style.width = `${containerProperty.value.width}px`
+  el.style.transform = `translate(${Math.round(containerProperty.value.x)/ratio}px, ${Math.round(containerProperty.value.y)/ratio}px)`
+  el.style.width = ` ${containerProperty.value.width}px`
   el.style.height = `${containerProperty.value.height}px`
 }
 
@@ -31,14 +39,14 @@ onMounted(() => {
   const el = viewContainer.value!
   interact(el)
       // 拖拽限制在父容器内
-      .draggable({
+    .draggable({
         allowFrom: '.title-bar',
         ignoreFrom: '.content',
         modifiers: [
-          interact.modifiers.restrictRect({
-            restriction: 'parent',    // 限制在父元素内
-            endOnly: true,            // 只有拖拽结束时才会修正位置
-          }),
+          // interact.modifiers.restrictEdges({
+          //   outer: 'parent',         // 外边界限制在父元素
+          //   endOnly: true,           // 结束时修正
+          // }),
         ],
         listeners: {
           start() {
@@ -54,10 +62,9 @@ onMounted(() => {
           },
         },
       })
-
       // 缩放限制在父容器内
-      .resizable({
-        edges:  { top: true, left: true, bottom: true, right: true },
+    .resizable({
+        edges:  { top: false, left: true, bottom: true, right: true },
         ignoreFrom: '.content',
         modifiers: [
           // 大小范围限制
@@ -83,12 +90,9 @@ onMounted(() => {
           end()     { el.classList.remove('interacting') },
         },
       })
-
   updateTransform()
 })
 
-
-const emit = defineEmits(['close'])
 
 
 function close(){
@@ -193,7 +197,7 @@ function close(){
 }
 .content-wrapper{
   width: 100%;
-  height: 100%;
+  height: calc(100% - 32px);
   padding: 0 5px 5px 5px;
 }
 .content{

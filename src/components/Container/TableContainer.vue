@@ -196,7 +196,7 @@ onMounted( async () => {
              :class="'align-' + item.align"
              @dblclick="cellClick(row as any, item.key)">
           <template v-if="item.key === 'name'">
-            <IconContainer :file-type="row.type"></IconContainer>
+            <IconContainer :file-type="row.type" :link-mode="true"></IconContainer>
             <span>{{ row[item.key] }}</span>
           </template>
           <template v-else-if="item.key === 'create_time'">
@@ -322,6 +322,10 @@ onMounted( async () => {
   display: flex;
   flex-direction: row;
   width: 100%;
+  height: auto;
+
+  flex-wrap: nowrap; /* 防止换行 */
+  align-items: stretch; /* 确保单元格高度自适应 */
 }
 .table-container-body-row:hover {
   background: rgba(0, 0, 0, 0.03);

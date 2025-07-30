@@ -26,6 +26,7 @@
     "xe-utils": "^3.7.5"
   },
   "devDependencies": {
+    "@electron/rebuild": "^4.0.1",
     "@types/better-sqlite3": "^7.6.13",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vueuse/core": "^13.5.0",

@@ -3,11 +3,12 @@
 // import ViewContainer from "@/components/Container/ViewContainer.vue";
 import {onMounted, ref} from 'vue'
 import Icon from "@/components/Container/Icon.vue";
-import {Component, Data, vResize} from "@/utils";
+import {Component, Data, Util, vResize} from "@/utils";
 import TableContainer from "@/components/Container/TableContainer.vue";
 import PathContainer from "@/components/Container/PathContainer.vue";
 import TreeContainer from "@/components/Container/TreeContainer.vue";
 import ViewContainerV2 from "@/components/Container/ViewContainerV2.vue";
+import SwitchDialog from '../Dialog/SwitchDialog.vue';
 
 const emit = defineEmits(['close'])
 const props = defineProps<{
@@ -26,10 +27,19 @@ function open() {
   })
 }
 
+const itemClick = (action: string) => {
+  switch (action) {
+    case 'spaceChange': {
+      console.log('切换工作空间')
+      Util.openComponent(SwitchDialog, {})
+      break
+    }
+  }
+}
 
 
-onMounted(() =>  {
-})
+
+
 
 
 
@@ -39,10 +49,10 @@ onMounted(() =>  {
   <teleport to="#window-view" v-if="show">
     <ViewContainerV2 :title="props.title" @close="show = false">
       <div class="resource">
-          <div class="resource-sidebar" v-resize="{ storageKey: 'my-panel-width' }">
+          <div class="resource-sidebar" v-resize="{ storageKey: 'my-panel-width', max: 300, min: 100}">
             <div class="resource-sidebar-title">快捷节点</div>
             <div class="resource-sidebar-section">
-              <div v-for="(item, index) in Data.nodeData" :key="index" class="resource-sidebar-section-item">
+              <div v-for="(item, index) in Data.nodeData" :key="index" class="resource-sidebar-section-item" @click="itemClick(item.action as string)">
                 <Icon :type="item.icon"  source="bar"/>
                 <span>{{ item.label }}</span>
               </div>
@@ -77,7 +87,7 @@ onMounted(() =>  {
   flex-direction: row;
   flex: 1;
   user-select: none;
-  height: calc(100% - 32px);
+  height: 100%;
 }
 
 .resource-sidebar {
@@ -117,6 +127,7 @@ onMounted(() =>  {
 .resource-sidebar-tree{
   flex: 1;
   overflow-x: auto;
+  max-width: 300px;
 }
 .resource-sidebar-tree::-webkit-scrollbar {
   display: none;
