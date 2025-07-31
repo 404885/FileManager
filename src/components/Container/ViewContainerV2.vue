@@ -16,7 +16,6 @@ const emit = defineEmits(['close'])
 
 const viewContainer = ref<HTMLElement | null>(null);
 const ratio = window.devicePixelRatio
-console.log(ratio)
 
 
 const containerProperty = ref<ViewContainer>({
@@ -28,13 +27,22 @@ const containerProperty = ref<ViewContainer>({
 })
 
 function updateTransform() {
-  if (!viewContainer.value) return
-  const el = viewContainer.value
-  el.style.transform = `translate(${Math.round(containerProperty.value.x)/ratio}px, ${Math.round(containerProperty.value.y)/ratio}px)`
-  el.style.width = ` ${containerProperty.value.width}px`
-  el.style.height = `${containerProperty.value.height}px`
-}
+  if (!viewContainer.value) return;
+  const el = viewContainer.value;
 
+  // 1. 先把累积的 CSS 逻辑像素 * ratio → 得到物理像素
+  // 2. Math.round → 对齐到最接近的设备像素
+  // 3. 再 / ratio → 回到 CSS 像素单位
+  const x = Math.round(containerProperty.value.x * ratio) / ratio;
+  const y = Math.round(containerProperty.value.y * ratio) / ratio;
+
+  const w = Math.round(containerProperty.value.width  * ratio) / ratio;
+  const h = Math.round(containerProperty.value.height * ratio) / ratio;
+
+  el.style.transform = `translate(${x}px, ${y}px)`;
+  el.style.width     = `${w}px`;
+  el.style.height    = `${h}px`;
+}
 onMounted(() => {
   const el = viewContainer.value!
   interact(el)
@@ -43,10 +51,10 @@ onMounted(() => {
         allowFrom: '.title-bar',
         ignoreFrom: '.content',
         modifiers: [
-          // interact.modifiers.restrictEdges({
-          //   outer: 'parent',         // 外边界限制在父元素
-          //   endOnly: true,           // 结束时修正
-          // }),
+          interact.modifiers.restrictEdges({
+            outer: 'parent',         // 外边界限制在父元素
+            endOnly: true,           // 结束时修正
+          }),
         ],
         listeners: {
           start() {
@@ -64,7 +72,7 @@ onMounted(() => {
       })
       // 缩放限制在父容器内
     .resizable({
-        edges:  { top: false, left: true, bottom: true, right: true },
+        edges:  { top: true, left: true, bottom: true, right: true },
         ignoreFrom: '.content',
         modifiers: [
           // 大小范围限制

@@ -13,6 +13,7 @@ import ElementPlus from 'element-plus'
 import router from '@/router'
 
 import 'virtual:svg-icons-register'
+// import {appendVideoIframe} from "@/utils/VideoPopUp.ts";
 
 
 const pinia = createPinia()
@@ -25,3 +26,8 @@ export const app = createApp(App) // 直接将创建的 app 实例赋值给导�
     .use(VxeUIAll)
     .use(VxeUITable)
     .mount('#app')
+
+// window.addEventListener('click', () => {
+//     appendVideoIframe()
+//     // 如果想点一次关闭，可以结合 closeVideoIframe()
+// })

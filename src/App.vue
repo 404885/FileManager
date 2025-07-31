@@ -2,12 +2,11 @@
 import TitleBar from "@/components/Bar/TitleBar.vue";
 import { Util } from "@/utils";
 import ResourceFolder from "@/components/Application/ResourceFolder.vue";
-import { ref,watch } from "vue";
-
+import {ref, watch} from "vue";
+import BottomBar from "@/components/Bar/BottomBar.vue";
 import {useTreeCondition} from "@/pinia/TreeCondition.ts";
 import DeskTopIcon from "@/components/Icon/DeskTopIcon.vue";
 import WebBrowser from "@/components/Application/WebBrowser.vue";
-
 
 const testf = ref<number>(1)
 const testw = ref<number>(1)
@@ -33,7 +32,6 @@ watch(testw, (newVal) => {
   store.setCurrentWorkspace(newVal)
 })
 
-
 </script>
 
 <template>
@@ -46,14 +44,15 @@ watch(testw, (newVal) => {
       <DeskTopIcon :name="'浏览器'" :icon="'chrome'" @dblclick='openBrowser'/>
 <!--      <input type="text" v-model.number="testf">-->
 <!--      <input type="text" v-model.number="testw">-->
+      <div class="window-bottom">
+        <BottomBar/>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
 .window-home {
-
-
   display: flex;
   background: white;
   height: 100%;
@@ -65,8 +64,6 @@ watch(testw, (newVal) => {
   box-shadow:
       inset 0 0 1px rgba(255, 255, 255, 0.4), /* 非常轻微的高光 */
       0 4px 12px rgba(0, 0, 0, 0.06);           /* 原本阴影保持 */
-
-
 }
 
 .window-title {
@@ -85,12 +82,19 @@ watch(testw, (newVal) => {
   position: relative;
   width: 100%;
   height: 100%;
-  background: url('https://picsum.photos/1200/800') center center / cover no-repeat;
+  background: url('./assets/background/bustup_020_004.png') center center / cover no-repeat;
+  background-size: contain;
 
   display: flex;
   flex-direction: row; /* 如果你想竖排，就改为 column */
 }
 
+.window-bottom{
+  position: absolute;
+  bottom: 0;
+  flex: 1;
+  width: 100%;
+}
 
 .menu-icon {
   width: 32px;
