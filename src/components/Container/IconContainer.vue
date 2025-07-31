@@ -6,7 +6,7 @@ const props = defineProps<{
   size?: string         // 尺寸，如 '24px'
   customClass?: string  // 额外样式 class
   linkMode: boolean
-  name: string
+  name?: string
 }>()
 
 const size = props.size || '20px'

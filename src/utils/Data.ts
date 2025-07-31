@@ -1,7 +1,7 @@
 /* DetailSpace快捷节点 */
 const nodeData = [
     { label: '全部文档', icon: '#Icon-file1' },
-    { label: '切换空间', icon: '#Icon-compass', action: 'workChange' },
+    { label: '切换空间', icon: '#Icon-compass', action: 'spaceChange'},
     { label: '搜索结果', icon: '#Icon-filesearch' },
     { label: '收藏夹', icon: '#Icon-heart' },
     { label: '回收站', icon: '#Icon-delete' },

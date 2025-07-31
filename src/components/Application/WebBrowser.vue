@@ -1,6 +1,6 @@
 <script setup lang="ts">
 //import ViewContainer from "@/components/Container/ViewContainer.vue";
-import {onMounted, ref} from "vue";
+import { ref, onMounted} from "vue";
 import IconContainer from "@/components/Container/IconContainer.vue";
 import ViewContainerV2 from "@/components/Container/ViewContainerV2.vue";
 
@@ -12,19 +12,23 @@ const props = defineProps<{
 
 const show = ref(true)
 
+
 const browser = ref()
 
 onMounted(() => {
   const webview = document.getElementById('browser') as Electron.WebviewTag
 
+
+
   webview.addEventListener('dom-ready', () => {
     const id = webview.getWebContentsId?.()
     if (id) {
       window.electronAPI.windowControls.getWebViewId(id)
-      console.log(id)
     }
   })
 })
+
+
 </script>
 
 <template>
