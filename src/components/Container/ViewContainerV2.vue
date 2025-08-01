@@ -2,8 +2,7 @@
 import {onMounted, ref} from "vue";
 import interact from 'interactjs'
 import {ViewContainer} from "@/utils/type.ts";
-
-
+import {useViewCondition} from "@/pinia/ViewCondition.ts";
 
 const props = defineProps<{
   title?: string,
@@ -12,14 +11,14 @@ const props = defineProps<{
 }>()
 const emit = defineEmits(['close'])
 
-
+const store = useViewCondition()
 
 const viewContainer = ref<HTMLElement | null>(null);
 const ratio = window.devicePixelRatio
 
 
 const containerProperty = ref<ViewContainer>({
-  id: Date.now(),
+  id: String(Date.now()),
   x: 0,
   y: 0,
   width: props.width || 800,
@@ -87,7 +86,7 @@ onMounted(() => {
           }),
         ],
         listeners: {
-          start()   { el.classList.add('interacting') },
+          start(){ el.classList.add('interacting') },
           move(event) {
             containerProperty.value.width  = event.rect.width
             containerProperty.value.height = event.rect.height
@@ -95,24 +94,28 @@ onMounted(() => {
             containerProperty.value.y += event.deltaRect.top
             updateTransform()
           },
-          end()     { el.classList.remove('interacting') },
+          end(){ el.classList.remove('interacting') },
         },
       })
   updateTransform()
+
+  store.init(containerProperty.value.id)
+  bringToFront()
 })
-
-
 
 function close(){
   emit('close', "dsadsa")
 }
 
+function bringToFront(){
+  store.bringToFront(containerProperty.value.id)
+}
 
 </script>
 
 <template>
-  <div class="view-container" ref="viewContainer">
-    <div class="title-bar" >
+  <div class="view-container" ref="viewContainer" :style="{zIndex:store.computeZIndex(containerProperty.id)}">
+    <div class="title-bar" @mousedown="bringToFront()">
       <div class="traffic-lights-wrapper">
         <div class="traffic-lights">
           <div class="traffic-light red non-drag" @click="close" title="关闭"></div>
@@ -212,7 +215,7 @@ function close(){
 .content-wrapper{
   width: 100%;
   height: calc(100% - 32px);
-  padding: 0 5px 5px 5px;
+  padding: 0 3px 5px 3px;
 }
 .content{
   width: 100%;

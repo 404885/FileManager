@@ -2,8 +2,8 @@
 import TitleBar from "@/components/Bar/TitleBar.vue";
 import { Util } from "@/utils";
 import ResourceFolder from "@/components/Application/ResourceFolder.vue";
+import BottomBar from "@/components/Bar/BottomBar.vue"
 import {ref, watch} from "vue";
-import BottomBar from "@/components/Bar/BottomBar.vue";
 import {useTreeCondition} from "@/pinia/TreeCondition.ts";
 import DeskTopIcon from "@/components/Icon/DeskTopIcon.vue";
 import WebBrowser from "@/components/Application/WebBrowser.vue";
@@ -14,7 +14,7 @@ const testw = ref<number>(1)
 
 const store =useTreeCondition()
 
-function aaa(){
+function openResourceFolder(){
   // store.setCurrentWorkspace(1);store.setCurrentFolder(-1)
   Util.openComponent(ResourceFolder, { title: '资源管理器' })
 }
@@ -40,7 +40,7 @@ watch(testw, (newVal) => {
   </div>
   <div class="window-home">
     <div id="window-view" class="window-view">
-      <DeskTopIcon :name="'资源管理器'" :icon="'file_explorer'" @dblclick="aaa"/>
+      <DeskTopIcon :name="'资源管理器'" :icon="'file_explorer'" @dblclick="openResourceFolder"/>
       <DeskTopIcon :name="'浏览器'" :icon="'chrome'" @dblclick='openBrowser'/>
 <!--      <input type="text" v-model.number="testf">-->
 <!--      <input type="text" v-model.number="testw">-->

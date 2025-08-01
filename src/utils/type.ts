@@ -41,7 +41,7 @@ export interface VXETableNode {
 }
 
 export interface ViewContainer {
-    id: number;
+    id: string;
     x:number;
     y:number;
     width:number;

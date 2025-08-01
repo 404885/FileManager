@@ -1,7 +1,5 @@
 <script setup lang="ts">
-
-// import ViewContainer from "@/components/Container/ViewContainer.vue";
-import {onMounted, ref} from 'vue'
+import { ref} from 'vue'
 import Icon from "@/components/Container/Icon.vue";
 import {Component, Data, Util, vResize} from "@/utils";
 import TableContainer from "@/components/Container/TableContainer.vue";
@@ -37,17 +35,11 @@ const itemClick = (action: string) => {
   }
 }
 
-
-
-
-
-
-
 </script>
 
 <template>
   <teleport to="#window-view" v-if="show">
-    <ViewContainerV2 :title="props.title" @close="show = false">
+    <ViewContainerV2 :title="props.title" @close="show = false" @click="">
       <div class="resource">
           <div class="resource-sidebar" v-resize="{ storageKey: 'my-panel-width', max: 300, min: 100}">
             <div class="resource-sidebar-title">快捷节点</div>

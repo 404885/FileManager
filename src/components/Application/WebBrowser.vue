@@ -21,6 +21,19 @@ onMounted(() => {
 
 
   webview.addEventListener('dom-ready', () => {
+    webview.insertCSS(`
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background-color: rgba(100, 100, 100, 0.5);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    `)
     const id = webview.getWebContentsId?.()
     if (id) {
       window.electronAPI.windowControls.getWebViewId(id)
