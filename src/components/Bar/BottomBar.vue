@@ -8,13 +8,6 @@ const controls = ref([
     icon:'windows8',
     hoverColor:'#007aff',
   },
-  {
-    icon:'to_do',
-    hoverColor:'',
-    onClick:(event:MouseEvent)=>{
-      console.log(event.type)
-    }
-  },
 ])
 
 const currentTime = ()=>{

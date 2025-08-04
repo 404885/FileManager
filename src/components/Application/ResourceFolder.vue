@@ -39,7 +39,7 @@ const itemClick = (action: string) => {
 
 <template>
   <teleport to="#window-view" v-if="show">
-    <ViewContainerV2 :title="props.title" @close="show = false" @click="">
+    <ViewContainerV2 :title="props.title" @close="show = false">
       <div class="resource">
           <div class="resource-sidebar" v-resize="{ storageKey: 'my-panel-width', max: 300, min: 100}">
             <div class="resource-sidebar-title">快捷节点</div>

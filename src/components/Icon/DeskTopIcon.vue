@@ -1,6 +1,9 @@
 <script setup lang="ts">
 
-defineProps({
+import {onMounted, ref} from "vue";
+import interact from "interactjs";
+
+const props=defineProps({
   icon: {
     required:true,
     type:String,
@@ -8,12 +11,64 @@ defineProps({
   name:{
     required:true,
     type:String,
-  }
+  },
+  x:{
+    type:Number,
+  },
+  y:{
+    type:Number,
+  },
+})
+
+const DeskTopIcon = ref<HTMLElement | null>(null)
+const position = ref({ x: props.x, y: props.y })
+const gridSize = 80
+
+onMounted(() => {
+  if (!DeskTopIcon.value) return
+
+  const target = DeskTopIcon.value
+  target.setAttribute('data-x', String(position.value.x))
+  target.setAttribute('data-y', String(position.value.y))
+
+  interact(target).draggable({
+    cursorChecker: () => 'default',
+    modifiers: [
+      interact.modifiers.restrictRect({
+        restriction: 'parent', // 限制在父容器内
+        endOnly: true,
+      }),
+    ],
+    listeners: {
+      move(event) {
+        const x = (parseFloat(target.getAttribute('data-x')!) || 0) + event.dx
+        const y = (parseFloat(target.getAttribute('data-y')!) || 0) + event.dy
+
+        target.style.transform = `translate(${x}px, ${y}px)`
+        target.setAttribute('data-x', String(x))
+        target.setAttribute('data-y', String(y))
+      },
+      end() {
+        let x = parseFloat(target.getAttribute('data-x')!) || 0
+        let y = parseFloat(target.getAttribute('data-y')!) || 0
+
+        x = Math.round(x / gridSize) * gridSize
+        y = Math.round(y / gridSize) * gridSize
+
+        target.style.transform = `translate(${x}px, ${y}px)`
+        target.setAttribute('data-x', String(x))
+        target.setAttribute('data-y', String(y))
+      },
+    },
+  })
+
+  // 初始位置
+  target.style.transform = `translate(${position.value.x}px, ${position.value.y}px)`
 })
 </script>
 
 <template>
-  <div class="desktop-icon-wrapper">
+  <div class="desktop-icon-wrapper" ref="DeskTopIcon">
     <svg class="desktop-icon" aria-hidden="true">
       <use :href="'#icon-'+icon" />
     </svg>

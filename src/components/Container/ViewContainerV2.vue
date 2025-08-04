@@ -16,6 +16,14 @@ const store = useViewCondition()
 const viewContainer = ref<HTMLElement | null>(null);
 const ratio = window.devicePixelRatio
 
+const isMaximized = ref(false)
+
+const originalPosition = ref({
+  x: 0,
+  y: 0,
+  width: 0,
+  height: 0,
+})
 
 const containerProperty = ref<ViewContainer>({
   id: String(Date.now()),
@@ -77,7 +85,6 @@ onMounted(() => {
           // 大小范围限制
           interact.modifiers.restrictSize({
             min: { width: 600, height: 450 },
-            max: { width: 1200, height: 900 },
           }),
           // 缩放后依然保持在父容器内部
           interact.modifiers.restrictEdges({
@@ -106,7 +113,55 @@ onMounted(() => {
 function close(){
   emit('close', "dsadsa")
 }
+function maximize() {
+  const el = viewContainer.value
+  if (!el || !el.parentElement) return
 
+  const parentRect = el.parentElement.getBoundingClientRect()
+
+  if (!isMaximized.value) {
+    // 记录原位置和大小
+    originalPosition.value = {
+      x: containerProperty.value.x,
+      y: containerProperty.value.y,
+      width: containerProperty.value.width,
+      height: containerProperty.value.height,
+    }
+    // 最大化：设置位置为 (0,0)，大小为父容器宽高
+    containerProperty.value.x = 0
+    containerProperty.value.y = 0
+    containerProperty.value.width = parentRect.width
+    containerProperty.value.height = parentRect.height
+
+    isMaximized.value = true
+  } else {
+    // 还原
+    const prev = originalPosition.value
+    containerProperty.value.x = prev.x
+    containerProperty.value.y = prev.y
+    containerProperty.value.width = prev.width
+    containerProperty.value.height = prev.height
+
+    isMaximized.value = false
+  }
+
+  updateTransform()
+}
+
+function onTitlebarDblclick(e: MouseEvent) {
+  const target = e.target as HTMLElement
+
+  if (
+      target.closest('.traffic-light') ||
+      target.closest('.traffic-lights') ||
+      target.closest('.title') ||
+      target.closest('.title-slot')
+  ) {
+    return
+  }
+
+  maximize()
+}
 function bringToFront(){
   store.bringToFront(containerProperty.value.id)
 }
@@ -114,13 +169,13 @@ function bringToFront(){
 </script>
 
 <template>
-  <div class="view-container" ref="viewContainer" :style="{zIndex:store.computeZIndex(containerProperty.id)}">
-    <div class="title-bar" @mousedown="bringToFront()">
+  <div class="view-container" ref="viewContainer" :style="{zIndex:store.computeZIndex(containerProperty.id)}" @mousedown="bringToFront()">
+    <div class="title-bar" @dblclick="onTitlebarDblclick">
       <div class="traffic-lights-wrapper">
         <div class="traffic-lights">
           <div class="traffic-light red non-drag" @click="close" title="关闭"></div>
           <div class="traffic-light yellow non-drag" data-action="minimize" title="最小化"></div>
-          <div class="traffic-light green" data-action="maximize" title="最大化"></div>
+          <div class="traffic-light green" @click="maximize" data-action="maximize" title="最大化"></div>
         </div>
       </div>
       <span class="title">{{ props.title || '默认应用'}}</span>
@@ -142,8 +197,8 @@ function bringToFront(){
   flex-direction: column;
 
   position: absolute;
-  top: 10%;
-  left: 10%;
+  top: 0;
+  left: 0;
 
   overflow: hidden;
   resize: both;
@@ -157,7 +212,7 @@ function bringToFront(){
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   box-shadow: inset 0 0 1px rgba(255, 255, 255, 0.3), 0 4px 12px rgba(0, 0, 0, 0.05);
   background-blend-mode: overlay; /* 增强层次感 */
-  transition: background 0.3s ease;
+  transition: background,width,height,left,top 0.3s ease;
 }
 
 .title-bar {

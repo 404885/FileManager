@@ -13,10 +13,10 @@ const props = defineProps<{
 const show = ref(true)
 
 
-const browser = ref()
+const browser = ref<Electron.WebviewTag>()
 
 onMounted(() => {
-  const webview = document.getElementById('browser') as Electron.WebviewTag
+  const webview = browser.value!
 
 
 
@@ -67,7 +67,7 @@ onMounted(() => {
       </template>
 
       <div class="browser-wrapper">
-        <webview id="browser" class="browser" ref="browser" :src="props.url" allowpopups/>
+        <webview ref="browser" class="browser" :src="props.url" allowpopups/>
       </div>
     </ViewContainerV2>
   </teleport>

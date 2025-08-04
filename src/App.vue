@@ -7,22 +7,58 @@ import {ref, watch} from "vue";
 import {useTreeCondition} from "@/pinia/TreeCondition.ts";
 import DeskTopIcon from "@/components/Icon/DeskTopIcon.vue";
 import WebBrowser from "@/components/Application/WebBrowser.vue";
+import Chat from "@/components/Application/Chat.vue";
 
 const testf = ref<number>(1)
 const testw = ref<number>(1)
 
+interface Applications{
+  name:string,
+  icon:string,
+  dblclick?:Function,
+}
+
 
 const store =useTreeCondition()
 
-function openResourceFolder(){
-  // store.setCurrentWorkspace(1);store.setCurrentFolder(-1)
-  Util.openComponent(ResourceFolder, { title: '资源管理器' })
-}
+// function openResourceFolder(){
+//   Util.openComponent(ResourceFolder, { title: '资源管理器' })
+// }
 
-function openBrowser(){
-  Util.openComponent(WebBrowser,{ title: '浏览器' ,url : 'https://www.bing.com' },false)
-}
+// function openBrowser(){
+//   Util.openComponent(WebBrowser,{ title: '浏览器' ,url : 'https://www.bing.com' },false)
+// }
 
+const applications = ref<Applications[]>([
+  {
+    name:'资源管理器',
+    icon:'file_explorer',
+    dblclick:()=>{
+      Util.openComponent(ResourceFolder, { title: '资源管理器' })
+    }
+  },
+  {
+    name:'回收站',
+    icon:'recycle_bin',
+    dblclick:()=>{
+
+    }
+  },
+  {
+    name:'浏览器',
+    icon:'chrome',
+    dblclick:()=>{
+      Util.openComponent(WebBrowser,{ title: '浏览器' ,url : 'https://www.bing.com' },false)
+    }
+  },
+  {
+    name:'通讯',
+    icon:'messages',
+    dblclick:()=>{
+      Util.openComponent(Chat,{title:'通讯'})
+    }
+  },
+])
 
 watch(testf, (newVal) => {
   store.setCurrentFolder(newVal)
@@ -40,8 +76,9 @@ watch(testw, (newVal) => {
   </div>
   <div class="window-home">
     <div id="window-view" class="window-view">
-      <DeskTopIcon :name="'资源管理器'" :icon="'file_explorer'" @dblclick="openResourceFolder"/>
-      <DeskTopIcon :name="'浏览器'" :icon="'chrome'" @dblclick='openBrowser'/>
+      <template v-for="(application,_index) in applications" :key="_index">
+        <DeskTopIcon :name="application.name" :icon="application.icon" @dblclick="application.dblclick"/>
+      </template>
 <!--      <input type="text" v-model.number="testf">-->
 <!--      <input type="text" v-model.number="testw">-->
       <div class="window-bottom">
@@ -86,7 +123,7 @@ watch(testw, (newVal) => {
   background-size: contain;
 
   display: flex;
-  flex-direction: row; /* 如果你想竖排，就改为 column */
+  flex-direction: column; /* 如果你想竖排，就改为 column */
 }
 
 .window-bottom{
