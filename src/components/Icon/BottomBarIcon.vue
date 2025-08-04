@@ -1,20 +1,17 @@
 <script lang="ts" setup>
 
 const props = defineProps({
-  control: {
-    type: Object as () => {
-      icon: string,
-      hoverColor?: string,
-      onClick?: Function,
-    },
-    required: true,
-  }
+  icon: {
+    type:String,
+    required:true,
+  },
+  hoverColor:String,
 })
 
 const hover=(event: MouseEvent)=>{
   const el = event.currentTarget as HTMLElement
   el.style.background = 'rgba(255, 255, 255, 0.91)'
-  el.style.fill = props.control.hoverColor || ''
+  el.style.fill = props.hoverColor || ''
 }
 const leave=(event: MouseEvent)=>{
   const el = event.currentTarget as HTMLElement
@@ -25,9 +22,9 @@ const leave=(event: MouseEvent)=>{
 </script>
 
 <template>
-  <div class="BottomBar-controls" @mouseenter="hover" @mouseleave="leave" @click="control.onClick?.($event)">
+  <div class="BottomBar-controls" @mouseenter="hover" @mouseleave="leave">
     <svg class="button" aria-hidden="true">
-      <use :href="'#icon-'+control.icon"/>
+      <use :href="'#icon-'+icon"/>
     </svg>
   </div>
 </template>

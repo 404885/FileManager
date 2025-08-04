@@ -1,7 +1,9 @@
 <script lang="ts" setup>
-
 import {onMounted, ref} from "vue";
 import BottomBarIcon from "@/components/Icon/BottomBarIcon.vue";
+import {useDeskTopCondition} from "@/pinia/DeskTopCondition.ts";
+
+const deskTopStore = useDeskTopCondition()
 
 const controls = ref([
   {
@@ -29,6 +31,11 @@ function update() {
   time.value = t
 }
 
+const toggleVolume = () => {
+  const newVolume = deskTopStore.volume === 0 ? 0.1 : 0
+  deskTopStore.setVolume(newVolume)
+}
+
 onMounted(()=>{
   update()
   setInterval(update, 1000)
@@ -37,10 +44,10 @@ onMounted(()=>{
 
 <template>
   <div class="window-bottom-controls">
-    <template v-for="(control,_index) in controls" :key="_index">
-      <BottomBarIcon :control="control"/>
-    </template>
+    <BottomBarIcon v-for="(control,_index) in controls" :key="_index" :icon="control.icon" :hover-color="control.hoverColor"/>
     <div class="right-controls">
+
+      <BottomBarIcon :icon="deskTopStore.volume === 0 ? 'no_audio' : 'volume'" @click="toggleVolume"/>
       <div class="time-wrapper">
         <div class="time">
           <span class="hour">
@@ -51,7 +58,7 @@ onMounted(()=>{
           </span>
         </div>
       </div>
-      <BottomBarIcon :control="{icon:'comments'}"/>
+      <BottomBarIcon :icon="'comments'"/>
     </div>
   </div>
 </template>

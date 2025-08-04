@@ -40,7 +40,7 @@ export interface VXETableNode {
     description?: string,
 }
 
-export interface ViewContainer {
+export interface DraggableContainer {
     id: string;
     x:number;
     y:number;

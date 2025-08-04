@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {onMounted, ref} from "vue";
 import interact from 'interactjs'
-import {ViewContainer} from "@/utils/type.ts";
+import {DraggableContainer} from "@/utils/type.ts";
 import {useViewCondition} from "@/pinia/ViewCondition.ts";
 
 const props = defineProps<{
@@ -25,8 +25,8 @@ const originalPosition = ref({
   height: 0,
 })
 
-const containerProperty = ref<ViewContainer>({
-  id: String(Date.now()),
+const containerProperty = ref<DraggableContainer>({
+  id:crypto.randomUUID(),
   x: 0,
   y: 0,
   width: props.width || 800,
@@ -234,7 +234,6 @@ function bringToFront(){
   display: flex;
   gap: 8px;
   cursor: default;
-  z-index: 100000;
   height: 100%;
 }
 .traffic-light {

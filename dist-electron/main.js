@@ -385,7 +385,8 @@ function createWindow() {
       preload: path.join(__dirname, "preload.mjs"),
       contextIsolation: true,
       nodeIntegration: false,
-      webviewTag: true
+      webviewTag: true,
+      autoplayPolicy: "no-user-gesture-required"
     }
   });
   win.webContents.on("did-finish-load", () => {

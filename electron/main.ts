@@ -40,6 +40,7 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
       webviewTag: true,
+      autoplayPolicy: 'no-user-gesture-required',
     },
   })
   // Test active push message to Renderer-process.

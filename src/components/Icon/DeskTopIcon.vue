@@ -1,74 +1,102 @@
 <script setup lang="ts">
+import { onMounted, ref } from "vue"
+import interact from "interactjs"
+import { useDeskTopCondition } from "@/pinia/DeskTopCondition.ts"
 
-import {onMounted, ref} from "vue";
-import interact from "interactjs";
-
-const props=defineProps({
-  icon: {
-    required:true,
-    type:String,
-  },
-  name:{
-    required:true,
-    type:String,
-  },
-  x:{
-    type:Number,
-  },
-  y:{
-    type:Number,
-  },
+const props = defineProps({
+  icon: { required: true, type: String },
+  name: { required: true, type: String },
+  id: { required: true, type: String }, // 需要添加 id
+  x: {type:Number, required:true},
+  y: {type:Number, required:true},
+  iconSize:{type:Number},
 })
 
+const store = useDeskTopCondition()
+
 const DeskTopIcon = ref<HTMLElement | null>(null)
-const position = ref({ x: props.x, y: props.y })
-const gridSize = 80
+const gridSize = props.iconSize || 80
+const width = props.iconSize || 80
+const height = props.iconSize || 80
+const position = ref({ x: props.x, y: props.y})
+const origin = ref({ x: position.value.x, y: position.value.y })
 
 onMounted(() => {
-  if (!DeskTopIcon.value) return
+  const el = DeskTopIcon.value
+  if (!el) return
 
-  const target = DeskTopIcon.value
-  target.setAttribute('data-x', String(position.value.x))
-  target.setAttribute('data-y', String(position.value.y))
+  el.setAttribute('data-x', String(position.value.x))
+  el.setAttribute('data-y', String(position.value.y))
 
-  interact(target).draggable({
+  // 初次注册
+  store.updateIconBox({
+    id: props.id,
+    x: position.value.x,
+    y: position.value.y,
+    width,
+    height,
+  })
+
+  interact(el).draggable({
     cursorChecker: () => 'default',
     modifiers: [
       interact.modifiers.restrictRect({
-        restriction: 'parent', // 限制在父容器内
+        restriction: 'parent',
         endOnly: true,
       }),
     ],
     listeners: {
+      start() {
+        origin.value = { ...position.value }
+      },
       move(event) {
-        const x = (parseFloat(target.getAttribute('data-x')!) || 0) + event.dx
-        const y = (parseFloat(target.getAttribute('data-y')!) || 0) + event.dy
-
-        target.style.transform = `translate(${x}px, ${y}px)`
-        target.setAttribute('data-x', String(x))
-        target.setAttribute('data-y', String(y))
+        const x = (parseFloat(el.getAttribute('data-x')!) || 0) + event.dx
+        const y = (parseFloat(el.getAttribute('data-y')!) || 0) + event.dy
+        el.style.transform = `translate(${x}px, ${y}px)`
+        el.setAttribute('data-x', String(x))
+        el.setAttribute('data-y', String(y))
       },
       end() {
-        let x = parseFloat(target.getAttribute('data-x')!) || 0
-        let y = parseFloat(target.getAttribute('data-y')!) || 0
+        let x = parseFloat(el.getAttribute('data-x')!) || 0
+        let y = parseFloat(el.getAttribute('data-y')!) || 0
 
         x = Math.round(x / gridSize) * gridSize
         y = Math.round(y / gridSize) * gridSize
 
-        target.style.transform = `translate(${x}px, ${y}px)`
-        target.setAttribute('data-x', String(x))
-        target.setAttribute('data-y', String(y))
+        const box = {
+          id: props.id,
+          x,
+          y,
+          width,
+          height,
+        }
+
+        // 碰撞则还原
+        if (store.isColliding(box)) {
+          x = origin.value.x
+          y = origin.value.y
+        } else {
+          store.updateIconBox(box)
+          origin.value = { x, y }
+        }
+
+        el.style.transform = `translate(${x}px, ${y}px)`
+        el.setAttribute('data-x', String(x))
+        el.setAttribute('data-y', String(y))
+
+        position.value.x = x
+        position.value.y = y
       },
     },
   })
 
   // 初始位置
-  target.style.transform = `translate(${position.value.x}px, ${position.value.y}px)`
+  el.style.transform = `translate(${position.value.x}px, ${position.value.y}px)`
 })
 </script>
 
 <template>
-  <div class="desktop-icon-wrapper" ref="DeskTopIcon">
+  <div class="desktop-icon-wrapper" :style="{width:iconSize+'px',height:iconSize+'px'}" ref="DeskTopIcon">
     <svg class="desktop-icon" aria-hidden="true">
       <use :href="'#icon-'+icon" />
     </svg>
@@ -78,12 +106,11 @@ onMounted(() => {
 
 <style scoped>
 .desktop-icon-wrapper {
+  position: absolute;
   display: flex;
-  flex-direction: column; /* 图标和文字垂直排列 */
-  align-items: center; /* 水平居中 */
-  justify-content: center; /* 垂直居中 */
-  width: 80px; /* 图标区域的宽度 */
-  height: 80px; /* 图标区域的高度 */
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   cursor: default; /* 鼠标悬停时显示手型光标 */
   border: 1px solid transparent; /* 默认透明边框，避免hover时布局跳动 */
   border-radius: 5px; /* 轻微圆角 */
