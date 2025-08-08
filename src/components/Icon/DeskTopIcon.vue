@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue"
+import {onBeforeMount, onMounted, ref} from "vue"
 import interact from "interactjs"
-import { useDeskTopCondition } from "@/pinia/DeskTopCondition.ts"
+import {useDeskTopCondition} from "@/pinia/DeskTopCondition.ts"
 
 const props = defineProps({
   icon: { required: true, type: String },
@@ -20,6 +20,12 @@ const width = props.iconSize || 80
 const height = props.iconSize || 80
 const position = ref({ x: props.x, y: props.y})
 const origin = ref({ x: position.value.x, y: position.value.y })
+
+const isSelected = ref(false)
+function onDeskTopIconClick(e: MouseEvent) {
+  const target = e.target as HTMLElement
+  isSelected.value = DeskTopIcon.value!.contains(target)
+}
 
 onMounted(() => {
   const el = DeskTopIcon.value
@@ -92,11 +98,18 @@ onMounted(() => {
 
   // 初始位置
   el.style.transform = `translate(${position.value.x}px, ${position.value.y}px)`
+
+
+  document.addEventListener('mousedown', onDeskTopIconClick)
+})
+
+onBeforeMount(()=>{
+  document.removeEventListener('mousedown', onDeskTopIconClick)
 })
 </script>
 
 <template>
-  <div class="desktop-icon-wrapper" :style="{width:iconSize+'px',height:iconSize+'px'}" ref="DeskTopIcon">
+  <div class="desktop-icon-wrapper" :class="{ selected: isSelected }" :style="{width:iconSize+'px',height:iconSize+'px'}" ref="DeskTopIcon">
     <svg class="desktop-icon" aria-hidden="true">
       <use :href="'#icon-'+icon" />
     </svg>
@@ -121,9 +134,15 @@ onMounted(() => {
 }
 
 .desktop-icon-wrapper:hover{
-  background-color: rgba(255, 255, 255, 0.22); /* 鼠标悬停时背景变浅半透明 */
-  border-color: rgba(255, 255, 255, 0.5); /* 边框变亮 */
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3); /* 添加一点点阴影 */
+  background-color: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+}
+
+.desktop-icon-wrapper.selected{
+  background-color: rgba(255, 255, 255, 0.55);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
 }
 
 .desktop-icon{

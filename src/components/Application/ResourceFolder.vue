@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref} from 'vue'
 import Icon from "@/components/Container/Icon.vue";
 import {Component, Data, Util, vResize} from "@/utils";
 import TableContainer from "@/components/Container/TableContainer.vue";
@@ -10,10 +9,15 @@ import SwitchDialog from '../Dialog/SwitchDialog.vue';
 
 const emit = defineEmits(['close'])
 const props = defineProps<{
+  id: string,
+  icon: string,
   title: string,
 }>()
 
-const show = ref(true)
+
+function close(){
+  emit("close")
+}
 
 
 function open() {
@@ -29,7 +33,7 @@ const itemClick = (action: string) => {
   switch (action) {
     case 'spaceChange': {
       console.log('切换工作空间')
-      Util.openComponent(SwitchDialog, {})
+      Util.openComponent(SwitchDialog,'切换', {})
       break
     }
   }
@@ -38,8 +42,8 @@ const itemClick = (action: string) => {
 </script>
 
 <template>
-  <teleport to="#window-view" v-if="show">
-    <ViewContainerV2 :title="props.title" @close="show = false">
+  <teleport to="#window-view">
+    <ViewContainerV2 :title="props.title" :id="props.id" :icon="icon" @close="close">
       <div class="resource">
           <div class="resource-sidebar" v-resize="{ storageKey: 'my-panel-width', max: 300, min: 100}">
             <div class="resource-sidebar-title">快捷节点</div>

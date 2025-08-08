@@ -1,7 +1,7 @@
 import path from 'path';
 import {ipcMain, IpcMainInvokeEvent} from 'electron';
 import {createRequire} from 'module';
-import {ElTreeNode, FileNode, VXETableNode} from "@/utils/type.ts";
+import {ElTreeNode, FileNode, VXETableNode, WallPaper} from "@/utils/type.ts";
 
 const require = createRequire(import.meta.url);
 const Database = require('better-sqlite3');
@@ -10,7 +10,6 @@ const Database = require('better-sqlite3');
 let db: InstanceType<typeof Database> | null = null;
 
 export function initDatabase() {
-    // const dbPath = path.join(app.getPath('userData'), 'FileManager.db');
     const dbPath = path.join(process.cwd(), 'FileManager.db');
 
     db = new Database(dbPath);
@@ -74,6 +73,19 @@ export function initDatabase() {
       FOREIGN KEY (associated_folder)
         REFERENCES portfolio(id)
         ON DELETE CASCADE
+    )
+  `).run();
+    db.prepare(`
+    CREATE TABLE IF NOT EXISTS wallpaper (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      file_size INTEGER NOT NULL,
+      file_path TEXT NOT NULL,
+      type TEXT NOT NULL,
+      description TEXT,
+      style TEXT,
+      create_time INTEGER,
+      last_browse_time INTEGER
     )
   `).run();
 
@@ -408,102 +420,35 @@ export function RegisterDataBaseOperations() {
     });
 
 
-    // ipcMain.handle('loadAll', () => {
-    //     if (!db) initDatabase();
-    //
-    //     function loadTreeFromDb(): ElTreeNode[] {
-    //
-    //         // 1. 读取所有目录（portfolio）和文件（file）
-    //         const portfolios: Array<{
-    //             id: number;
-    //             name: string;
-    //             type: string;
-    //             associated_folder: number|null;
-    //             create_time: number;
-    //             last_browse_time: number;
-    //             connected_workspace:number;
-    //             isLeaf:0 | 1;
-    //         }> = db!.prepare(`
-    //         SELECT * ,0 AS isLeaf FROM portfolio
-    //       `).all();
-    //
-    //         const files: Array<{
-    //             id: number;
-    //             name: string;
-    //             file_size: number;
-    //             file_path: string;
-    //             type: string;
-    //             associated_folder: number|null;
-    //             connected_workspace:number;
-    //             create_time: number;
-    //             last_browse_time: number;
-    //             isLeaf:0 | 1;
-    //         }> = db!.prepare(`
-    //         SELECT *, 1 AS isLeaf FROM file
-    //       `).all();
-    //
-    //         // 2. 构建一个通用的 Map：parentId -> 子节点列表
-    //         const childrenMap = new Map<number, ElTreeNode[]>();
-    //
-    //         // helper：往 map 里 push
-    //         function pushChild(parentId: number | null, node: ElTreeNode) {
-    //             const key = parentId ?? 0;            // null 或者 undefined 都归为 0
-    //             if (!childrenMap.has(key)) {
-    //                 childrenMap.set(key, []);
-    //             }
-    //             childrenMap.get(key)!.push(node);
-    //         }
-    //
-    //         // 3. 把所有目录先插入 map
-    //         for (const p of portfolios) {
-    //             const node: ElTreeNode = {
-    //                 id: p.id,
-    //                 label: p.name,
-    //                 name: p.name,
-    //                 type: p.type,
-    //                 associated_folder: p.associated_folder,
-    //                 isLeaf: p.isLeaf,
-    //                 connected_workspace:p.connected_workspace
-    //                 // children 会在后面自动填充
-    //             };
-    //             pushChild(p.associated_folder, node);
-    //         }
-    //
-    //         // 4. 再把文件插入 map
-    //         for (const f of files) {
-    //             const node: ElTreeNode = {
-    //                 id: f.id,          // 防止与目录 id 冲突，可选
-    //                 label: f.name,
-    //                 isLeaf: f.isLeaf,
-    //                 file_path: f.file_path,
-    //                 file_size: f.file_size,
-    //                 associated_folder: f.associated_folder,
-    //                 connected_workspace: f.connected_workspace,
-    //                 name: f.name,
-    //                 type: f.type
-    //             };
-    //             pushChild(f.associated_folder, node);
-    //         }
-    //
-    //         // 5. 递归构建树：从 associated_folder = 0（根）开始
-    //         function buildTree(parentId: number): ElTreeNode[] {
-    //             const list = childrenMap.get(parentId) || [];
-    //             for (const node of list) {
-    //                 const kids = buildTree(node.id);
-    //                 if (kids.length) {
-    //                     node.children = kids;
-    //                 }
-    //             }
-    //             return list;
-    //         }
-    //
-    //         // 根节点 list
-    //         return buildTree(0);
-    //     }
-    //
-    //     return loadTreeFromDb();
-    // });
+    ipcMain.handle('saveAsWallpaper', async (_e, file: WallPaper) => {
+        if (!db) initDatabase();
+        const now = Date.now();
 
+        try {
+            const stmt = db.prepare(`
+              INSERT INTO wallpaper
+                (name, file_size, file_path, type, create_time)
+              VALUES (?, ?, ?, ?, ?)
+            `);
+            const result = stmt.run(
+                file.name,
+                file.size,
+                file.path,
+                file.type,
+                now,
+            );
+
+            if (result.changes === 1) {
+                return { success: true, lastInsertRowid: result.lastInsertRowid };
+            } else {
+                // 极少会发生 INSERT changes === 0 的情况
+                return { success: false, reason: 'no rows inserted' };
+            }
+        } catch (err: any) {
+            console.error('插入文件失败：', err);
+            return { success: false, error: err.message };
+        }
+    });
 }
 
 

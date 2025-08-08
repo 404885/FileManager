@@ -4,26 +4,16 @@ import { Util } from "@/utils";
 import ResourceFolder from "@/components/Application/ResourceFolder.vue";
 import BottomBar from "@/components/Bar/BottomBar.vue"
 import {computed, nextTick, onMounted, reactive, ref, watch} from "vue";
-import {useTreeCondition} from "@/pinia/TreeCondition.ts";
 import DeskTopIcon from "@/components/Icon/DeskTopIcon.vue";
 import WebBrowser from "@/components/Application/WebBrowser.vue";
 import Chat from "@/components/Application/Chat.vue";
 import {useDeskTopCondition} from "@/pinia/DeskTopCondition.ts";
+import {DESKTOP_ICON_SIZE} from "@/utils/constant.ts";
+import {useClickHandler} from "@/utils/util.ts";
+import DeskTopContextMenu from "@/components/Menu/DeskTopContextMenu.vue";
+import RecycleContextMenu from "@/components/Menu/RecycleContextMenu.vue";
+import {Applications} from "@/utils/type.ts"
 
-const ICON_SIZE   = 80  // 桌面图标宽高
-
-const testf = ref<number>(1)
-const testw = ref<number>(1)
-
-interface Applications{
-  id:string,
-  name:string,
-  icon:string,
-  dblclick?:Function,
-}
-
-
-const treeStore =useTreeCondition()
 const deskTopStore =useDeskTopCondition()
 
 
@@ -32,49 +22,59 @@ const applications = reactive<Applications[]>([
     id:crypto.randomUUID(),
     name:'资源管理器',
     icon:'file_explorer',
-    dblclick:()=>{
-      Util.openComponent(ResourceFolder, { title: '资源管理器' })
-    }
+    dblclick(){
+      Util.openComponent(ResourceFolder, this.id,{ title: '资源管理器',id:crypto.randomUUID(),icon:this.icon,})
+    },
+    contextMenu(e:MouseEvent){
+      e.stopPropagation()
+      Util.openComponent(RecycleContextMenu, this.id,{position: { x: e.clientX, y: e.clientY }})
+    },
   },
   {
     id:crypto.randomUUID(),
     name:'回收站',
     icon:'recycle_bin',
-    dblclick:()=>{
+    dblclick(){
 
-    }
+    },
+    contextMenu(e:MouseEvent){
+      e.stopPropagation()
+      Util.openComponent(RecycleContextMenu,this.id, {position: { x: e.clientX, y: e.clientY }})
+    },
   },
   {
     id:crypto.randomUUID(),
     name:'浏览器',
     icon:'chrome',
-    dblclick:()=>{
-      Util.openComponent(WebBrowser,{ title: '浏览器' ,url : 'https://www.bing.com' },false)
-    }
+    dblclick(){
+      Util.openComponent(WebBrowser,this.id,{ title: '浏览器' ,url : 'https://www.bing.com',id:crypto.randomUUID(),icon:this.icon, },false)
+    },
+    contextMenu(e:MouseEvent){
+      e.stopPropagation()
+      Util.openComponent(RecycleContextMenu, this.id,{position: { x: e.clientX, y: e.clientY }})
+    },
   },
   {
     id:crypto.randomUUID(),
     name:'通讯',
     icon:'messages',
-    dblclick:()=>{
-      Util.openComponent(Chat,{title:'通讯'})
-    }
+    dblclick(){
+      Util.openComponent(Chat,this.id,{title:'通讯',id:crypto.randomUUID(),icon:this.icon,})
+    },
+    contextMenu(e:MouseEvent){
+      e.stopPropagation()
+      Util.openComponent(RecycleContextMenu,this.id, {position: { x: e.clientX, y: e.clientY }})
+    },
   },
 ])
 
-watch(testf, (newVal) => {
-  treeStore.setCurrentFolder(newVal)
-})
-
-watch(testw, (newVal) => {
-  treeStore.setCurrentWorkspace(newVal)
-})
 
 watch(()=>deskTopStore.getVolume, (newVal) => {
   if (backgroundVideo.value) {
     backgroundVideo.value.volume = newVal
   }
 })
+
 
 // 容器引用 & 宽度
 const desktop = ref<HTMLElement | null>(null)
@@ -89,18 +89,9 @@ function updateContainerWidth() {
 
 const backgroundVideo = ref<HTMLVideoElement | null>(null)
 
-onMounted(() => {
-  nextTick(updateContainerWidth)
-  window.addEventListener("resize", updateContainerWidth)
-
-  if (backgroundVideo.value) {
-    backgroundVideo.value.volume = deskTopStore.getVolume
-  }
-})
-
 const cols = computed(() => {
   return containerWidth.value
-      ? Math.floor(containerWidth.value / ICON_SIZE)
+      ? Math.floor(containerWidth.value / DESKTOP_ICON_SIZE)
       : 1
 })
 
@@ -111,11 +102,30 @@ const positions = computed(() => {
     const row = Math.floor(idx / c)
     const col = idx % c
     arr.push({
-      x: col * ICON_SIZE,
-      y: row * ICON_SIZE,
+      x: col * DESKTOP_ICON_SIZE,
+      y: row * DESKTOP_ICON_SIZE,
     })
   })
   return arr
+})
+
+const { handleClick } = useClickHandler<Applications>(
+    (app) => app.id,
+    (app) => console.log('单击:', app.name),
+    (app) => app.dblclick?.()
+)
+
+function onRightClick(e: MouseEvent) {
+  e.stopPropagation()
+  Util.openComponent(DeskTopContextMenu,'桌面右键菜单',{position: { x: e.clientX, y: e.clientY }})
+}
+
+onMounted(() => {
+  nextTick(updateContainerWidth)
+  window.addEventListener("resize", updateContainerWidth)
+  if (backgroundVideo.value) {
+    backgroundVideo.value.volume = deskTopStore.getVolume
+  }
 })
 </script>
 
@@ -124,8 +134,8 @@ const positions = computed(() => {
     <TitleBar/>
   </div>
   <div class="window-home">
-    <div id="window-view" ref="desktop" class="window-view">
-      <div class="window-background">
+    <div id="window-view" ref="desktop" class="window-view" @contextmenu="onRightClick">
+      <div id="wallpaper" class="window-background">
         <video ref="backgroundVideo"
                autoplay
                loop
@@ -138,15 +148,14 @@ const positions = computed(() => {
           :id="app.id"
           :icon="app.icon"
           :name="app.name"
-          :icon-size="ICON_SIZE"
+          :icon-size="DESKTOP_ICON_SIZE"
           :x="positions[index].x"
           :y="positions[index].y"
-          @dblclick="app.dblclick"
+          @click="handleClick(app)"
+          @contextmenu="app.contextMenu"
       />
-<!--      <input type="text" v-model.number="testf">-->
-<!--      <input type="text" v-model.number="testw">-->
       <div class="window-bottom">
-        <BottomBar/>
+        <BottomBar :applications="applications" />
       </div>
     </div>
   </div>
@@ -192,7 +201,7 @@ const positions = computed(() => {
   position: relative;
   width: 100%;
   height: 100%;
-  background: url('./assets/background/bustup_020_004.png') center center / cover no-repeat;
+  background: url('./assets/background/bustup_020_013.png') center center / cover no-repeat;
   background-size: contain;
 
   z-index: -1;
@@ -209,19 +218,6 @@ const positions = computed(() => {
   bottom: 0;
   flex: 1;
   width: 100%;
-}
-
-.menu-icon {
-  width: 32px;
-  height: 32px;
-  background: rgba(255, 255, 255, 0.85);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease;
 }
 
 

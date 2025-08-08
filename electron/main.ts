@@ -32,7 +32,7 @@ function createWindow() {
     minHeight: 450,
     resizable: true,
     // 从public文件中找静态图片和图标等文件
-    icon: path.join(process.env.VITE_PUBLIC!, 'electron-vite.svg'),
+    icon: path.join(process.env.VITE_PUBLIC!, 'Icon.ico'),
     frame:false,
     // 预加载文件在运行时的文件夹，实际实在dist-electron中
     webPreferences: {

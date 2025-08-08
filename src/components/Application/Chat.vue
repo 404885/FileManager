@@ -5,11 +5,16 @@ import ViewContainerV2 from "@/components/Container/ViewContainerV2.vue";
 
 const emit = defineEmits(['close'])
 const props = defineProps<{
+  id: string,
+  icon: string,
   title: string,
 }>()
 
 
-const show = ref(true);
+function close(){
+  emit("close")
+}
+
 
 const peer = ref()
 
@@ -48,8 +53,8 @@ onMounted(()=>{
 </script>
 
 <template>
-  <teleport to="#window-view" v-if="show">
-    <ViewContainerV2 :title="props.title" @close="show = false">
+  <teleport to="#window-view">
+    <ViewContainerV2 :title="props.title" @close="close" :id="props.id" :icon="icon">
       <div class="control">
         <p>
           <el-input v-model="PeerId" style="width: 240px" placeholder="连接对象ID" clearable/>

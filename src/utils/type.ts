@@ -47,3 +47,27 @@ export interface DraggableContainer {
     width:number;
     height:number;
 }
+
+export interface ContextMenuRow {
+    name:string;
+    icon?:string;
+    click:Function;
+}
+
+export interface Applications{
+    id:string,
+    name:string,
+    icon:string,
+    contextMenu?:Function,
+    dblclick?:Function,
+}
+
+export interface WallPaper{
+    name:string,
+    size:number,
+    path:string,
+    type:string,
+    style?:string,
+    tag?:string,
+    description?: string,
+}

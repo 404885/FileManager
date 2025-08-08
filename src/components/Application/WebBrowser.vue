@@ -1,24 +1,26 @@
 <script setup lang="ts">
-//import ViewContainer from "@/components/Container/ViewContainer.vue";
 import { ref, onMounted} from "vue";
 import IconContainer from "@/components/Container/IconContainer.vue";
 import ViewContainerV2 from "@/components/Container/ViewContainerV2.vue";
 
 const emit = defineEmits(['close'])
 const props = defineProps<{
+  id: string,
+  icon: string,
   title: string,
   url: string,
 }>()
 
-const show = ref(true)
+
+function close(){
+  emit("close")
+}
 
 
 const browser = ref<Electron.WebviewTag>()
 
 onMounted(() => {
   const webview = browser.value!
-
-
 
   webview.addEventListener('dom-ready', () => {
     webview.insertCSS(`
@@ -45,8 +47,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <teleport to="#window-view" v-if="show">
-    <ViewContainerV2 :title="props.title" @close="show = false">
+  <teleport to="#window-view">
+    <ViewContainerV2 :title="props.title" :id="props.id" @close="close" :icon="icon">
       <template #title-slot>
         <div class="icons">
           <IconContainer size="18px" :link-mode="false" name="back" class="non-drag" @click="console.log('das')"/>

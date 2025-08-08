@@ -6,6 +6,8 @@ const props = defineProps({
     required:true,
   },
   hoverColor:String,
+  width: String,
+  height: String,
 })
 
 const hover=(event: MouseEvent)=>{
@@ -23,7 +25,7 @@ const leave=(event: MouseEvent)=>{
 
 <template>
   <div class="BottomBar-controls" @mouseenter="hover" @mouseleave="leave">
-    <svg class="button" aria-hidden="true">
+    <svg class="button" aria-hidden="true" :style="{width:width || '1em',height:height || '1em'}">
       <use :href="'#icon-'+icon"/>
     </svg>
   </div>
@@ -40,7 +42,5 @@ const leave=(event: MouseEvent)=>{
 }
 .button{
   margin: auto;
-  width: 1em;
-  height: 1em;
 }
 </style>

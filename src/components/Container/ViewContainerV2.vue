@@ -2,33 +2,37 @@
 import {onMounted, ref} from "vue";
 import interact from 'interactjs'
 import {DraggableContainer} from "@/utils/type.ts";
-import {useViewCondition} from "@/pinia/ViewCondition.ts";
+import {useDeskTopCondition} from "@/pinia/DeskTopCondition.ts";
 
 const props = defineProps<{
+  id:string,
+  icon:string,
   title?: string,
   width?: number,
   height?: number,
 }>()
 const emit = defineEmits(['close'])
 
-const store = useViewCondition()
+const store = useDeskTopCondition()
 
 const viewContainer = ref<HTMLElement | null>(null);
 const ratio = window.devicePixelRatio
 
 const isMaximized = ref(false)
 
+const offset = store.getNextPosition()
+
 const originalPosition = ref({
-  x: 0,
-  y: 0,
+  x: offset.x,
+  y: offset.y,
   width: 0,
   height: 0,
 })
 
 const containerProperty = ref<DraggableContainer>({
-  id:crypto.randomUUID(),
-  x: 0,
-  y: 0,
+  id:props.id,
+  x: offset.x,
+  y: offset.y,
   width: props.width || 800,
   height: props.height || 600,
 })
@@ -106,12 +110,16 @@ onMounted(() => {
       })
   updateTransform()
 
-  store.init(containerProperty.value.id)
+  store.init({
+    id: props.id,
+    icon: props.icon,
+  })
   bringToFront()
 })
 
 function close(){
-  emit('close', "dsadsa")
+  emit('close')
+  store.removeApplication(props.id)
 }
 function maximize() {
   const el = viewContainer.value
@@ -166,15 +174,19 @@ function bringToFront(){
   store.bringToFront(containerProperty.value.id)
 }
 
+function minimize() {
+  store.minimizeWindow(containerProperty.value.id)
+}
+
 </script>
 
 <template>
-  <div class="view-container" ref="viewContainer" :style="{zIndex:store.computeZIndex(containerProperty.id)}" @mousedown="bringToFront()">
+  <div class="view-container" ref="viewContainer" v-show="!store.isMinimized(containerProperty.id)" :style="{zIndex:store.computeZIndex(containerProperty.id)}" @mousedown="bringToFront()">
     <div class="title-bar" @dblclick="onTitlebarDblclick">
       <div class="traffic-lights-wrapper">
         <div class="traffic-lights">
-          <div class="traffic-light red non-drag" @click="close" title="关闭"></div>
-          <div class="traffic-light yellow non-drag" data-action="minimize" title="最小化"></div>
+          <div class="traffic-light red" @click="close" title="关闭"></div>
+          <div class="traffic-light yellow" @click="minimize" data-action="minimize" title="最小化"></div>
           <div class="traffic-light green" @click="maximize" data-action="maximize" title="最大化"></div>
         </div>
       </div>

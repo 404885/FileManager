@@ -1,7 +1,4 @@
-/// <reference types="vite-plugin-electron/electron-env" />
-
-import {ElTreeNode, FileNode, VXETableNode} from "@/utils/type.ts";
-import {ipcRenderer} from "electron";
+import {ElTreeNode, FileNode, VXETableNode, WallPaper} from "@/utils/type.ts";
 
 export {};
 
@@ -66,6 +63,7 @@ declare global{
         loadTree: (workspace: number,keyword?: string) => Promise<ElTreeNode[]>,
         loadTable: (workspace: number,associatedFolder:number | null = null) => Promise<VXETableNode[]>,
         loadTableV2: (workspace: number) => Promise<VXETableNode[]>,
+        saveAsWallpaper: (file: WallPaper) => Promise<{ success: boolean,lastInsertRowid?: number,reason?: string,error?: any}>,
       }
     }
   }

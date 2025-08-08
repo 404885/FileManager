@@ -164,6 +164,19 @@ function initDatabase() {
         ON DELETE CASCADE
     )
   `).run();
+  db.prepare(`
+    CREATE TABLE IF NOT EXISTS wallpaper (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      file_size INTEGER NOT NULL,
+      file_path TEXT NOT NULL,
+      type TEXT NOT NULL,
+      description TEXT,
+      style TEXT,
+      create_time INTEGER,
+      last_browse_time INTEGER
+    )
+  `).run();
   console.log("DataBase has initialized", dbPath);
 }
 function RegisterDataBaseOperations() {
@@ -362,6 +375,32 @@ function RegisterDataBaseOperations() {
     }));
     return nodes;
   });
+  ipcMain.handle("saveAsWallpaper", async (_e, file) => {
+    if (!db) initDatabase();
+    const now = Date.now();
+    try {
+      const stmt = db.prepare(`
+              INSERT INTO wallpaper
+                (name, file_size, file_path, type, create_time)
+              VALUES (?, ?, ?, ?, ?)
+            `);
+      const result = stmt.run(
+        file.name,
+        file.size,
+        file.path,
+        file.type,
+        now
+      );
+      if (result.changes === 1) {
+        return { success: true, lastInsertRowid: result.lastInsertRowid };
+      } else {
+        return { success: false, reason: "no rows inserted" };
+      }
+    } catch (err) {
+      console.error("插入文件失败：", err);
+      return { success: false, error: err.message };
+    }
+  });
 }
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 process.env.APP_ROOT = path.join(__dirname, "..");
@@ -378,7 +417,7 @@ function createWindow() {
     minHeight: 450,
     resizable: true,
     // 从public文件中找静态图片和图标等文件
-    icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
+    icon: path.join(process.env.VITE_PUBLIC, "Icon.ico"),
     frame: false,
     // 预加载文件在运行时的文件夹，实际实在dist-electron中
     webPreferences: {

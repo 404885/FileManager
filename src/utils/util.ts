@@ -1,13 +1,14 @@
 import { useTreeCondition } from '@/pinia/TreeCondition'
 import { createApp, h, type Component, type App } from 'vue'
+import {DOUBLE_CLICK_THRESHOLD, LOCK_DURATION} from "@/utils/constant.ts";
 
 // 为 props 定义一个通用类型
 interface ComponentProps {
     [key: string]: any;
 }
-let currentSyncInstance: App | null = null
+// let currentSyncInstance: App | null = null
 let currentAsyncInstance: App | null = null
-
+const currentSyncInstances = new Map<string, ReturnType<typeof createApp>>()
 
 /*  递归查询父文件夹，得到一个路径列表。
 *
@@ -139,21 +140,60 @@ export const formatter ={
 
 
 // 同步调用openComponent，返回 Promise，可以获取组件传出的数据
-export function openComponent(ComponentCtor: Component, props: ComponentProps, singleton = true): void {
-    console.log('openComponent called with props:', props, 'singleton:', singleton)
+// export function openComponent(ComponentCtor: Component, props?: ComponentProps, singleton = true): void {
+//     console.log('openComponent called with props:', props, 'singleton:', singleton)
+//
+//     const container = document.createElement('div')
+//     container.className = 'sync-component-container'
+//     document.body.appendChild(container)
+//
+//     // 如果是单例模式，先卸载已有实例
+//     if (singleton && currentSyncInstance) {
+//         currentSyncInstance.unmount()
+//         const old = document.querySelector('.sync-component-container')
+//         container.dataset.id = Date.now().toString()
+//         old?.remove()
+//         currentSyncInstance = null
+//     }
+//
+//     const app = createApp({
+//         render() {
+//             return h(ComponentCtor, {
+//                 ...props,
+//                 onClose: (payload?: any) => {
+//                     app.unmount()
+//                     container.remove()
+//                     if (singleton) currentSyncInstance = null
+//                     props?.onClose?.(payload) // 透传原始回调
+//                 }
+//             })
+//         }
+//     })
+//
+//     app.mount(container)
+//
+//     if (singleton) {
+//         currentSyncInstance = app
+//     }
+// }
+export function openComponent(ComponentCtor: Component,instanceId: string, props?: ComponentProps, singleton = true): void {
+    console.log('openComponent called with props:', props, 'singleton:', singleton, 'instanceId:', instanceId)
+
+    if (singleton && instanceId) {
+        // 卸载已有同 instanceId 实例
+        const existingApp = currentSyncInstances.get(instanceId)
+        if (existingApp) {
+            existingApp.unmount()
+            currentSyncInstances.delete(instanceId)
+            const old = document.querySelector(`.sync-component-container[data-instance-id="${instanceId}"]`)
+            old?.remove()
+        }
+    }
 
     const container = document.createElement('div')
     container.className = 'sync-component-container'
+    if (instanceId) container.dataset.instanceId = instanceId
     document.body.appendChild(container)
-
-    // 如果是单例模式，先卸载已有实例
-    if (singleton && currentSyncInstance) {
-        currentSyncInstance.unmount()
-        const old = document.querySelector('.sync-component-container')
-        container.dataset.id = Date.now().toString()
-        old?.remove()
-        currentSyncInstance = null
-    }
 
     const app = createApp({
         render() {
@@ -162,8 +202,10 @@ export function openComponent(ComponentCtor: Component, props: ComponentProps, s
                 onClose: (payload?: any) => {
                     app.unmount()
                     container.remove()
-                    if (singleton) currentSyncInstance = null
-                    props?.onClose?.(payload) // 透传原始回调
+                    if (singleton && instanceId) {
+                        currentSyncInstances.delete(instanceId)
+                    }
+                    props?.onClose?.(payload)
                 }
             })
         }
@@ -171,8 +213,8 @@ export function openComponent(ComponentCtor: Component, props: ComponentProps, s
 
     app.mount(container)
 
-    if (singleton) {
-        currentSyncInstance = app
+    if (singleton && instanceId) {
+        currentSyncInstances.set(instanceId, app)
     }
 }
 // 异步调用的 openComponent，返回 Promise，可以获取组件传出的数据
@@ -237,6 +279,61 @@ export function useHandleClick(delay = 250) {
                 clickTimer = null
             }, delay)
         }
+    }
+
+    return { handleClick }
+}
+// 一个单双击处理回调函数,传入回调函数，分别是id 单击事件 双击事件
+export function useClickHandler<T>(getId: (node: T) => string , singleClickFn?: (node: T) => void, doubleClickFn?: (node: T) => void, doubleClickThreshold: number = DOUBLE_CLICK_THRESHOLD, lockDuration: number = LOCK_DURATION) {
+
+    const lastClickTimes = new Map<string, number>()
+    const lockMap = new Map<string, boolean>()
+    const timers = new Map<string, ReturnType<typeof setTimeout>>()
+
+    function handleClick(node: T) {
+        const now = Date.now()
+        const id = getId(node)
+
+        const isLocked = lockMap.get(id) ?? false
+        if (isLocked) return
+
+        const lastClickTime = lastClickTimes.get(id) ?? 0
+
+        // 是否是双击
+        if (now - lastClickTime < doubleClickThreshold) {
+            if (timers.has(id)) {
+                clearTimeout(timers.get(id)!)
+                timers.delete(id)
+            }
+
+            if (doubleClickFn) {
+                doubleClickFn(node)
+
+                // 加锁
+                lockMap.set(id, true)
+                setTimeout(() => {
+                    lockMap.set(id, false)
+                }, lockDuration)
+            }
+        } else {
+            if (singleClickFn) {
+                // 启动一个延迟触发（防止误触双击）
+                const timer = setTimeout(() => {
+                    singleClickFn(node)
+                    timers.delete(id)
+
+                    // 加锁
+                    lockMap.set(id, true)
+                    setTimeout(() => {
+                        lockMap.set(id, false)
+                    }, lockDuration)
+                }, doubleClickThreshold)
+
+                timers.set(id, timer)
+            }
+        }
+
+        lastClickTimes.set(id, now)
     }
 
     return { handleClick }

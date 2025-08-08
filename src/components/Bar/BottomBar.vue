@@ -2,7 +2,6 @@
 import {onMounted, ref} from "vue";
 import BottomBarIcon from "@/components/Icon/BottomBarIcon.vue";
 import {useDeskTopCondition} from "@/pinia/DeskTopCondition.ts";
-
 const deskTopStore = useDeskTopCondition()
 
 const controls = ref([
@@ -36,6 +35,14 @@ const toggleVolume = () => {
   deskTopStore.setVolume(newVolume)
 }
 
+function toggleWindow(id: string) {
+  if (deskTopStore.isMinimized(id)) {
+    deskTopStore.restoreWindow(id)
+  } else {
+    deskTopStore.minimizeWindow(id)
+  }
+}
+
 onMounted(()=>{
   update()
   setInterval(update, 1000)
@@ -44,9 +51,18 @@ onMounted(()=>{
 
 <template>
   <div class="window-bottom-controls">
-    <BottomBarIcon v-for="(control,_index) in controls" :key="_index" :icon="control.icon" :hover-color="control.hoverColor"/>
+    <div class="left-controls">
+      <BottomBarIcon v-for="(control,_index) in controls" :key="_index" :icon="control.icon" :hover-color="control.hoverColor"/>
+    </div>
+    <div class="mid-controls">
+      <BottomBarIcon v-for="(app,_index) in deskTopStore.getApp"
+                     :key="app.id"
+                     :icon="app.icon"
+                     :width="'1.5em'"
+                     :height="'1.5em'"
+                     @click="toggleWindow(app.id)"/>
+    </div>
     <div class="right-controls">
-
       <BottomBarIcon :icon="deskTopStore.volume === 0 ? 'no_audio' : 'volume'" @click="toggleVolume"/>
       <div class="time-wrapper">
         <div class="time">
@@ -68,9 +84,16 @@ onMounted(()=>{
   display: flex;
   flex-direction: row;
   min-height: 36px;
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(230, 230, 230, 0.8);
   box-shadow: inset 0 0 1px rgba(255, 255, 255, 0.3), 0 4px 12px rgba(0, 0, 0, 0.05);
-  background-blend-mode: overlay; /* 增强层次感 */
+}
+.left-controls{
+  display: flex;
+  flex-direction: row;
+}
+.mid-controls{
+  display: flex;
+  flex-direction: row;
 }
 .right-controls{
   margin-left: auto;
