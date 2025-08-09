@@ -7,6 +7,7 @@ electron.contextBridge.exposeInMainWorld("electronAPI", {
   openDirectoryDialog: () => electron.ipcRenderer.invoke("open-directory-dialog"),
   openFile: (filePath) => electron.ipcRenderer.invoke("open-file", filePath),
   svgTransform: (filePath) => electron.ipcRenderer.invoke("svg-to-symbol", filePath),
+  svgsTransform: (folderPath) => electron.ipcRenderer.invoke("svgs-to-symbol", folderPath),
   windowControls: {
     minimize: () => electron.ipcRenderer.send("window-minimize"),
     maximize: () => electron.ipcRenderer.send("window-maximize"),

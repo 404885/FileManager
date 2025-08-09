@@ -4,7 +4,7 @@ import path from "node:path";
 import fs from "fs/promises";
 import path$1 from "path";
 import { createRequire } from "module";
-function RegisterIpcEvent() {
+function RegisterIpcEvent(resourcesPath) {
   ipcMain.on("window-minimize", (event) => {
     const win2 = BrowserWindow.fromWebContents(event.sender);
     win2 == null ? void 0 : win2.minimize();
@@ -109,6 +109,29 @@ function RegisterIpcEvent() {
       return { success: true, symbol, id, viewBox };
     } catch (error) {
       console.error("解析 SVG 失败:", error);
+      return { success: false, message: String(error) };
+    }
+  });
+  ipcMain.handle("svgs-to-symbol", async (_event, folderPath) => {
+    try {
+      const absolutePath = path.join(resourcesPath, folderPath);
+      const files = await fs.readdir(absolutePath);
+      console.log(absolutePath, files);
+      const svgFiles = files.filter((file) => file.endsWith(".svg"));
+      const symbols = [];
+      for (const file of svgFiles) {
+        const filePath = path.join(absolutePath, file);
+        const content = await fs.readFile(filePath, "utf-8");
+        const viewBoxMatch = content.match(/viewBox="([^"]+)"/);
+        const innerContent = content.replace(/<svg[^>]*>/, "").replace("</svg>", "").trim();
+        const id = "icon-" + path.basename(file, ".svg");
+        const viewBox = viewBoxMatch ? viewBoxMatch[1] : "0 0 64 64";
+        const symbol = `<symbol id="${id}" viewBox="${viewBox}">${innerContent}</symbol>`;
+        symbols.push(symbol);
+      }
+      return { success: true, symbols };
+    } catch (error) {
+      console.error("解析 SVG 文件夹失败:", error);
       return { success: false, message: String(error) };
     }
   });
@@ -470,7 +493,7 @@ function createWindow() {
     win.loadFile(path.join(RENDERER_DIST, "index.html"));
   }
 }
-RegisterIpcEvent();
+RegisterIpcEvent(process.env.VITE_PUBLIC);
 RegisterDataBaseOperations();
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {

@@ -5,6 +5,7 @@ import {Util} from "@/utils/index.ts";
 import ResourceFolder from "@/components/Application/ResourceFolder.vue";
 import MenuContainerV1 from "@/components/Container/MenuContainerV1.vue";
 import WebBrowser from "@/components/Application/WebBrowser.vue";
+import SystemSetting from "@/components/Application/SystemSetting.vue";
 
 export const nodeData = [
     { label: '工作空间', icon: '#Icon-file1', action: '', key: 'workspace'},
@@ -116,7 +117,7 @@ export const applicationData = reactive<Applications[]>([
         name: '设置',
         icon:'setting',
         dblclick(){
-            // Util.openComponent(Chat,this.id,{title:'通讯',id:crypto.randomUUID(),icon:this.icon,})
+            Util.openComponent(SystemSetting,this.id,{title:'设置',id:crypto.randomUUID(),icon:this.icon,})
         },
         contextMenu(e:MouseEvent){
             e.stopPropagation()

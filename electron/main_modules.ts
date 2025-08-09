@@ -2,7 +2,10 @@ import {BrowserWindow, dialog, ipcMain, shell,webContents} from 'electron';
 import fs from "fs/promises";
 import path from "node:path";
 
-export function RegisterIpcEvent() {
+
+
+
+export function RegisterIpcEvent(resourcesPath: string) {
     ipcMain.on('window-minimize', (event) => {
         const win = BrowserWindow.fromWebContents(event.sender);
         win?.minimize();
@@ -19,6 +22,7 @@ export function RegisterIpcEvent() {
         const win = BrowserWindow.fromWebContents(event.sender);
         win?.setAlwaysOnTop(isPinned);
     })
+
     ipcMain.on('webview-id', (_event, id:number) => {
         const wc = webContents.fromId(id)
         // 拦截 new-window 事件
@@ -98,9 +102,7 @@ export function RegisterIpcEvent() {
             files: tree
         }
     })
-
     ipcMain.handle('close-directory-dialog', async () => {})
-
     ipcMain.handle('open-file', async (_event, filePath) => {
         try {
             return await shell.openPath(filePath) // 空字符串表示成功
@@ -134,6 +136,47 @@ export function RegisterIpcEvent() {
         }
     })
 
+    ipcMain.handle('svgs-to-symbol', async (_event, folderPath: string) => {
+        try {
+
+            const absolutePath = path.join(resourcesPath, folderPath);
+
+            const files = await fs.readdir(absolutePath)
+            console.log(absolutePath, files)
+
+            const svgFiles = files.filter(file => file.endsWith('.svg'));  // 只筛选 SVG 文件
+
+
+            const symbols: string[] = [];  // 用于存放所有 <symbol> 标签
+
+            for (const file of svgFiles) {
+                const filePath = path.join(absolutePath, file);  // 获取文件的完整路径
+                const content = await fs.readFile(filePath, 'utf-8');  // 读取文件内容
+
+                // 提取 viewBox 和内部的 SVG 内容
+                const viewBoxMatch = content.match(/viewBox="([^"]+)"/);
+                const innerContent = content
+                    .replace(/<svg[^>]*>/, '')  // 去除 <svg> 标签
+                    .replace('</svg>', '')  // 去除 </svg> 标签
+                    .trim();  // 清除前后空格
+
+                const id = 'icon-' + path.basename(file, '.svg');  // 生成 id
+                const viewBox = viewBoxMatch ? viewBoxMatch[1] : '0 0 64 64';  // 如果没有 viewBox，使用默认值
+
+                // 生成 symbol 标签并添加到 symbols 数组
+                const symbol = `<symbol id="${id}" viewBox="${viewBox}">${innerContent}</symbol>`;
+                symbols.push(symbol);
+            }
+            return { success: true, symbols };  // 返回生成的 sprite.svg 内容
+        }
+        catch (error) {
+            console.error('解析 SVG 文件夹失败:', error);
+            return { success: false, message: String(error) };
+        }
+
+
+
+    })
 
 
 

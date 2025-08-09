@@ -54,6 +54,11 @@ declare global{
         viewBox?: string,
         message?: string
       }>
+      svgsTransform: (folderPath: string) => Promise<{
+        success: boolean,
+        symbols: string,
+        message?: string
+      }>
 
       windowControls: {
         minimize: () => void;

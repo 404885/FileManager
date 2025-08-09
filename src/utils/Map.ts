@@ -93,30 +93,34 @@ export async function createMap(map: any){
 export async function injectSymbol() {
     if (document.getElementById('__svg-symbols__')) return
 
-    let data = await window.electronAPI.dataOperation.queryAll('SELECT * FROM icon')
-    let symbols = data.map(s => s.icon_value)
+    // let data = await window.electronAPI.dataOperation.queryAll('SELECT * FROM icon')
+    // let symbols = data.map(s => s.icon_value)
+
+    let result = await window.electronAPI.svgsTransform('./icon')
+    console.log(result)
+    const symbols = result.symbols
 
 
-    let pathall = []
-    const res = await window.electronAPI.openDirectoryDialog()
-    if (!res.canceled) {
-        const node = res.files
-        pathall = extractPaths(node)
-        console.log(pathall)
-    }
-    await transSymbol(pathall)
+    // let pathall = []
+    // const res = await window.electronAPI.openDirectoryDialog()
+    // if (!res.canceled) {
+    //     const node = res.files
+    //     pathall = extractPaths(node)
+    //     console.log(pathall)
+    // }
+    // await transSymbol(pathall)
 
 
-    if (!data || data.length === 0) {
-        symbols = await createSymbol('/sprite.svg');
-
-        for (const [ext, icon] of defaultMappings) {
-            await window.electronAPI.dataOperation.execute(
-                `INSERT OR IGNORE INTO icon_map (extension, icon_name) VALUES (?, ?)`,
-                [ext, icon]
-            );
-        }
-    }
+    // if (!data || data.length === 0) {
+    //     symbols = await createSymbol('/sprite.svg');
+    //
+    //     for (const [ext, icon] of defaultMappings) {
+    //         await window.electronAPI.dataOperation.execute(
+    //             `INSERT OR IGNORE INTO icon_map (extension, icon_name) VALUES (?, ?)`,
+    //             [ext, icon]
+    //         );
+    //     }
+    // }
 
     // 构造完整 SVG 内容
     const rawSvg = `<svg id="__svg__icons__dom__" xmlns="http://www.w3.org/2000/svg" style="position: absolute; width: 0; height: 0;"> ${symbols.join('\n')}</svg>`

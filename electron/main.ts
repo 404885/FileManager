@@ -57,7 +57,7 @@ function createWindow() {
 }
 
 // 注册所有ipcMain.on和ipcMain.handle
-RegisterIpcEvent()
+RegisterIpcEvent(process.env.VITE_PUBLIC)
 RegisterDataBaseOperations()
 
 // darwin是macOS的版本，因为退出逻辑不一致，单独处理

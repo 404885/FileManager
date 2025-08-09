@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   openDirectoryDialog: () => ipcRenderer.invoke('open-directory-dialog'),
   openFile: (filePath: string) => ipcRenderer.invoke('open-file', filePath),
   svgTransform: (filePath: string) => ipcRenderer.invoke('svg-to-symbol', filePath),
+  svgsTransform: (folderPath: string) => ipcRenderer.invoke('svgs-to-symbol', folderPath),
 
   windowControls: {
     minimize: () => ipcRenderer.send('window-minimize'),
