@@ -1,98 +1,58 @@
 <script setup lang="ts">
 import TitleBar from "@/components/Bar/TitleBar.vue";
-import { Util } from "@/utils";
-import ResourceFolder from "@/components/Application/ResourceFolder.vue";
+import { Util,Data } from "@/utils";
 import BottomBar from "@/components/Bar/BottomBar.vue"
-import {computed, nextTick, onMounted, reactive, ref, watch} from "vue";
+import {computed, nextTick, onMounted, ref, watch} from "vue";
 import DeskTopIcon from "@/components/Icon/DeskTopIcon.vue";
-import WebBrowser from "@/components/Application/WebBrowser.vue";
-import Chat from "@/components/Application/Chat.vue";
-import {useDeskTopCondition} from "@/pinia/DeskTopCondition.ts";
+import { useDeskTopCondition } from "@/pinia/DeskTopCondition.ts";
 import {DESKTOP_ICON_SIZE} from "@/utils/constant.ts";
 import {useClickHandler} from "@/utils/util.ts";
-import DeskTopContextMenu from "@/components/Menu/DeskTopContextMenu.vue";
-import RecycleContextMenu from "@/components/Menu/RecycleContextMenu.vue";
 import {Applications} from "@/utils/type.ts"
-
-const deskTopStore =useDeskTopCondition()
-
-
-const applications = reactive<Applications[]>([
-  {
-    id:crypto.randomUUID(),
-    name:'资源管理器',
-    icon:'file_explorer',
-    dblclick(){
-      Util.openComponent(ResourceFolder, this.id,{ title: '资源管理器',id:crypto.randomUUID(),icon:this.icon,})
-    },
-    contextMenu(e:MouseEvent){
-      e.stopPropagation()
-      Util.openComponent(RecycleContextMenu, this.id,{position: { x: e.clientX, y: e.clientY }})
-    },
-  },
-  {
-    id:crypto.randomUUID(),
-    name:'回收站',
-    icon:'recycle_bin',
-    dblclick(){
-
-    },
-    contextMenu(e:MouseEvent){
-      e.stopPropagation()
-      Util.openComponent(RecycleContextMenu,this.id, {position: { x: e.clientX, y: e.clientY }})
-    },
-  },
-  {
-    id:crypto.randomUUID(),
-    name:'浏览器',
-    icon:'chrome',
-    dblclick(){
-      Util.openComponent(WebBrowser,this.id,{ title: '浏览器' ,url : 'https://www.bing.com',id:crypto.randomUUID(),icon:this.icon, },false)
-    },
-    contextMenu(e:MouseEvent){
-      e.stopPropagation()
-      Util.openComponent(RecycleContextMenu, this.id,{position: { x: e.clientX, y: e.clientY }})
-    },
-  },
-  {
-    id:crypto.randomUUID(),
-    name:'通讯',
-    icon:'messages',
-    dblclick(){
-      Util.openComponent(Chat,this.id,{title:'通讯',id:crypto.randomUUID(),icon:this.icon,})
-    },
-    contextMenu(e:MouseEvent){
-      e.stopPropagation()
-      Util.openComponent(RecycleContextMenu,this.id, {position: { x: e.clientX, y: e.clientY }})
-    },
-  },
-])
+import MenuContainerV1 from "@/components/Container/MenuContainerV1.vue";
 
 
-watch(()=>deskTopStore.getVolume, (newVal) => {
-  if (backgroundVideo.value) {
-    backgroundVideo.value.volume = newVal
-  }
-})
 
-
+const applications = Data.applicationData
 // 容器引用 & 宽度
 const desktop = ref<HTMLElement | null>(null)
 const containerWidth = ref(0)
+const backgroundVideo = ref<HTMLVideoElement | null>(null)
+const deskTopStore =useDeskTopCondition()
+
+
+
+
+
+async function onRightClick(e: MouseEvent) {
+  e.stopPropagation()
+  const result = await Util.asyncOpenComponent(MenuContainerV1,'桌面右键菜单', {
+    position: { x: e.clientX, y: e.clientY },
+    data:  [
+      { name: "Option 1", icon: "icon1", click: () => {}},
+      { name: "Option 2", icon: "icon2", click: () => {}},
+      { name: "Option 3", icon: "icon2", click: () => {}},
+    ],
+  })
+  if (result){
+    console.log(result)
+  }
+}
+
+const { handleClick } = useClickHandler<Applications>(
+    (app) => app.id,
+    (app) => console.log('单击:', app.name),
+    (app) => app.dblclick?.()
+)
 
 // 测量容器宽度
-function updateContainerWidth() {
+const updateContainerWidth = () => {
   if (desktop.value) {
     containerWidth.value = desktop.value.clientWidth
   }
 }
 
-const backgroundVideo = ref<HTMLVideoElement | null>(null)
-
 const cols = computed(() => {
-  return containerWidth.value
-      ? Math.floor(containerWidth.value / DESKTOP_ICON_SIZE)
-      : 1
+  return containerWidth.value ? Math.floor(containerWidth.value / DESKTOP_ICON_SIZE) : 1
 })
 
 const positions = computed(() => {
@@ -109,16 +69,11 @@ const positions = computed(() => {
   return arr
 })
 
-const { handleClick } = useClickHandler<Applications>(
-    (app) => app.id,
-    (app) => console.log('单击:', app.name),
-    (app) => app.dblclick?.()
-)
-
-function onRightClick(e: MouseEvent) {
-  e.stopPropagation()
-  Util.openComponent(DeskTopContextMenu,'桌面右键菜单',{position: { x: e.clientX, y: e.clientY }})
-}
+watch(()=>deskTopStore.getVolume, (newVal) => {
+  if (backgroundVideo.value) {
+    backgroundVideo.value.volume = newVal
+  }
+})
 
 onMounted(() => {
   nextTick(updateContainerWidth)
@@ -127,6 +82,7 @@ onMounted(() => {
     backgroundVideo.value.volume = deskTopStore.getVolume
   }
 })
+
 </script>
 
 <template>
@@ -136,14 +92,9 @@ onMounted(() => {
   <div class="window-home">
     <div id="window-view" ref="desktop" class="window-view" @contextmenu="onRightClick">
       <div id="wallpaper" class="window-background">
-        <video ref="backgroundVideo"
-               autoplay
-               loop
-               src="./assets/video/senrenbanka.mp4"
-               :muted="false"/>
+        <video ref="backgroundVideo" autoplay loop src="" :muted="false"/>
       </div>
-      <DeskTopIcon
-          v-for="(app, index) in applications"
+      <DeskTopIcon v-for="(app, index) in applications"
           :key="app.id"
           :id="app.id"
           :icon="app.icon"
@@ -152,8 +103,7 @@ onMounted(() => {
           :x="positions[index].x"
           :y="positions[index].y"
           @click="handleClick(app)"
-          @contextmenu="app.contextMenu"
-      />
+          @contextmenu="app.contextMenu"/>
       <div class="window-bottom">
         <BottomBar :applications="applications" />
       </div>

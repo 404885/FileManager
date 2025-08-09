@@ -110,4 +110,31 @@ export function RegisterIpcEvent() {
         }
     })
 
+
+    // 异步写法
+    ipcMain.handle('svg-to-symbol', async (_event, filePath: string) => {
+        try {
+            const content = await fs.readFile(filePath, 'utf-8')
+
+            const viewBoxMatch = content.match(/viewBox="([^"]+)"/)
+            const innerContent = content
+                .replace(/<svg[^>]*>/, '')
+                .replace('</svg>', '')
+                .trim()
+
+            const id = 'icon-' + path.basename(filePath, '.svg')
+            const viewBox = viewBoxMatch ? viewBoxMatch[1] : '0 0 64 64'
+
+            const symbol = `<symbol id="${id}" viewBox="${viewBox}">${innerContent}</symbol>`
+
+            return { success: true, symbol, id, viewBox }
+        } catch (error) {
+            console.error('解析 SVG 失败:', error)
+            return { success: false, message: String(error) }
+        }
+    })
+
+
+
+
 }

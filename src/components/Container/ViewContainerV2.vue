@@ -61,12 +61,6 @@ onMounted(() => {
     .draggable({
         allowFrom: '.title-bar',
         ignoreFrom: '.content',
-        modifiers: [
-          interact.modifiers.restrictEdges({
-            outer: 'parent',         // 外边界限制在父元素
-            endOnly: true,           // 结束时修正
-          }),
-        ],
         listeners: {
           start() {
             el.classList.add('interacting')
@@ -83,7 +77,7 @@ onMounted(() => {
       })
       // 缩放限制在父容器内
     .resizable({
-        edges:  { top: true, left: true, bottom: true, right: true },
+        edges:  { top: false, left: true, bottom: true, right: true },
         ignoreFrom: '.content',
         modifiers: [
           // 大小范围限制
@@ -238,6 +232,7 @@ function minimize() {
   border-bottom: 1px solid #e0e0e0; /* Subtle separator */
   will-change: transform;
   background: transparent;
+  cursor: pointer;
 }
 .traffic-lights-wrapper{
   height: 100%;

@@ -15,10 +15,10 @@ export default defineConfig({
         }
       }
     }),
-    createSvgIconsPlugin({
-      iconDirs: [path.resolve(process.cwd(), 'src/assets/icons')],
-      symbolId: 'icon-[name]',
-    }),
+    // createSvgIconsPlugin({
+    //   iconDirs: [path.resolve(process.cwd(), 'src/assets/icons')],
+    //   symbolId: 'icon-[name]',
+    // }),
     electron({
       main: {
         entry: 'electron/main.ts',

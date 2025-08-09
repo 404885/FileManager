@@ -7,6 +7,7 @@ export const useTreeCondition= defineStore('TreeCondition', {
 
         currentWorkspace: 1 as number,
         currentFolder: -1 as number,
+        chooseFile: -1 as number,
     }),
     getters:{
         getChangedState(state){
@@ -40,6 +41,9 @@ export const useTreeCondition= defineStore('TreeCondition', {
         },
         setCurrentWorkspace(workspace: number){
             this.currentWorkspace = workspace
+        },
+        setChooseFile(chooseFile: number){
+            this.chooseFile = chooseFile
         }
     }
 })

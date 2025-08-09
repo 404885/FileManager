@@ -55,7 +55,6 @@ const resolvedIcon = computed(() => {
       <use :href="`#icon-${name}`" />
     </svg>
   </template>
-
 </template>
 
 <style scoped>

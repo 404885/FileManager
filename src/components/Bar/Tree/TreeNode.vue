@@ -31,6 +31,8 @@ import { computed, ref } from 'vue'
 import TreeNode from './TreeNode.vue'
 import type { TreeNodeData } from './TreeBar.vue'
 
+
+
 const props = defineProps<{
   node: TreeNodeData
   renderContent?: (node: TreeNodeData) => any

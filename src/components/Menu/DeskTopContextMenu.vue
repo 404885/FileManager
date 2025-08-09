@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import ContextMenu from '@/components/Container/ContextMenuContainer.vue'
+import MenuContainer from '@/components/Container/MenuContainer.vue'
 import {CSSProperties, reactive} from "vue";
 import {ContextMenuRow} from "@/utils/type.ts";
 import ContextMenuIcon from "@/components/Icon/ContextMenuIcon.vue";
@@ -31,9 +31,9 @@ const rows = reactive<ContextMenuRow[]>([
 
 <template>
   <teleport to="body">
-    <ContextMenu :position="position" :customStyle="{}" @close="close">
+    <MenuContainer :position="position" :customStyle="{}" @close="close">
       <ContextMenuIcon v-for="(row,index) in rows" :key="index" :row="row"/>
-    </ContextMenu>
+    </MenuContainer>
   </teleport>
 </template>
 

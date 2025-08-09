@@ -6,6 +6,9 @@ import {ElTreeNode, VXETableNode} from "@/utils/type.ts";
 import {useTreeCondition} from "@/pinia/TreeCondition.ts";
 import IconContainer from "@/components/Container/IconContainer.vue";
 
+import MenuContainerV1 from "@/components/Container/MenuContainerV1.vue";
+import ContextMenuV1 from "@/components/Menu/ContextMenuV1.vue";
+
 
 const store = useTreeCondition()
 const tableData = ref<VXETableNode[]>([])
@@ -23,21 +26,20 @@ async function fieldContext(e: MouseEvent, index: any) {
     {label: '对齐', key: 'align', disabled: false},
       { label: '属性', key: 'distribution' ,disabled: false},
       { label: '删除', key: 'delete', disabled: false},
-
   ]
+
   if (Fields.value[index].key === 'name') {
     data.find(i => i.key === 'delete')!.disabled = true
   }
 
-  const result = await Component.openMenuAsync({
-    type: 'contextMenuV1',
-    props: {
-      x: e.x,
-      y: e.y,
-      data: data,
-      title: Fields.value[index].key
-    }
+  const result = await Util.asyncOpenComponent(ContextMenuV1, data[index].key,{
+    x:e.x,
+    y:e.y,
+    data: data,
+    title: Fields.value[index].key
   })
+
+
 
   if (result && result.key === 'delete') {
     if (Fields.value[index].key === 'name') {
@@ -67,9 +69,6 @@ function isClicked(item: any) {
 }
 
 
-const saveField = () => {
-
-}
 
 const cellClick = async (row: ElTreeNode, key:string) => {
   if (key === 'name') {
@@ -101,6 +100,7 @@ function loadWidths() {
     })
   }
 }
+
 function startResize(e: MouseEvent, index: number) {
   const startX = e.clientX
   const startWidth = Fields.value[index].width
@@ -123,34 +123,22 @@ function startResize(e: MouseEvent, index: number) {
 
 
 
-
-// store.$subscribe(async (mutation, state) => {
-//   const events = mutation.events
-//
-//   if ((Array.isArray(events) && events.some(e => e.key === 'currentFolder' || e.key === 'currentWorkspace')) ||
-//       (!Array.isArray(events) && (events.key === 'currentFolder' || events.key === 'currentWorkspace'))) {
-//
-//     // 取最新值
-//     const folder = state.currentFolder
-//     const workspace = state.currentWorkspace
-//
-//     // 根据值判断
-//     if (folder !== -1 && workspace !== 0) {
-//       await initData()
-//     }
-//     else {
-//       await window.electronAPI.dataOperation.loadTable(store.currentWorkspace)
-//     }
-//   }
-//
-// })
-
 watch(() => [store.currentFolder, store.currentWorkspace], async () => {
   if (store.currentFolder === -1) {
      tableData.value = await window.electronAPI.dataOperation.loadTable(store.currentWorkspace)
   }
   else {
     await initData()
+  }
+})
+
+
+store.$subscribe(async(mutation, _state) => {
+  const events = mutation.events
+
+  if ((Array.isArray(events) && events.some(e => e.key === 'changedState')) || (!Array.isArray(events) && events.key === 'changedState')) {
+    tableData.value = await window.electronAPI.dataOperation.loadTable(store.currentWorkspace)
+    store.setChangedState(-1)
   }
 })
 
@@ -170,7 +158,7 @@ onMounted( async () => {
       <div class="table-container-head-item"></div>
       <div class="table-container-head-item"
            v-for="(item,index) of Fields"
-           @contextmenu="fieldContext($event, index)"
+           @contextmenu.stop.prevent="fieldContext($event, index)"
            :style="{ width: item.width + 'px' }">
         <div class="table-container-head-item-cell">{{item.label}}</div>
         <div class="table-container-head-item-resizeHandle" @mousedown.stop.prevent="startResize($event, index)"></div>

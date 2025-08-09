@@ -2,13 +2,19 @@
 import { ref, onMounted, onBeforeUnmount, CSSProperties } from 'vue'
 
 const emit = defineEmits(['close'])
-defineProps<{
-  position: { x: number, y: number }
-  customStyle?: CSSProperties
+
+const props = defineProps<{
+  position: {x: number; y: number};
+  data: Array<{ name: string, icon: string, click: (item: any) => void }>,
+  customStyle?: CSSProperties;
+  customClass?: string
+  resolve: (item: any) => void;
 }>()
+
 
 const menu = ref<HTMLElement | null>(null)
 
+// 点击外部区域关闭
 function handleClickOutside(e: MouseEvent) {
   if (menu.value && !menu.value.contains(e.target as Node)) {
     emit('close')
@@ -22,14 +28,14 @@ onMounted(() => {
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
 })
+
 </script>
 
 <template>
-  <div
-      ref="menu"
+  <div ref="menu"
       class="context-menu"
-      :style="[{ top: `${position.y}px`, left: `${position.x}px` }, customStyle]"
-  >
+      :style="[{ top: `${props.position.y}px`, left: `${props.position.x}px` }, props.customStyle]"
+      :class="props.customClass">
     <slot />
   </div>
 </template>

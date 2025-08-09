@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { ElTree } from 'element-plus'
 import { useTreeCondition } from "@/pinia/TreeCondition.ts";
 import { ElTreeNode } from "@/utils/type.ts";
@@ -60,6 +60,15 @@ const initData = async () => {
 }
 
 
+
+store.$subscribe(async(mutation, _state) => {
+  const events = mutation.events
+
+  if ((Array.isArray(events) && events.some(e => e.key === 'changedState')) || (!Array.isArray(events) && events.key === 'changedState')) {
+    await initData()
+    store.setChangedState(-1)
+  }
+})
 
 
 

@@ -1,12 +1,17 @@
 <script setup lang="ts">
+
+import { ref } from 'vue'
 import ViewContainerV2 from "@/components/Container/ViewContainerV2.vue";
 
 const emit = defineEmits(['close'])
 const props = defineProps<{
-  id:string,
-  icon:string,
   title: string,
 }>()
+
+const show = ref(true)
+
+
+
 
 
 
@@ -14,15 +19,18 @@ const props = defineProps<{
 </script>
 
 <template>
-  <teleport to="#window-view">
-    <ViewContainerV2 :title="props.title" :id="props.id" @close="emit('close')" :icon="props.icon">
-      <div class="wallpaper">
+  <teleport to="#window-view" v-if="show">
+    <ViewContainerV2 :title="props.title" @close="show = false">
 
-      </div>
+
+
     </ViewContainerV2>
   </teleport>
 </template>
 
-<style scoped>
+
+<style>
+
 
 </style>
+

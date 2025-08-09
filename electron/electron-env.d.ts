@@ -47,6 +47,14 @@ declare global{
         files: FileNode
       }
       >
+      svgTransform: (filePath: string) => Promise<{
+        success: boolean,
+        symbol?: string,
+        id?: string,
+        viewBox?: string,
+        message?: string
+      }>
+
       windowControls: {
         minimize: () => void;
         maximize: () => void;

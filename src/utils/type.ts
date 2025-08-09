@@ -58,8 +58,8 @@ export interface Applications{
     id:string,
     name:string,
     icon:string,
-    contextMenu?:Function,
     dblclick?:Function,
+    contextMenu?: (e: MouseEvent) => void;
 }
 
 export interface WallPaper{

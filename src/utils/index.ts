@@ -1,10 +1,8 @@
 import { openDialog,openDialogAsync } from "@/utils/component/Dialog.ts"
-import { openMenu, openMenuAsync } from "@/utils/component/Menu.ts"
 import { openNotification } from "@/utils/component/Notification.ts";
 
 
-import { getFileIcon, getFileIconMap, setFileIconMap, clearFileIconMap, defaultFileIconMap } from '@/utils/iconMap.ts'
-import { nodeData,sideTopData,sideBottomData,headData } from "@/utils/Data.ts";
+import { nodeData,sideTopData,sideBottomData,headData,workspaceData,applicationData } from "@/utils/Data.ts";
 import { formatter,idToPath,idToPathList,setAndJump,openComponent,asyncOpenComponent,useHandleClick  } from "@/utils/util.ts";
 
 import { vDrag } from "@/utils/directives/drag.ts";
@@ -19,24 +17,17 @@ export const Data = {
     nodeData,
     sideTopData,
     sideBottomData,
-    headData
+    headData,
+    workspaceData,
+    applicationData
 }
 
 export const Component = {
     openDialog,
     openDialogAsync,
     openNotification,
-    openMenu,
-    openMenuAsync
 }
 
-export const IconMap = {
-    getFileIcon,
-    getFileIconMap,
-    setFileIconMap,
-    clearFileIconMap,
-    defaultFileIconMap,
-}
 
 export const Util = {
     idToPath,

@@ -88,6 +88,26 @@ export function initDatabase() {
       last_browse_time INTEGER
     )
   `).run();
+    db.prepare(`
+    CREATE TABLE IF NOT EXISTS icon (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        icon_type TEXT NOT NULL, 
+        icon_name TEXT NOT NULL,         -- 图标名称（如 'pdf', 'folder' 等）
+        icon_value TEXT,                 -- 图标内容（SVG源码、URL或路径）
+        symbol_id TEXT NOT NULL,         -- 生成的 symbol ID
+        level INTEGER DEFAULT 0,       -- 优先级等级，数字越小优先级越高，默认100
+        create_time INTEGER,             -- 创建时间
+        update_time INTEGER              -- 更新时间
+      )
+    `).run();
+    db.prepare(`
+    CREATE TABLE icon_map (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      extension TEXT NOT NULL UNIQUE,     -- 扩展名，比如 pdf、docx、mp4
+      icon_name TEXT NOT NULL          -- 对应图标名，比如：pdf、word、video
+    )
+    `).run();
+
 
     console.log('DataBase has initialized', dbPath);
 }

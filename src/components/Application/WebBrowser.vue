@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted} from "vue";
+import { ref, onMounted } from "vue";
 import IconContainer from "@/components/Container/IconContainer.vue";
 import ViewContainerV2 from "@/components/Container/ViewContainerV2.vue";
 
@@ -12,9 +12,6 @@ const props = defineProps<{
 }>()
 
 
-function close(){
-  emit("close")
-}
 
 
 const browser = ref<Electron.WebviewTag>()
@@ -48,7 +45,7 @@ onMounted(() => {
 
 <template>
   <teleport to="#window-view">
-    <ViewContainerV2 :title="props.title" :id="props.id" @close="close" :icon="icon">
+    <ViewContainerV2 :title="props.title" :id="props.id" @close="emit('close')" :icon="props.icon">
       <template #title-slot>
         <div class="icons">
           <IconContainer size="18px" :link-mode="false" name="back" class="non-drag" @click="console.log('das')"/>

@@ -9,6 +9,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   openFileDialog: () => ipcRenderer.invoke('open-file-dialog'),
   openDirectoryDialog: () => ipcRenderer.invoke('open-directory-dialog'),
   openFile: (filePath: string) => ipcRenderer.invoke('open-file', filePath),
+  svgTransform: (filePath: string) => ipcRenderer.invoke('svg-to-symbol', filePath),
 
   windowControls: {
     minimize: () => ipcRenderer.send('window-minimize'),

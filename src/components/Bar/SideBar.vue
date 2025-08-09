@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 
 
-import Icon from "@/components/Container/Icon.vue";
+
 import { IconData } from "@/utils";
 
 

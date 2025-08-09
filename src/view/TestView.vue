@@ -5,7 +5,7 @@ import router from "@/router";
 
 import { ArrowRight} from '@element-plus/icons-vue'
 
-import Icon from "@/components/Container/Icon.vue";
+
 import { VxeTableEvents, VxeTableInstance } from "vxe-pc-ui/types/components/table";
 import { VxeColumnPropTypes } from "vxe-pc-ui/types/components/column";
 import { VXETableNode } from "@/utils/type.ts";
@@ -387,7 +387,7 @@ import { vResize } from "@/utils/directives/resizable";
       <div class="mainView-container">
         <div class="mainView-container-bread">
 
-          <el-breadcrumb :separator-icon="ArrowRight" class="resource-container-bread-path">
+          <el-breadcrumb :separator-icon="ArrowRight" class="resource-container-collection-bread-path">
             <el-breadcrumb-item
                 v-for="(item, index) in pathArray"
                 :key="item.id" @click="breadClick(index)"
@@ -399,9 +399,9 @@ import { vResize } from "@/utils/directives/resizable";
 
 
 
-          <div class="resource-container-bread-button animate_press" @click="open">新增</div>
+          <div class="resource-container-collection-bread-button animate_press" @click="open">新增</div>
         </div>
-        <div class="resource-container-table">
+        <div class="resource-container-collection-table">
           <TableContainer :data="tableData"></TableContainer>
         </div>
       </div>
@@ -475,7 +475,7 @@ import { vResize } from "@/utils/directives/resizable";
   padding: 0 12px 12px;
   background: transparent;
 }
-.resource-container-table {
+.resource-container-collection-table {
   flex: 1;
   min-width: 0;
   overflow: hidden;
@@ -496,7 +496,7 @@ import { vResize } from "@/utils/directives/resizable";
   background: transparent;
   font-size: 14px;
 }
-.resource-container-bread-path{
+.resource-container-collection-bread-path{
   text-decoration: 1px underline;
 
   height: 100%;
@@ -508,7 +508,7 @@ import { vResize } from "@/utils/directives/resizable";
   justify-content: center;
   align-items: center;
 }
-.resource-container-bread-button{
+.resource-container-collection-bread-button{
   height: 100%;
   background: rgba(255, 255, 255, 0.4);
   border-radius: 3px;

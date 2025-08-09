@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Icon from "@/components/Container/Icon.vue";
 import {Component, Data, Util, vResize} from "@/utils";
 import TableContainer from "@/components/Container/TableContainer.vue";
 import PathContainer from "@/components/Container/PathContainer.vue";
@@ -14,10 +13,6 @@ const props = defineProps<{
   title: string,
 }>()
 
-
-function close(){
-  emit("close")
-}
 
 
 function open() {
@@ -43,13 +38,12 @@ const itemClick = (action: string) => {
 
 <template>
   <teleport to="#window-view">
-    <ViewContainerV2 :title="props.title" :id="props.id" :icon="icon" @close="close">
+    <ViewContainerV2 :title="props.title" :id="props.id" :icon="props.icon" @close="emit('close')">
       <div class="resource">
           <div class="resource-sidebar" v-resize="{ storageKey: 'my-panel-width', max: 300, min: 100}">
             <div class="resource-sidebar-title">快捷节点</div>
             <div class="resource-sidebar-section">
               <div v-for="(item, index) in Data.nodeData" :key="index" class="resource-sidebar-section-item" @click="itemClick(item.action as string)">
-                <Icon :type="item.icon"  source="bar"/>
                 <span>{{ item.label }}</span>
               </div>
             </div>

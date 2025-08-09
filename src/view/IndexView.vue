@@ -5,7 +5,7 @@ import router from "@/router";
 
 import {ArrowDown, ArrowRight} from '@element-plus/icons-vue'
 
-import Icon from "@/components/Container/Icon.vue";
+
 import { VxeTableEvents, VxeTableInstance } from "vxe-pc-ui/types/components/table";
 import { VxeColumnPropTypes } from "vxe-pc-ui/types/components/column";
 import { VXETableNode } from "@/utils/type.ts";

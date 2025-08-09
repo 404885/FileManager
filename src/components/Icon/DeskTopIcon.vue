@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {onBeforeMount, onMounted, ref} from "vue"
 import interact from "interactjs"
-import {useDeskTopCondition} from "@/pinia/DeskTopCondition.ts"
+import { useDeskTopCondition } from "@/pinia/DeskTopCondition.ts"
 
 const props = defineProps({
   icon: { required: true, type: String },
@@ -22,10 +22,15 @@ const position = ref({ x: props.x, y: props.y})
 const origin = ref({ x: position.value.x, y: position.value.y })
 
 const isSelected = ref(false)
+
 function onDeskTopIconClick(e: MouseEvent) {
-  const target = e.target as HTMLElement
+  // e.stopPropagation();
+
+  const target = e.target as HTMLElement;
   isSelected.value = DeskTopIcon.value!.contains(target)
 }
+
+
 
 onMounted(() => {
   const el = DeskTopIcon.value
@@ -96,6 +101,7 @@ onMounted(() => {
     },
   })
 
+
   // 初始位置
   el.style.transform = `translate(${position.value.x}px, ${position.value.y}px)`
 
@@ -106,10 +112,15 @@ onMounted(() => {
 onBeforeMount(()=>{
   document.removeEventListener('mousedown', onDeskTopIconClick)
 })
+
 </script>
 
 <template>
-  <div class="desktop-icon-wrapper" :class="{ selected: isSelected }" :style="{width:iconSize+'px',height:iconSize+'px'}" ref="DeskTopIcon">
+  <div class="desktop-icon-wrapper"
+       :class="{ selected: isSelected }"
+       :style="{width:iconSize+'px',height:iconSize+'px'}"
+
+       ref="DeskTopIcon">
     <svg class="desktop-icon" aria-hidden="true">
       <use :href="'#icon-'+icon" />
     </svg>

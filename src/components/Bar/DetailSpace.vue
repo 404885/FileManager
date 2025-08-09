@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {ref, watch, onMounted } from 'vue'
 
-import Icon from "@/components/Container/Icon.vue";
+
 
 import { ElTreeNode } from "@/utils/type.ts";
 import { useTreeCondition } from "@/pinia/TreeCondition.ts";

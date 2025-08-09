@@ -1,5 +1,5 @@
 import { useTreeCondition } from '@/pinia/TreeCondition'
-import { createApp, h, type Component, type App } from 'vue'
+import { createApp, h, type Component } from 'vue'
 import {DOUBLE_CLICK_THRESHOLD, LOCK_DURATION} from "@/utils/constant.ts";
 
 // 为 props 定义一个通用类型
@@ -7,7 +7,7 @@ interface ComponentProps {
     [key: string]: any;
 }
 // let currentSyncInstance: App | null = null
-let currentAsyncInstance: App | null = null
+
 const currentSyncInstances = new Map<string, ReturnType<typeof createApp>>()
 
 /*  递归查询父文件夹，得到一个路径列表。
@@ -139,43 +139,6 @@ export const formatter ={
 }
 
 
-// 同步调用openComponent，返回 Promise，可以获取组件传出的数据
-// export function openComponent(ComponentCtor: Component, props?: ComponentProps, singleton = true): void {
-//     console.log('openComponent called with props:', props, 'singleton:', singleton)
-//
-//     const container = document.createElement('div')
-//     container.className = 'sync-component-container'
-//     document.body.appendChild(container)
-//
-//     // 如果是单例模式，先卸载已有实例
-//     if (singleton && currentSyncInstance) {
-//         currentSyncInstance.unmount()
-//         const old = document.querySelector('.sync-component-container')
-//         container.dataset.id = Date.now().toString()
-//         old?.remove()
-//         currentSyncInstance = null
-//     }
-//
-//     const app = createApp({
-//         render() {
-//             return h(ComponentCtor, {
-//                 ...props,
-//                 onClose: (payload?: any) => {
-//                     app.unmount()
-//                     container.remove()
-//                     if (singleton) currentSyncInstance = null
-//                     props?.onClose?.(payload) // 透传原始回调
-//                 }
-//             })
-//         }
-//     })
-//
-//     app.mount(container)
-//
-//     if (singleton) {
-//         currentSyncInstance = app
-//     }
-// }
 export function openComponent(ComponentCtor: Component,instanceId: string, props?: ComponentProps, singleton = true): void {
     console.log('openComponent called with props:', props, 'singleton:', singleton, 'instanceId:', instanceId)
 
@@ -217,36 +180,50 @@ export function openComponent(ComponentCtor: Component,instanceId: string, props
         currentSyncInstances.set(instanceId, app)
     }
 }
-// 异步调用的 openComponent，返回 Promise，可以获取组件传出的数据
-export function asyncOpenComponent<T = any>(ComponentCtor: Component, props: ComponentProps = {}): Promise<T> {
+// 异步调用版本，支持 instanceId + singleton 控制，返回 Promise 获取返回值
+export function asyncOpenComponent<T = any>(ComponentCtor: Component, instanceId: string, props: ComponentProps = {}, singleton = true): Promise<T> {
     return new Promise((resolve) => {
-        if (currentAsyncInstance) {
-            currentAsyncInstance.unmount()
-            document.getElementById('async-component')?.remove()
+        // 单例模式下卸载已有实例
+        if (singleton && instanceId) {
+            const existingApp = currentSyncInstances.get(instanceId)
+            if (existingApp) {
+                existingApp.unmount()
+                currentSyncInstances.delete(instanceId)
+                document.querySelector(`.sync-component-container[data-instance-id="${instanceId}"]`)?.remove()
+            }
         }
 
         const container = document.createElement('div')
-        container.id = 'async-component'
+        container.className = 'sync-component-container'
+        if (instanceId) container.dataset.instanceId = instanceId
         document.body.appendChild(container)
 
         const app = createApp({
             render() {
                 return h(ComponentCtor, {
                     ...props,
-                    onClose: (result: T) => {
-                        resolve(result)  // 异步回调，传递返回值
+                    resolve,  // 自动注入 resolve
+                    onClose: (payload?: T) => {
+                        resolve(payload as T)  // 组件关闭时返回值
                         app.unmount()
                         container.remove()
-                        currentAsyncInstance = null
+                        if (singleton && instanceId) {
+                            currentSyncInstances.delete(instanceId)
+                        }
+                        props?.onClose?.(payload)
                     }
                 })
             }
         })
 
         app.mount(container)
-        currentAsyncInstance = app
+
+        if (singleton && instanceId) {
+            currentSyncInstances.set(instanceId, app)
+        }
     })
 }
+
 
 // 一个单双击处理回调函数
 export function useHandleClick(delay = 250) {
@@ -282,6 +259,13 @@ export function useHandleClick(delay = 250) {
     }
 
     return { handleClick }
+}
+// 对openDirectoy进行解析，得到一个扁平的路径文件
+export function extractPaths(node:any) {
+    if (!node) return []
+
+    const childrenPaths = (node.children || []).flatMap(extractPaths)
+    return node.path ? [node.path, ...childrenPaths] : childrenPaths
 }
 // 一个单双击处理回调函数,传入回调函数，分别是id 单击事件 双击事件
 export function useClickHandler<T>(getId: (node: T) => string , singleClickFn?: (node: T) => void, doubleClickFn?: (node: T) => void, doubleClickThreshold: number = DOUBLE_CLICK_THRESHOLD, lockDuration: number = LOCK_DURATION) {
