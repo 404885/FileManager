@@ -72,10 +72,10 @@ const visibleBreadData = computed(() => {
   justify-content: center; /* 水平居中 */
   align-items: center;
 }
+
 .breadCrumbItem {
   display: flex;
   flex-direction: row;
-
   gap: 5px;
 }
 
@@ -87,6 +87,7 @@ const visibleBreadData = computed(() => {
   border-radius: 4px;
   transition: all 0.1s ease-in-out;
   user-select: none;
+
 }
 
 .navItem:hover {

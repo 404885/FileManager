@@ -8,12 +8,18 @@ import WebBrowser from "@/components/Application/WebBrowser.vue";
 import SystemSetting from "@/components/Application/SystemSetting.vue";
 
 export const nodeData = [
-    { label: '工作空间', icon: '#Icon-file1', action: '', key: 'workspace'},
-    { label: '我的文档', icon: '#Icon-compass', action: '', key: 'collection' },
+    { label: '工作空间', icon: 'pdf', action: '', key: 'workspace'},
+    { label: '文档', icon: '#Icon-compass', action: '', key: 'collection' },
     { label: '最近浏览', icon: '#Icon-filesearch', key: 'recent'},
-    { label: '收藏文件', icon: '#Icon-heart', key: 'favorite'},
-    { label: '回收中心', icon: '#Icon-delete', key: 'delete'},
-    { label: '草稿记录', icon: '#Icon-edit-square', key: 'draft'},
+    { label: '收藏夹', icon: '#Icon-heart', key: 'favorite'},
+    { label: '回收站', icon: '#Icon-delete', key: 'delete'},
+    { label: '标签', icon: '#Icon-delete', key: 'delete'},
+    { label: '关系图', icon: '#Icon-delete', key: 'delete'},
+    { label: '未分类', icon: '#Icon-edit-square', key: 'draft'},
+    { label: '图片', icon: '#Icon-edit-square', key: 'draft'},
+    { label: '视频', icon: '#Icon-edit-square', key: 'draft'},
+    { label: '音频', icon: '#Icon-edit-square', key: 'draft'},
+    { label: '文档', icon: '#Icon-edit-square', key: 'draft'},
 ]
 
 /* SideBar功能页面跳转 */
@@ -64,7 +70,8 @@ export const applicationData = reactive<Applications[]>([
         name:'资源管理器',
         icon:'file_explorer',
         dblclick(){
-            Util.openComponent(ResourceFolder, this.id,{ title: '资源管理器',id:crypto.randomUUID(),icon:this.icon,})
+            console.log(this.id)
+            Util.openComponent(ResourceFolder, this.id,{ title: '资源管理器',id:crypto.randomUUID(),icon:this.icon,}, false)
         },
         async contextMenu(e:MouseEvent){
             e.stopPropagation()

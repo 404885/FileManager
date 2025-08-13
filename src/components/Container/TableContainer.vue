@@ -101,20 +101,53 @@ function loadWidths() {
   }
 }
 
+// function startResize(e: MouseEvent, index: number) {
+//   const startX = e.clientX
+//   const startWidth = Fields.value[index].width
+//
+//   const onMouseMove = (moveEvent: MouseEvent) => {
+//     const delta = moveEvent.clientX - startX
+//     Fields.value[index].width = Math.max(112, startWidth + delta)
+//   }
+//
+//   const onMouseUp = () => {
+//     window.removeEventListener('mousemove', onMouseMove)
+//     window.removeEventListener('mouseup', onMouseUp)
+//
+//     saveWidths()  // 保存列宽
+//   }
+//
+//   window.addEventListener('mousemove', onMouseMove)
+//   window.addEventListener('mouseup', onMouseUp)
+// }
+
 function startResize(e: MouseEvent, index: number) {
   const startX = e.clientX
   const startWidth = Fields.value[index].width
 
+  let newWidth = startWidth
+
+  // 节流标记
+  let ticking = false
+
   const onMouseMove = (moveEvent: MouseEvent) => {
     const delta = moveEvent.clientX - startX
-    Fields.value[index].width = Math.max(112, startWidth + delta)
+    newWidth = Math.max(112, startWidth + delta)
+
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        Fields.value[index].width = newWidth
+        ticking = false
+      })
+      ticking = true
+    }
   }
 
   const onMouseUp = () => {
     window.removeEventListener('mousemove', onMouseMove)
     window.removeEventListener('mouseup', onMouseUp)
 
-    saveWidths()  // 保存列宽
+    saveWidths()
   }
 
   window.addEventListener('mousemove', onMouseMove)
@@ -142,6 +175,8 @@ store.$subscribe(async(mutation, _state) => {
   }
 })
 
+
+
 onMounted( async () => {
   tableData.value = await window.electronAPI.dataOperation.loadTable(store.currentWorkspace)
   loadWidths()
@@ -154,50 +189,50 @@ onMounted( async () => {
 
 <template>
   <div class="table-container">
-    <div class="table-container-head">
-      <div class="table-container-head-item"></div>
-      <div class="table-container-head-item"
-           v-for="(item,index) of Fields"
-           @contextmenu.stop.prevent="fieldContext($event, index)"
-           :style="{ width: item.width + 'px' }">
-        <div class="table-container-head-item-cell">{{item.label}}</div>
-        <div class="table-container-head-item-resizeHandle" @mousedown.stop.prevent="startResize($event, index)"></div>
-      </div>
-      <div class="table-container-head-fill">
-        <el-popover placement="right-end" >
-        <template #reference>
-          <div class="table-container-head-menu">+</div>
-        </template>
-        <template #default>
-          <div class="context-menu" ref="container">
-            <div class="context-menu-item" v-for="item of Data.headData" @click="itemClick(item)" :class="{ disabled: isClicked(item) }">{{item.label}}</div>
-          </div>
-        </template>
-      </el-popover></div>
-    </div>
-    <div class="table-container-body">
-      <div class="table-container-body-row" v-for="(row, index) of tableData">
-        <div class="table-container-body-row-cell">{{ index+1 }}</div>
-        <div class="table-container-body-row-cell"
-             v-for="item of Fields"
-             :style="{ width: item.width + 'px' }"
-             :class="'align-' + item.align"
-             @dblclick="cellClick(row as any, item.key)">
-          <template v-if="item.key === 'name'">
-            <IconContainer :file-type="row.type" :link-mode="true"></IconContainer>
-            <span>{{ row[item.key] }}</span>
-          </template>
-          <template v-else-if="item.key === 'create_time'">
-            {{ Util.formatter.timeFormatter(Number(row[item.key])) }}
-          </template>
-          <template v-else>
-            {{ (row as any)[item.key] }}
-          </template>
+      <div class="table-container-head">
+        <div class="table-container-head-item"></div>
+        <div class="table-container-head-item"
+             v-for="(item,index) of Fields"
+             @contextmenu.stop.prevent="fieldContext($event, index)"
+             :style="{ width: item.width + 'px' }">
+          <div class="table-container-head-item-cell">{{item.label}}</div>
+          <div class="table-container-head-item-resizeHandle" @mousedown.stop.prevent="startResize($event, index)"></div>
         </div>
-        <div class="table-container-body-row-fill"></div>
+        <div class="table-container-head-fill">
+          <el-popover placement="right-end" >
+            <template #reference>
+              <div class="table-container-head-menu">+</div>
+            </template>
+            <template #default>
+              <div class="context-menu" ref="container">
+                <div class="context-menu-item" v-for="item of Data.headData" @click="itemClick(item)" :class="{ disabled: isClicked(item) }">{{item.label}}</div>
+              </div>
+            </template>
+          </el-popover></div>
       </div>
-      <div class="table-container-body-fill"></div>
-    </div>
+      <div class="table-container-body">
+        <div class="table-container-body-row" v-for="(row, index) of tableData">
+          <div class="table-container-body-row-cell">{{ index+1 }}</div>
+          <div class="table-container-body-row-cell"
+               v-for="item of Fields"
+               :style="{ width: item.width + 'px' }"
+               :class="'align-' + item.align"
+               @dblclick="cellClick(row as any, item.key)">
+            <template v-if="item.key === 'name'">
+              <IconContainer :file-type="row.type" :link-mode="true"></IconContainer>
+              <span>{{ row[item.key] }}</span>
+            </template>
+            <template v-else-if="item.key === 'create_time'">
+              {{ Util.formatter.timeFormatter(Number(row[item.key])) }}
+            </template>
+            <template v-else>
+              {{ (row as any)[item.key] }}
+            </template>
+          </div>
+          <div class="table-container-body-row-fill"></div>
+        </div>
+        <div class="table-container-body-fill"></div>
+      </div>
   </div>
 </template>
 
@@ -232,8 +267,7 @@ onMounted( async () => {
   min-height: 40px;
   display: flex;
   flex-direction: row;
-  width: 100%;
-
+  height: 40px;
   position: sticky;
   top: 0;
 }
@@ -294,18 +328,17 @@ onMounted( async () => {
 }
 
 .table-container-body{
-  flex: 1;
+  height: 100%;
   display: flex;
   flex-direction: column;
   background: transparent;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.table-container-body::-webkit-scrollbar {
+  width: 6px;
+}
 
-  overflow: auto;
-  scrollbar-width: none;  /* Firefox 隐藏纵向滚动条 */
-  -ms-overflow-style: none; /* IE 隐藏纵向滚动条 */
-}
-.table-container-body::-webkit-scrollbar:vertical {
-  display: none;
-}
 .table-container-body-row{
   display: flex;
   flex-direction: row;
@@ -338,6 +371,8 @@ onMounted( async () => {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  will-change: width;
+
 }
 .table-container-body-row-cell:first-child{
   width: 40px;

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import {Component, Data, Util, vResize} from "@/utils";
-import TableContainer from "@/components/Container/TableContainer.vue";
-import PathContainer from "@/components/Container/PathContainer.vue";
-import TreeContainer from "@/components/Container/TreeContainer.vue";
+import BreadCrumb from "@/components/Application/ResourceFolder/BreadCrumb.vue";
 import ViewContainerV2 from "@/components/Container/ViewContainerV2.vue";
 import SwitchDialog from '../Dialog/SwitchDialog.vue';
+import IconContainer from "@/components/Container/IconContainer.vue";
+import Table from "@/components/Application/ResourceFolder/Table.vue";
 
 const emit = defineEmits(['close'])
 const props = defineProps<{
@@ -41,28 +41,28 @@ const itemClick = (action: string) => {
     <ViewContainerV2 :title="props.title" :id="props.id" :icon="props.icon" @close="emit('close')">
       <div class="resource">
           <div class="resource-sidebar" v-resize="{ storageKey: 'my-panel-width', max: 300, min: 100}">
+
             <div class="resource-sidebar-title">快捷节点</div>
             <div class="resource-sidebar-section">
               <div v-for="(item, index) in Data.nodeData" :key="index" class="resource-sidebar-section-item" @click="itemClick(item.action as string)">
                 <span>{{ item.label }}</span>
+                <IconContainer size="20px" :link-mode="false" :name="item.icon"/>
               </div>
             </div>
-            <div class="resource-sidebar-title">工作空间</div>
-            <div class="resource-sidebar-tree">
-              <TreeContainer></TreeContainer>
-            </div>
+<!--            <div class="resource-sidebar-title">工作空间</div>-->
+<!--            <div class="resource-sidebar-tree">-->
+<!--              <TreeContainer></TreeContainer>-->
+<!--            </div>-->
           </div>
           <div class="resource-container">
             <div class="resource-container-bread">
-
-              <div class="resource-container-bread-path">
-                <PathContainer></PathContainer>
-              </div>
-
+              <div class="resource-container-bread-path"><BreadCrumb></BreadCrumb></div>
               <div class="resource-container-bread-button animate_press" @click="open">新增</div>
             </div>
+
             <div class="resource-container-table">
-              <TableContainer></TableContainer>
+              <Table></Table>
+<!--              <TableContainer></TableContainer>-->
             </div>
           </div>
         </div>
@@ -72,6 +72,7 @@ const itemClick = (action: string) => {
 
 
 <style>
+
 .resource {
   display: flex;
   flex-direction: row;
@@ -79,6 +80,8 @@ const itemClick = (action: string) => {
   user-select: none;
   height: 100%;
 }
+
+
 
 .resource-sidebar {
   display: flex;
@@ -98,6 +101,14 @@ const itemClick = (action: string) => {
   margin-left: 8px;
   margin-right: 8px;
   font-size: 14px;
+  flex: 1;
+  overflow-y: auto;
+  /* 隐藏滚动条 - Webkit 浏览器 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE 10+ */
+}
+.resource-sidebar-section::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 .resource-sidebar-section-item {
   display: flex;
@@ -109,10 +120,13 @@ const itemClick = (action: string) => {
   color: #4B4B4F;
   cursor: pointer;
   transition: background 0.2s;
+
+  justify-content: space-between;
 }
 .resource-sidebar-section-item:hover {
   background-color: rgba(0, 0, 0, 0.05);
 }
+
 
 .resource-sidebar-tree{
   flex: 1;
@@ -135,7 +149,7 @@ const itemClick = (action: string) => {
   flex-direction: column;
   flex: 1;
   min-width: 408px;
-  padding: 0 12px 12px;
+  padding: 0 12px 8px;
   background: transparent;
 }
 .resource-container-table {
@@ -144,8 +158,10 @@ const itemClick = (action: string) => {
   overflow: hidden;
   border-radius: 6px;
   background: transparent;
-  overflow-x: auto;
+  will-change: width;
 }
+
+
 .resource-container-bread {
   min-height: 46px;
   width: 100%;

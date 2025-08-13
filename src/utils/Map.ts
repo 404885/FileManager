@@ -1,33 +1,33 @@
-const defaultMappings = [
-    ['pdf', 'pdf'],
-    ['docx', 'word'],
-    ['doc', 'word'],
-    ['xlsx', 'excel'],
-    ['xls', 'excel'],
-    ['png', 'photo'],
-    ['jpg', 'photo'],
-    ['jpeg', 'photo'],
-    ['gif', 'photo'],
-    ['svg', 'photo'],
-    ['mp4', 'video'],
-    ['mp3', 'audio'],
-    ['zip', 'zip'],
-    ['rar', 'zip'],
-    ['7z', 'zip'],
-    ['txt', 'txt'],
-    ['json', 'code'],
-    ['js', 'code'],
-    ['ts', 'code'],
-    ['html', 'code'],
-    ['css', 'code']
-];
-
-function extractPaths(node:any) {
-    if (!node) return []
-
-    const childrenPaths = (node.children || []).flatMap(extractPaths)
-    return node.path ? [node.path, ...childrenPaths] : childrenPaths
-}
+// const defaultMappings = [
+//     ['pdf', 'pdf'],
+//     ['docx', 'word'],
+//     ['doc', 'word'],
+//     ['xlsx', 'excel'],
+//     ['xls', 'excel'],
+//     ['png', 'photo'],
+//     ['jpg', 'photo'],
+//     ['jpeg', 'photo'],
+//     ['gif', 'photo'],
+//     ['svg', 'photo'],
+//     ['mp4', 'video'],
+//     ['mp3', 'audio'],
+//     ['zip', 'zip'],
+//     ['rar', 'zip'],
+//     ['7z', 'zip'],
+//     ['txt', 'txt'],
+//     ['json', 'code'],
+//     ['js', 'code'],
+//     ['ts', 'code'],
+//     ['html', 'code'],
+//     ['css', 'code']
+// ];
+//
+// function extractPaths(node:any) {
+//     if (!node) return []
+//
+//     const childrenPaths = (node.children || []).flatMap(extractPaths)
+//     return node.path ? [node.path, ...childrenPaths] : childrenPaths
+// }
 
 
 export async function netSymbol() {
@@ -97,8 +97,8 @@ export async function injectSymbol() {
     // let symbols = data.map(s => s.icon_value)
 
     let result = await window.electronAPI.svgsTransform('./icon')
-    console.log(result)
-    const symbols = result.symbols
+    const symbols = result.symbols as unknown as string[];
+
 
 
     // let pathall = []
