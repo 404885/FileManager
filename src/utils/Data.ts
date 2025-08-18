@@ -75,15 +75,15 @@ export const applicationData = reactive<Applications[]>([
         },
         async contextMenu(e:MouseEvent){
             e.stopPropagation()
-            const result = await Util.asyncOpenComponent(MenuContainerV1,'1', {
-                position: { x: e.clientX, y: e.clientY },
-                data:  [
-                    { name: "O2 1", icon: "icon1", click: () => {}},
-                    { name: "Op3ion 2", icon: "icon2", click: () => {}},
-                    { name: "1n 3", icon: "icon2", click: () => {}},
-                ],
-            })
-            console.log(result)
+            // const result = await Util.asyncOpenComponent(MenuContainerV1,'1', {
+            //     position: { x: e.clientX, y: e.clientY },
+            //     data:  [
+            //         { name: "O2 1", icon: "icon1", click: () => {}},
+            //         { name: "Op3ion 2", icon: "icon2", click: () => {}},
+            //         { name: "1n 3", icon: "icon2", click: () => {}},
+            //     ],
+            // })
+            // console.log(result)
         },
     },
     {

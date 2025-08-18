@@ -85,41 +85,51 @@
 
 /* ----------------- el table 组件样式重置------------------ */
 
-
-/* 表格整体透明背景 */
-.el-table,
-.el-table tr,
-.el-table__header-wrapper,
-.el-table__body-wrapper,
-.el-table__expanded-cell {
-    background-color: transparent;
+/* 拖拽代理条样式 */
+.el-table__column-resize-proxy {
+    background-color: rgba(0, 0, 0, 0.2);
+    width: 4px;
+    border: none;
 }
 
-/* 表头每个单元格背景透明 */
+/* 表格整体透明背景 */
+.el-table, .el-table tr {
+    background-color: transparent;
+}
+/* 表头单元格重置 */
 .el-table__header-wrapper th.el-table__cell {
     background-color: transparent;
 }
-
-/* 表头可排序列悬停背景透明 */
-.el-table th.el-table__cell.is-sortable:hover {
+/* 表头hover重置 */
+.el-table__header-wrapper th.el-table__cell:hover {
     background-color: transparent;
 }
-
-/* 表格单元格底部分割线去除 */
-.el-table__body-wrapper tbody tr td,
-.el-table td.el-table__cell,
-.el-table th.el-table__cell.is-leaf {
-    border-bottom: none;
-}
-
-/* 去除内层伪元素的边框线 */
-.el-table--fit .el-table__inner-wrapper::before {
-    display: none ;
-}
-
-/* 行悬停背景透明 */
+/* 表体row hover重置 */
 .el-table__body-wrapper tr:hover > td.el-table__cell {
     background-color: transparent !important;
 }
+/* el-table内部框线去除 */
+.el-table th, .el-table td {
+    border: none !important; /* 使用灰色边框 */
+}
+
+
+/* 去除内层伪元素的边框线 */
+.el-table__inner-wrapper::before {
+    display: none ;
+}
+.el-table__inner-wrapper:after {
+    display: none;
+}
+.el-table--border:before {
+    display: none !important;
+}
+.el-table--border:after{
+    display: none !important;
+}
+.el-table__border-left-patch{
+    display: none !important;
+}
+
 
 

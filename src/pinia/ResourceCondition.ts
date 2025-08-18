@@ -1,102 +1,51 @@
 import { defineStore } from 'pinia'
-import {DraggableContainer} from "@/utils/type.ts";
 
-export const useResourceCondition = defineStore('DeskTopCondition', {
+
+export interface ResourceFolderState {
+    folders: any[]  // 你资源管理器特有的数据，比如文件夹列表等
+    selectedId: string | null
+    // 其他实例私有状态
+}
+
+export const useResourceCondition = defineStore('ResourceCondition', {
     state: () => ({
-        iconBoxes: {} as Record<string, DraggableContainer>,
-        application: [] as {id:string,icon:string}[],
-        minimizedWindows: {} as Record<string, boolean>,
-        volume:0.1 as number,
-        windowOffset: {
-            x: 15,
-            y: 15,
-        },
-        offsetStep: 15 as number,
-        offsetLimit: 300 as number,
+        instances: {} as Record<string, ResourceFolderState>,
+        // 公用状态，比如：
+        // globalSetting: { theme: 'light' },
     }),
-    getters:{
-        computeZIndex: (state) => {
-            return (id: string) => {
-                const idx = state.application.findIndex(app => app.id === id)
-                return idx === -1 ? 0 : idx + 10
-            }
-        },
-        isMinimized: (state) => {
-            return (id: string) => state.minimizedWindows[id] ?? false
-        },
-        getVolume: (state) => {
-            return state.volume
-        },
-        getApp: (state) => {
-            return state.application
+    getters: {
+        getInstance: (state) => {
+            return (id: string) => state.instances[id]
         },
     },
     actions: {
-        init(app: {id:string, icon:string}) {
-            if (!this.application.some(a => a.id === app.id)) {
-                this.application.push(app)
+        // 初始化某个资源管理器实例状态
+        initInstance(id: string) {
+            if (!this.instances[id]) {
+                this.instances[id] = {
+                    folders: [],
+                    selectedId: null,
+                }
             }
         },
-        bringToFront(id: string) {
-            const index = this.application.findIndex(app => app.id === id)
-            if (index !== -1) {
-                const app = this.application.splice(index, 1)[0]
-                this.application.push(app)
+        // 更新某个实例的文件夹数据
+        setFolders(id: string, folders: any[]) {
+            if (this.instances[id]) {
+                this.instances[id].folders = folders
             }
         },
-        setVolume(volume: number) {
-            this.volume = volume
-        },
-        updateIconBox(box: DraggableContainer) {
-            this.iconBoxes[box.id] = box
-        },
-        removeIconBox(id: string) {
-            delete this.iconBoxes[id]
-        },
-        isColliding(current: DraggableContainer) {
-            return Object.values(this.iconBoxes).some(icon => {
-                if (icon.id === current.id) return false
-                return !(
-                    current.x + current.width <= icon.x ||
-                    current.x >= icon.x + icon.width ||
-                    current.y + current.height <= icon.y ||
-                    current.y >= icon.y + icon.height
-                )
-            })
-        },
-        getNextPosition() {
-            const offset = { ...this.windowOffset };
-
-            this.windowOffset.x += this.offsetStep;
-            this.windowOffset.y += this.offsetStep;
-
-            if (this.windowOffset.x > this.offsetLimit || this.windowOffset.y > this.offsetLimit) {
-                this.windowOffset.x = 0;
-                this.windowOffset.y = 0;
+        setSelected(id: string, selectedId: string) {
+            if (this.instances[id]) {
+                this.instances[id].selectedId = selectedId
             }
-
-            return offset;
         },
-        minimizeWindow(id: string) {
-            this.minimizedWindows[id] = true
+        // 删除实例
+        removeInstance(id: string) {
+            delete this.instances[id]
         },
-        restoreWindow(id: string) {
-            this.minimizedWindows[id] = false
-            this.bringToFront(id)
-        },
-        removeApplication(id: string) {
-            const index = this.application.findIndex(app => app.id === id)
-            if (index !== -1) {
-                this.application.splice(index, 1)
-            }
-            delete this.minimizedWindows[id]
-        },
-        resetWindowOffset() {
-            this.windowOffset.x = 0;
-            this.windowOffset.y = 0;
-        },
-        desktopInitialize(){
-
-        },
+        // 公用状态修改
+        setGlobalTheme(theme: string) {
+            this.globalSetting.theme = theme
+        }
     }
 })

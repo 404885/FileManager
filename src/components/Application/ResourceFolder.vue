@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import {Component, Data, Util, vResize} from "@/utils";
-import BreadCrumb from "@/components/Application/ResourceFolder/BreadCrumb.vue";
+import BreadCrumb from "@/components/Application/ResourceFolder/ShowTable/BreadCrumb.vue";
 import ViewContainerV2 from "@/components/Container/ViewContainerV2.vue";
 import SwitchDialog from '../Dialog/SwitchDialog.vue';
 import IconContainer from "@/components/Container/IconContainer.vue";
-import Table from "@/components/Application/ResourceFolder/Table.vue";
+import Table from "@/components/Application/ResourceFolder/ShowTable/Table.vue";
+import ShowTable from "@/components/Application/ResourceFolder/ShowTable/ShowTable.vue";
 
 const emit = defineEmits(['close'])
 const props = defineProps<{
@@ -33,12 +34,15 @@ const itemClick = (action: string) => {
     }
   }
 }
+const context = (e: MouseEvent) => {
+  e.stopPropagation()
+}
 
 </script>
 
 <template>
   <teleport to="#window-view">
-    <ViewContainerV2 :title="props.title" :id="props.id" :icon="props.icon" @close="emit('close')">
+    <ViewContainerV2 :title="props.title" :id="props.id" :icon="props.icon" @close="emit('close')" @contextmenu="context">
       <div class="resource">
           <div class="resource-sidebar" v-resize="{ storageKey: 'my-panel-width', max: 300, min: 100}">
 
@@ -54,17 +58,11 @@ const itemClick = (action: string) => {
 <!--              <TreeContainer></TreeContainer>-->
 <!--            </div>-->
           </div>
-          <div class="resource-container">
-            <div class="resource-container-bread">
-              <div class="resource-container-bread-path"><BreadCrumb></BreadCrumb></div>
-              <div class="resource-container-bread-button animate_press" @click="open">新增</div>
-            </div>
 
-            <div class="resource-container-table">
-              <Table></Table>
-<!--              <TableContainer></TableContainer>-->
-            </div>
-          </div>
+
+        <ShowTable></ShowTable>
+
+
         </div>
     </ViewContainerV2>
   </teleport>
@@ -144,55 +142,7 @@ const itemClick = (action: string) => {
 }
 
 
-.resource-container {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-width: 408px;
-  padding: 0 12px 8px;
-  background: transparent;
-}
-.resource-container-table {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  border-radius: 6px;
-  background: transparent;
-  will-change: width;
-}
 
-
-.resource-container-bread {
-  min-height: 46px;
-  width: 100%;
-  display: flex;
-
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 0;
-  background: transparent;
-  font-size: 14px;
-}
-.resource-container-bread-path{
-  height: 100%;
-  background: rgba(255, 255, 255, 0.4);
-  border-radius: 3px;
-  padding: 0 12px;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.resource-container-bread-button{
-  height: 100%;
-  background: rgba(255, 255, 255, 0.4);
-  border-radius: 3px;
-  padding: 0 12px;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
 
 </style>
 
