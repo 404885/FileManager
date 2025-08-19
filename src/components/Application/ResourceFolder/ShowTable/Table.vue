@@ -5,7 +5,7 @@ import { onMounted, ref, onBeforeUnmount } from "vue";
 import { VXETableNode } from "@/utils/type.ts";
 import IconContainer from "@/components/Container/IconContainer.vue";
 import ShowTableDialog from "@/components/Application/ResourceFolder/ShowTable/ShowTableDialog.vue";
-import CellExpand from "@/components/Application/ResourceFolder/ShowTable/CellExpand.vue";
+import TagExpand from "@/components/Application/ResourceFolder/ShowTable/TagExpand.vue";
 
 const tableData = ref<VXETableNode[]>([])
 const proxy = ref<HTMLElement | null>(null)
@@ -51,7 +51,7 @@ const handleCellClick = (row: any, column: any, cell: any, event: MouseEvent) =>
       const top = rect.top + window.scrollY;   // 加上滚动偏移
       const left = rect.left + window.scrollX; // 加上滚动偏移
       const height = rect.height
-      Util.openComponent(CellExpand, 'id', {dialogVisible: true, cellId: row.id, tag: row.tag, position: { top: top, left: left }, height: height});
+      Util.openComponent(TagExpand, 'id', {dialogVisible: true, cellId: row.id, tag: row.tag, position: { top: top, left: left }, height: height});
     }
 
 
@@ -144,6 +144,9 @@ onMounted( async () => {
             </template>
 
             <template v-else-if="item.key === 'tag' ">
+
+
+
               <div class="ellipsis-tag">
                 <el-tag v-for="tag in table.row[item.key]" :key="tag" class="tag-item" type="primary">
                   {{ tag }}
