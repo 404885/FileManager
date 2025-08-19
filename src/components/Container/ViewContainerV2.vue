@@ -59,6 +59,7 @@ onMounted(() => {
   interact(el)
       // 拖拽限制在父容器内
     .draggable({
+        cursorChecker: () => 'default',
         allowFrom: '.title-bar',
         ignoreFrom: '.content',
         listeners: {
@@ -77,7 +78,7 @@ onMounted(() => {
       })
       // 缩放限制在父容器内
     .resizable({
-        edges:  { top: false, left: true, bottom: true, right: true },
+        edges:  { top: true, left: true, bottom: true, right: true },
         ignoreFrom: '.content',
         modifiers: [
           // 大小范围限制
@@ -150,7 +151,7 @@ function maximize() {
   updateTransform()
 }
 
-function onTitlebarDblclick(e: MouseEvent) {
+function onTitleBarDblclick(e: MouseEvent) {
   const target = e.target as HTMLElement
 
   if (
@@ -176,7 +177,7 @@ function minimize() {
 
 <template>
   <div class="view-container" ref="viewContainer" v-show="!store.isMinimized(containerProperty.id)" :style="{zIndex:store.computeZIndex(containerProperty.id)}" @mousedown="bringToFront()">
-    <div class="title-bar" @dblclick="onTitlebarDblclick">
+    <div class="title-bar" @dblclick="onTitleBarDblclick">
       <div class="traffic-lights-wrapper">
         <div class="traffic-lights">
           <div class="traffic-light red" @click="close" title="关闭"></div>
@@ -232,7 +233,6 @@ function minimize() {
   border-bottom: 1px solid #e0e0e0; /* Subtle separator */
   will-change: transform;
   background: transparent;
-  cursor: pointer;
 }
 .traffic-lights-wrapper{
   height: 100%;

@@ -24,7 +24,6 @@ function RegisterIpcEvent(resourcesPath) {
   ipcMain.on("webview-id", (_event, id) => {
     const wc = webContents.fromId(id);
     wc == null ? void 0 : wc.setWindowOpenHandler(({ url }) => {
-      console.log(url);
       wc.loadURL(url);
       return { action: "deny" };
     });
@@ -227,7 +226,7 @@ function initDatabase() {
       )
     `).run();
   db.prepare(`
-    CREATE TABLE icon_map (
+    CREATE TABLE IF NOT EXISTS icon_map (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       extension TEXT NOT NULL UNIQUE,     -- 扩展名，比如 pdf、docx、mp4
       icon_name TEXT NOT NULL          -- 对应图标名，比如：pdf、word、video

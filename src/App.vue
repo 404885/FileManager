@@ -92,7 +92,11 @@ onMounted(() => {
   <div class="window-home">
     <div id="window-view" ref="desktop" class="window-view" @contextmenu="onRightClick">
       <div id="wallpaper" class="window-background">
-        <video ref="backgroundVideo" autoplay loop src="" :muted="false"/>
+        <video ref="backgroundVideo"
+               autoplay
+               loop
+               src="./assets/video/senrenbanka.mp4"
+               :muted="false"/>
       </div>
       <DeskTopIcon v-for="(app, index) in applications"
           :key="app.id"

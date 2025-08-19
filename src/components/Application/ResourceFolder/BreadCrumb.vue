@@ -52,7 +52,7 @@ const visibleBreadData = computed(() => {
   <div class="breadCrumb">
     <template v-for="(item, index) in visibleBreadData" :key="index">
       <div class="breadCrumbItem">
-        <div class="navItem" :style="{ cursor: item.name === '...' ? 'default' : 'pointer' }" @click="breadClick(item.id)">
+        <div class="navItem" :style="{ cursor: item.name === '...' ? 'default' : 'pointer' }" @click="breadClick(Number(item.id))">
           {{ item.name }}
         </div>
       </div>

@@ -101,7 +101,7 @@ export function initDatabase() {
       )
     `).run();
     db.prepare(`
-    CREATE TABLE icon_map (
+    CREATE TABLE IF NOT EXISTS icon_map (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       extension TEXT NOT NULL UNIQUE,     -- 扩展名，比如 pdf、docx、mp4
       icon_name TEXT NOT NULL          -- 对应图标名，比如：pdf、word、video
@@ -276,77 +276,6 @@ export function RegisterDataBaseOperations() {
             `).all(workspace);
 
         rows = [...portfolios, ...files];
-
-        // const safeKeyword = (keyword || '').trim();
-        // const likePattern = `%${safeKeyword}%`;
-        // if (!safeKeyword) {
-        //     // —— 无关键词：直接拿全表（portfolio + file），不标记 —— //
-        //     const portfolios = db.prepare(`
-        //       SELECT id, name, NULL AS file_size, NULL AS file_path, type,
-        //              connected_workspace, associated_folder,
-        //              create_time, last_browse_time,
-        //              0 AS isLeaf, 0 AS marked
-        //       FROM portfolio
-        //       WHERE connected_workspace = ?
-        //     `).all(workspace);
-        //
-        //             const files = db.prepare(`
-        //       SELECT id, name, file_size, file_path, type,
-        //              connected_workspace, associated_folder,
-        //              create_time, last_browse_time,
-        //              1 AS isLeaf, 0 AS marked
-        //       FROM file
-        //       WHERE connected_workspace = ?
-        //     `).all(workspace);
-        //
-        //     rows = [...portfolios, ...files];
-        //
-        // } else {
-        //     // —— 有关键词：CTE + GROUP BY + MAX(marked) —— //
-        //     const sql = `
-        //       WITH RECURSIVE result AS (
-        //         SELECT id, name, file_size, file_path, type,
-        //                connected_workspace, associated_folder,
-        //                create_time, last_browse_time,
-        //                1 AS isLeaf, 1 AS marked
-        //         FROM file
-        //         WHERE connected_workspace = ? AND name LIKE ?
-        //
-        //         UNION ALL
-        //
-        //         SELECT id, name, NULL AS file_size, NULL AS file_path, type,
-        //                connected_workspace, associated_folder,
-        //                create_time, last_browse_time,
-        //                0 AS isLeaf, 1 AS marked
-        //         FROM portfolio
-        //         WHERE connected_workspace = ? AND name LIKE ?
-        //
-        //         UNION ALL
-        //
-        //         SELECT p.id, p.name, NULL AS file_size, NULL AS file_path, p.type,
-        //                p.connected_workspace, p.associated_folder,
-        //                p.create_time, p.last_browse_time,
-        //                0 AS isLeaf, 0 AS marked
-        //         FROM portfolio p
-        //         JOIN result r ON p.id = r.associated_folder
-        //         WHERE p.connected_workspace = ?
-        //       )
-        //       SELECT
-        //         id, name, file_size, file_path, type,
-        //         connected_workspace, associated_folder,
-        //         create_time, last_browse_time,
-        //         isLeaf,
-        //         MAX(marked) AS marked
-        //       FROM result
-        //       GROUP BY id;
-        //     `;
-        //     const stmt = db.prepare(sql);
-        //     rows = stmt.all(
-        //         workspace, likePattern,
-        //         workspace, likePattern,
-        //         workspace
-        //     );
-        // }
 
         // —— 通用：把 rows 映射成 ElTreeNode —— //
         const nodes: ElTreeNode[] = rows.map(row => ({

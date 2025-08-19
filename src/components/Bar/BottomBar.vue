@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {onMounted, ref} from "vue";
+import {onMounted, onUnmounted, ref} from "vue";
 import BottomBarIcon from "@/components/Icon/BottomBarIcon.vue";
 import {useDeskTopCondition} from "@/pinia/DeskTopCondition.ts";
 const deskTopStore = useDeskTopCondition()
@@ -43,9 +43,14 @@ function toggleWindow(id: string) {
   }
 }
 
-onMounted(()=>{
+let clockTimer: number | null = null
+onMounted(() => {
   update()
-  setInterval(update, 1000)
+  clockTimer = window.setInterval(update, 1000)
+})
+
+onUnmounted(() => {
+  if (clockTimer) clearInterval(clockTimer)
 })
 </script>
 

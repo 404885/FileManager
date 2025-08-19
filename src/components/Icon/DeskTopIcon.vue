@@ -24,8 +24,7 @@ const origin = ref({ x: position.value.x, y: position.value.y })
 const isSelected = ref(false)
 
 function onDeskTopIconClick(e: MouseEvent) {
-  // e.stopPropagation();
-
+  e.stopPropagation();
   const target = e.target as HTMLElement;
   isSelected.value = DeskTopIcon.value!.contains(target)
 }

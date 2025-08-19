@@ -6,6 +6,8 @@ import ResourceFolder from "@/components/Application/ResourceFolder.vue";
 import MenuContainerV1 from "@/components/Container/MenuContainerV1.vue";
 import WebBrowser from "@/components/Application/WebBrowser.vue";
 import SystemSetting from "@/components/Application/SystemSetting.vue";
+import Preview from "@/components/Application/Preview.vue";
+import Chat from "@/components/Application/Chat.vue";
 
 export const nodeData = [
     { label: '工作空间', icon: 'pdf', action: '', key: 'workspace'},
@@ -113,7 +115,7 @@ export const applicationData = reactive<Applications[]>([
         name:'通讯',
         icon:'messages',
         dblclick(){
-            // Util.openComponent(Chat,this.id,{title:'通讯',id:crypto.randomUUID(),icon:this.icon,})
+            Util.openComponent(Chat,this.id,{title:'通讯',id:crypto.randomUUID(),icon:this.icon,})
         },
         contextMenu(e:MouseEvent){
             e.stopPropagation()
@@ -122,9 +124,20 @@ export const applicationData = reactive<Applications[]>([
     {
         id: crypto.randomUUID(),
         name: '设置',
-        icon:'setting',
+        icon:'settings',
         dblclick(){
             Util.openComponent(SystemSetting,this.id,{title:'设置',id:crypto.randomUUID(),icon:this.icon,})
+        },
+        contextMenu(e:MouseEvent){
+            e.stopPropagation()
+        },
+    },
+    {
+        id: crypto.randomUUID(),
+        name: 'PDF',
+        icon:'pdf',
+        dblclick(){
+            Util.openComponent(Preview,this.id,{title:'PDF预览',id:crypto.randomUUID(),icon:this.icon,})
         },
         contextMenu(e:MouseEvent){
             e.stopPropagation()

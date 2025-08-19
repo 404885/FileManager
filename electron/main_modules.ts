@@ -27,7 +27,6 @@ export function RegisterIpcEvent(resourcesPath: string) {
         const wc = webContents.fromId(id)
         // 拦截 new-window 事件
         wc?.setWindowOpenHandler(({ url }) => {
-            console.log(url);
             wc.loadURL(url) // 当前 webview 内打开
             return { action: 'deny' }
         })

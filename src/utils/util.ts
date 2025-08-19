@@ -181,9 +181,9 @@ export function openComponent(ComponentCtor: Component,instanceId: string, props
     }
 }
 // 异步调用版本，支持 instanceId + singleton 控制，返回 Promise 获取返回值
-export function asyncOpenComponent<T = any>(ComponentCtor: Component, instanceId: string, props: ComponentProps = {}, singleton = true): Promise<T> {
-    return new Promise((resolve) => {
-        // 单例模式下卸载已有实例
+export async function asyncOpenComponent<T = any>(ComponentOrLoader: Component | (() => Promise<{ default: Component }>), instanceId: string, props: ComponentProps = {}, singleton = true): Promise<T> {
+    return new Promise(async (resolve) => {
+        // 单例控制
         if (singleton && instanceId) {
             const existingApp = currentSyncInstances.get(instanceId)
             if (existingApp) {
@@ -198,13 +198,22 @@ export function asyncOpenComponent<T = any>(ComponentCtor: Component, instanceId
         if (instanceId) container.dataset.instanceId = instanceId
         document.body.appendChild(container)
 
+        // 处理动态导入
+        let ComponentCtor: Component
+        if (typeof ComponentOrLoader === 'function' && !(ComponentOrLoader as any).render) {
+            const { default: Comp } = await (ComponentOrLoader as () => Promise<{ default: Component }>)()
+            ComponentCtor = Comp
+        } else {
+            ComponentCtor = ComponentOrLoader as Component
+        }
+
         const app = createApp({
             render() {
                 return h(ComponentCtor, {
                     ...props,
-                    resolve,  // 自动注入 resolve
+                    resolve, // 自动注入
                     onClose: (payload?: T) => {
-                        resolve(payload as T)  // 组件关闭时返回值
+                        resolve(payload as T)
                         app.unmount()
                         container.remove()
                         if (singleton && instanceId) {

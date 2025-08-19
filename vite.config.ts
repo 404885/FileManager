@@ -29,6 +29,10 @@ export default defineConfig({
       renderer: process.env.NODE_ENV === 'test' ? undefined : {},
     }),
   ],
+  define: {
+    'global': {}, // pdf.js 依赖 global
+    'process.env': {} // 可能还会用到 process.env
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
