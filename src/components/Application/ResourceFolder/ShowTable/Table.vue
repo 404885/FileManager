@@ -5,15 +5,17 @@ import { onMounted, ref, onBeforeUnmount } from "vue";
 import { VXETableNode } from "@/utils/type.ts";
 import IconContainer from "@/components/Container/IconContainer.vue";
 import ShowTableDialog from "@/components/Application/ResourceFolder/ShowTable/ShowTableDialog.vue";
+import CellExpand from "@/components/Application/ResourceFolder/ShowTable/CellExpand.vue";
 
 const tableData = ref<VXETableNode[]>([])
 const proxy = ref<HTMLElement | null>(null)
 let clickTimer: ReturnType<typeof setTimeout> | null = null;
-const clickDelay = 300;
+const clickDelay = 200;
 
 
 const hoverRow = ref<any>(null);
 const hoverColumn = ref<string | null>(null);
+
 
 const fields = ref([
   { key: 'name', label: 'Name', width: 180, minWidth: 200 },
@@ -36,21 +38,27 @@ const handleCellClick = (row: any, column: any, cell: any, event: MouseEvent) =>
 
   // 延时触发单击事件
   clickTimer = setTimeout(() => {
-    console.log('单击事件触发:', row.name);
     clickTimer = null; // 执行完毕后清空计时器
     ElMessage({
       message: `单击事件触发: ${row.name}`,
       type: 'primary', // 这里设置消息类型，可改为 'success'/'warning'/'error'
       duration: 3000,
     });
+
+    if (column.property === 'tag') {
+      const cellRef = cell
+      const rect = cellRef.getBoundingClientRect();
+      const top = rect.top + window.scrollY;   // 加上滚动偏移
+      const left = rect.left + window.scrollX; // 加上滚动偏移
+      const height = rect.height
+      Util.openComponent(CellExpand, 'id', {dialogVisible: true, cellId: row.id, tag: row.tag, position: { top: top, left: left }, height: height});
+    }
+
+
+
+
+
   }, clickDelay);
-
-  if (column.property === 'tag') {
-    console.log('点击了tag')
-    console.log(cell, row, column)
-
-  }
-
 };
 
 const handleCellDblClick = async (row: any, column: any, cell: any, event: MouseEvent) => {
@@ -74,6 +82,7 @@ const handleCellDblClick = async (row: any, column: any, cell: any, event: Mouse
   if (column.property === 'tag') {
     console.log('点击了tag')
     console.log(cell, row, column)
+
   }
 
 };
@@ -117,6 +126,7 @@ onMounted( async () => {
         @cell-mouse-leave="handleCellLeave"
         @cell-click="handleCellClick"
         @cell-dblclick="handleCellDblClick">
+
       <el-table-column type="index" label="Id" :index="index => index" align="center" width="60" :resizable="false"></el-table-column>
 
 
@@ -134,11 +144,15 @@ onMounted( async () => {
             </template>
 
             <template v-else-if="item.key === 'tag' ">
-              <span class="ellipsis-tag">
+              <div class="ellipsis-tag">
                 <el-tag v-for="tag in table.row[item.key]" :key="tag" class="tag-item" type="primary">
                   {{ tag }}
                 </el-tag>
-              </span>
+              </div>
+
+
+
+
             </template>
 
             <template v-else>
@@ -166,22 +180,15 @@ onMounted( async () => {
             </template>
           </el-popover>
         </template>
+
         <template #default="button">
-          <el-button circle type="primary" v-show="hoverRow === button.row && hoverColumn === button.key" size="small">
-            <template #icon>
-              <IconContainer :link-mode="false" name="edit"></IconContainer>
-            </template>
-          </el-button>
-          <el-button circle type="warning" v-show="hoverRow === button.row && hoverColumn === button.key" size="small">
-            <template #icon>
-              <IconContainer :link-mode="false" name="star"></IconContainer>
-            </template>
-          </el-button>
-          <el-button circle type="danger" v-show="hoverRow === button.row && hoverColumn === button.key" size="small">
-            <template #icon>
-              <IconContainer :link-mode="false" name="trash"></IconContainer>
-            </template>
-          </el-button>
+          <div class="edit-icon" v-show="hoverRow === button.row && hoverColumn === button.key">
+            <button>1</button>
+            <button>2</button>
+            <button>2</button>
+          </div>
+
+
         </template>
       </el-table-column>
 
@@ -194,7 +201,6 @@ onMounted( async () => {
 
 
 
-
 /* 省略号效果 */
 .ellipsis {
   width: 90%;
@@ -202,19 +208,15 @@ onMounted( async () => {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
-.ellipsis-tag{
-  display: inline-block;
-  width: 100%;   /* 确保容器宽度为100% */
+.ellipsis-tag {
+  width: 100%;
   overflow: hidden;
-  text-overflow: ellipsis; /* 省略号 */
-  white-space: nowrap;     /* 防止换行 */
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.tag-item + .tag-item {
-  margin-left: 5px;
 
-}
+
 
 :deep(.el-table) {
   background: rgba(255, 255, 255, 0.4);
@@ -260,13 +262,6 @@ onMounted( async () => {
   outline-offset: -2px;
   transform: none;
   box-shadow: none;
-}
-
-:deep(el-tooltip){
-  background-color: #333 !important;
-  color: #fff !important;
-  font-size: 13px;
-  padding: 6px 10px;
 }
 
 
