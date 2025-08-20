@@ -2,6 +2,8 @@
 import {onMounted, onUnmounted, ref} from "vue";
 import BottomBarIcon from "@/components/Icon/BottomBarIcon.vue";
 import {useDeskTopCondition} from "@/pinia/DeskTopCondition.ts";
+import Sortable from "sortablejs";
+
 const deskTopStore = useDeskTopCondition()
 
 const controls = ref([
@@ -43,10 +45,38 @@ function toggleWindow(id: string) {
   }
 }
 
+function iconHover(e: MouseEvent,hoverColor: string) {
+  const el = e.currentTarget as HTMLElement
+  el.style.background = 'rgba(255, 255, 255, 0.91)'
+  el.style.fill = hoverColor
+}
+function iconLeave(e: MouseEvent) {
+  const el = e.currentTarget as HTMLElement
+  el.style.background = ''
+  el.style.fill = ''
+}
+
 let clockTimer: number | null = null
+const midControls = ref<HTMLDivElement|null>(null)
 onMounted(() => {
   update()
   clockTimer = window.setInterval(update, 1000)
+
+  if (midControls.value) {
+    Sortable.create(midControls.value, {
+      animation: 150,
+      ghostClass: 'sortable-ghost',
+      dragClass: 'sortable-drag',
+      chosenClass: 'sortable-chosen',
+      forceFallback: true, // 必须开这个才能禁止 clone
+      onEnd: (evt) => {
+        const newOrder = [...deskTopStore.bottomBarOrder]
+        const [moved] = newOrder.splice(evt.oldIndex!, 1)
+        newOrder.splice(evt.newIndex!, 0, moved)
+        deskTopStore.setBottomBarOrder(newOrder)
+      },
+    })
+  }
 })
 
 onUnmounted(() => {
@@ -57,15 +87,19 @@ onUnmounted(() => {
 <template>
   <div class="window-bottom-controls">
     <div class="left-controls">
-      <BottomBarIcon v-for="(control,_index) in controls" :key="_index" :icon="control.icon" :hover-color="control.hoverColor"/>
+      <BottomBarIcon v-for="(control,_index) in controls" :key="_index" :icon="control.icon" @hover="iconHover($event,control.hoverColor)" @leave="iconLeave"/>
     </div>
-    <div class="mid-controls">
-      <BottomBarIcon v-for="(app,_index) in deskTopStore.getApp"
-                     :key="app.id"
-                     :icon="app.icon"
-                     :width="'1.5em'"
-                     :height="'1.5em'"
-                     @click="toggleWindow(app.id)"/>
+    <div class="mid-controls" ref="midControls">
+      <BottomBarIcon
+          v-for="(app) in deskTopStore.getBottomBarApps"
+          :key="app.id"
+          :icon="app.icon"
+          :width="'1.5em'"
+          :height="'1.5em'"
+          @click="toggleWindow(app.id)"
+          @hover="iconHover"
+          @leave="iconLeave"
+      />
     </div>
     <div class="right-controls">
       <BottomBarIcon :icon="deskTopStore.volume === 0 ? 'no_audio' : 'volume'" @click="toggleVolume"/>
@@ -85,6 +119,14 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+.sortable-drag {
+  opacity: 1 !important;
+}
+
+.sortable-chosen {
+  background: rgba(255, 255, 255, 0.4);
+  opacity: 0.8; /* 选中的时候稍微暗一点（可选） */
+}
 .window-bottom-controls {
   display: flex;
   flex-direction: row;

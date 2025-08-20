@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {onBeforeMount, onMounted, ref} from "vue"
+import {onBeforeUnmount, onMounted, ref} from "vue"
 import interact from "interactjs"
 import { useDeskTopCondition } from "@/pinia/DeskTopCondition.ts"
 
@@ -108,7 +108,7 @@ onMounted(() => {
   document.addEventListener('mousedown', onDeskTopIconClick)
 })
 
-onBeforeMount(()=>{
+onBeforeUnmount(()=>{
   document.removeEventListener('mousedown', onDeskTopIconClick)
 })
 
@@ -118,7 +118,6 @@ onBeforeMount(()=>{
   <div class="desktop-icon-wrapper"
        :class="{ selected: isSelected }"
        :style="{width:iconSize+'px',height:iconSize+'px'}"
-
        ref="DeskTopIcon">
     <svg class="desktop-icon" aria-hidden="true">
       <use :href="'#icon-'+icon" />

@@ -82,9 +82,9 @@ onMounted(() => {
         ignoreFrom: '.content',
         modifiers: [
           // 大小范围限制
-          interact.modifiers.restrictSize({
-            min: { width: 600, height: 450 },
-          }),
+          // interact.modifiers.restrictSize({
+          //   min: { width: 600, height: 450 },
+          // }),
           // 缩放后依然保持在父容器内部
           interact.modifiers.restrictEdges({
             outer: 'parent',         // 外边界限制在父元素

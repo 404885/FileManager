@@ -4,7 +4,9 @@ import {DraggableContainer} from "@/utils/type.ts";
 export const useDeskTopCondition = defineStore('DeskTopCondition', {
     state: () => ({
         iconBoxes: {} as Record<string, DraggableContainer>,
-        application: [] as {id:string,icon:string}[],
+        application: {} as Record<string, {id:string,icon:string}>, // 改成对象存储，方便查找
+        displayOrder: [] as string[], // 专门控制窗口显示顺序
+        bottomBarOrder: [] as string[], // 底部任务栏顺序
         minimizedWindows: {} as Record<string, boolean>,
         volume:0.1 as number,
         windowOffset: {
@@ -17,7 +19,7 @@ export const useDeskTopCondition = defineStore('DeskTopCondition', {
     getters:{
         computeZIndex: (state) => {
             return (id: string) => {
-                const idx = state.application.findIndex(app => app.id === id)
+                const idx = state.displayOrder.findIndex(appId => appId === id)
                 return idx === -1 ? 0 : idx + 10
             }
         },
@@ -30,18 +32,28 @@ export const useDeskTopCondition = defineStore('DeskTopCondition', {
         getApp: (state) => {
             return state.application
         },
+        getBottomBarApps: (state) => {
+            return state.bottomBarOrder
+                .map(id => state.application[id])
+                .filter(Boolean)
+        },
     },
     actions: {
         init(app: {id:string, icon:string}) {
-            if (!this.application.some(a => a.id === app.id)) {
-                this.application.push(app)
+            if (!this.application[app.id]) {
+                this.application[app.id] = app
+                this.displayOrder.push(app.id)
+                this.bottomBarOrder.push(app.id) // 初始化时加到任务栏
             }
         },
+        setBottomBarOrder(newOrder: string[]) {
+            this.bottomBarOrder = [...newOrder]
+        },
         bringToFront(id: string) {
-            const index = this.application.findIndex(app => app.id === id)
+            const index = this.displayOrder.findIndex(appId => appId === id)
             if (index !== -1) {
-                const app = this.application.splice(index, 1)[0]
-                this.application.push(app)
+                this.displayOrder.splice(index, 1)
+                this.displayOrder.push(id)
             }
         },
         setVolume(volume: number) {
@@ -85,9 +97,12 @@ export const useDeskTopCondition = defineStore('DeskTopCondition', {
             this.bringToFront(id)
         },
         removeApplication(id: string) {
-            const index = this.application.findIndex(app => app.id === id)
+            if (this.application[id]) {
+                delete this.application[id]
+            }
+            const index = this.displayOrder.findIndex(appId => appId === id)
             if (index !== -1) {
-                this.application.splice(index, 1)
+                this.displayOrder.splice(index, 1)
             }
             delete this.minimizedWindows[id]
         },
@@ -96,7 +111,10 @@ export const useDeskTopCondition = defineStore('DeskTopCondition', {
             this.windowOffset.y = 0;
         },
         desktopInitialize(){
-
+            this.application = {}
+            this.displayOrder = []
+            this.minimizedWindows = {}
+            this.resetWindowOffset()
         },
     }
 })

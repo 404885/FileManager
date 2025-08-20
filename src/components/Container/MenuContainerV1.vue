@@ -22,8 +22,8 @@ function handleClickOutside(e: MouseEvent) {
 }
 
 function handleClick(item: any) {
-  emit('close', item)
   item.click()
+  emit('close', item)
 }
 
 onMounted(() => {

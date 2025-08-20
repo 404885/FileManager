@@ -1,30 +1,18 @@
 <script lang="ts" setup>
 
-const props = defineProps({
+defineProps({
   icon: {
     type:String,
     required:true,
   },
-  hoverColor:String,
   width: String,
   height: String,
 })
 
-const hover=(event: MouseEvent)=>{
-  const el = event.currentTarget as HTMLElement
-  el.style.background = 'rgba(255, 255, 255, 0.91)'
-  el.style.fill = props.hoverColor || ''
-}
-const leave=(event: MouseEvent)=>{
-  const el = event.currentTarget as HTMLElement
-  el.style.background = ''
-  el.style.fill = ''
-}
-
 </script>
 
 <template>
-  <div class="BottomBar-controls" @mouseenter="hover" @mouseleave="leave">
+  <div class="BottomBar-controls" @mouseenter="$emit('hover', $event)" @mouseleave="$emit('leave', $event)">
     <svg class="button" aria-hidden="true" :style="{width:width || '1em',height:height || '1em'}">
       <use :href="'#icon-'+icon"/>
     </svg>
