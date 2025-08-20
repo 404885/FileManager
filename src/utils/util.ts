@@ -1,6 +1,7 @@
 import { useTreeCondition } from '@/pinia/TreeCondition'
-import { createApp, h, type Component } from 'vue'
+import {createApp, h, type Component} from 'vue'
 import {DOUBLE_CLICK_THRESHOLD, LOCK_DURATION} from "@/utils/constant.ts";
+
 
 // 为 props 定义一个通用类型
 interface ComponentProps {
@@ -331,3 +332,9 @@ export function useClickHandler<T>(getId: (node: T) => string , singleClickFn?: 
 
     return { handleClick }
 }
+
+
+
+
+
+

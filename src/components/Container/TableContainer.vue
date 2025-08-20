@@ -208,7 +208,8 @@ onMounted( async () => {
                 <div class="context-menu-item" v-for="item of Data.headData" @click="itemClick(item)" :class="{ disabled: isClicked(item) }">{{item.label}}</div>
               </div>
             </template>
-          </el-popover></div>
+          </el-popover>
+        </div>
       </div>
       <div class="table-container-body">
         <div class="table-container-body-row" v-for="(row, index) of tableData">

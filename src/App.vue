@@ -155,7 +155,7 @@ onMounted(() => {
   position: relative;
   width: 100%;
   height: 100%;
-  background: url('./assets/background/bustup_020_013.png') center center / cover no-repeat;
+  background-image: url('https://via.placeholder.com/150');
   background-size: contain;
 
   z-index: -1;

@@ -23,6 +23,7 @@
     "peerjs": "^1.5.5",
     "pinia": "^3.0.2",
     "sortablejs": "^1.15.6",
+    "split.js": "^1.6.5",
     "vue": "^3.4.21",
     "vue-router": "^4.5.1",
     "vxe-pc-ui": "^4.6.13",
