@@ -187,8 +187,8 @@ function minimize() {
       <div class="traffic-lights-wrapper">
         <div class="traffic-lights">
           <div class="traffic-light red" @click="close" title="关闭"></div>
-          <div class="traffic-light yellow" @click="minimize" data-action="minimize" title="最小化"></div>
-          <div class="traffic-light green" @click="maximize" data-action="maximize" title="最大化"></div>
+          <div class="traffic-light yellow" @click="minimize" title="最小化"></div>
+          <div class="traffic-light green" @click="maximize" title="最大化"></div>
         </div>
       </div>
       <span class="title">{{ props.title || '默认应用'}}</span>

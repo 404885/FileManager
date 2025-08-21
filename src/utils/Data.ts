@@ -3,9 +3,7 @@ import { reactive } from "vue";
 import { Applications } from "@/utils/type.ts";
 import {Util} from "@/utils/index.ts";
 import ResourceFolder from "@/components/Application/ResourceFolder.vue";
-import MenuContainerV1 from "@/components/Container/MenuContainerV1.vue";
 import WebBrowser from "@/components/Application/WebBrowser.vue";
-import SystemSetting from "@/components/Application/SystemSetting.vue";
 import Preview from "@/components/Application/Preview.vue";
 import Chat from "@/components/Application/Chat.vue";
 
@@ -116,17 +114,6 @@ export const applicationData = reactive<Applications[]>([
         icon:'messages',
         dblclick(){
             Util.openComponent(Chat,this.id,{title:'通讯',id:crypto.randomUUID(),icon:this.icon,})
-        },
-        contextMenu(e:MouseEvent){
-            e.stopPropagation()
-        },
-    },
-    {
-        id: crypto.randomUUID(),
-        name: '设置',
-        icon:'settings',
-        dblclick(){
-            Util.openComponent(SystemSetting,this.id,{title:'设置',id:crypto.randomUUID(),icon:this.icon,})
         },
         contextMenu(e:MouseEvent){
             e.stopPropagation()
