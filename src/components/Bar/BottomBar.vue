@@ -1,8 +1,10 @@
 <script lang="ts" setup>
-import {onMounted, onUnmounted, ref} from "vue";
+import {onMounted, ref} from "vue";
 import BottomBarIcon from "@/components/Icon/BottomBarIcon.vue";
 import {useDeskTopCondition} from "@/pinia/DeskTopCondition.ts";
 import Sortable from "sortablejs";
+import Clock from "@/components/Bar/BottomBar/Clock.vue";
+import Volume from "@/components/Bar/BottomBar/Volume.vue";
 
 const deskTopStore = useDeskTopCondition()
 
@@ -13,30 +15,6 @@ const controls = ref([
   },
 ])
 
-const currentTime = ()=>{
-  const now = new Date()
-  const y = now.getFullYear()
-  const m = String(now.getMonth() + 1)
-  const d = String(now.getDate())
-  const h = String(now.getHours()).padStart(2, '0')
-  const min = String(now.getMinutes()).padStart(2, '0')
-  const s = String(now.getSeconds()).padStart(2, '0')
-  return [`${y}/${m}/${d}`,`${h}:${min}:${s}`]
-}
-
-const date =ref<string>()
-const time =ref<string>()
-function update() {
-  const [d, t] = currentTime()
-  date.value = d
-  time.value = t
-}
-
-const toggleVolume = () => {
-  const newVolume = deskTopStore.volume === 0 ? 0.1 : 0
-  deskTopStore.setVolume(newVolume)
-}
-
 function toggleWindow(id: string) {
   if (deskTopStore.isMinimized(id)) {
     deskTopStore.restoreWindow(id)
@@ -45,22 +23,8 @@ function toggleWindow(id: string) {
   }
 }
 
-function iconHover(e: MouseEvent,hoverColor: string) {
-  const el = e.currentTarget as HTMLElement
-  el.style.background = 'rgba(255, 255, 255, 0.91)'
-  el.style.fill = hoverColor
-}
-function iconLeave(e: MouseEvent) {
-  const el = e.currentTarget as HTMLElement
-  el.style.background = ''
-  el.style.fill = ''
-}
-
-let clockTimer: number | null = null
 const midControls = ref<HTMLDivElement|null>(null)
 onMounted(() => {
-  update()
-  clockTimer = window.setInterval(update, 1000)
 
   if (midControls.value) {
     Sortable.create(midControls.value, {
@@ -78,16 +42,12 @@ onMounted(() => {
     })
   }
 })
-
-onUnmounted(() => {
-  if (clockTimer) clearInterval(clockTimer)
-})
 </script>
 
 <template>
   <div class="window-bottom-controls">
     <div class="left-controls">
-      <BottomBarIcon v-for="(control,_index) in controls" :key="_index" :icon="control.icon" @hover="iconHover($event,control.hoverColor)" @leave="iconLeave"/>
+      <BottomBarIcon v-for="(control,_index) in controls" :key="_index" :icon="control.icon" :hoverColor="control.hoverColor"/>
     </div>
     <div class="mid-controls" ref="midControls">
       <BottomBarIcon
@@ -97,22 +57,11 @@ onUnmounted(() => {
           :width="'1.5em'"
           :height="'1.5em'"
           @click="toggleWindow(app.id)"
-          @hover="iconHover"
-          @leave="iconLeave"
       />
     </div>
     <div class="right-controls">
-      <BottomBarIcon :icon="deskTopStore.volume === 0 ? 'no_audio' : 'volume'" @click="toggleVolume"/>
-      <div class="time-wrapper">
-        <div class="time">
-          <span class="hour">
-            {{time}}
-          </span>
-          <span class="date">
-            {{date}}
-          </span>
-        </div>
-      </div>
+      <Volume/>
+      <Clock />
       <BottomBarIcon :icon="'comments'"/>
     </div>
   </div>
@@ -147,18 +96,5 @@ onUnmounted(() => {
   display: flex;
   flex-direction: row;
 }
-.time-wrapper{
-  font-size: 12px;
-  height: 36px;
-  position: relative;
-}
-.time{
-  display: flex;
-  flex-direction: column;
-  padding: 3px 10px 0 10px;
-}
-.time-wrapper:hover{
-  background: rgba(255, 255, 255, 0.91);
-  user-select: none;
-}
+
 </style>

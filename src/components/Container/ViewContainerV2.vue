@@ -60,8 +60,14 @@ onMounted(() => {
       // 拖拽限制在父容器内
     .draggable({
         cursorChecker: () => 'default',
-        allowFrom: '.title-bar',
+        allowFrom: '.view-container',
         ignoreFrom: '.content',
+        modifiers: [
+          interact.modifiers.restrictRect({
+            restriction: 'parent', // 限制在父容器
+            endOnly: true,         // 结束时修正
+          }),
+        ],
         listeners: {
           start() {
             el.classList.add('interacting')
@@ -202,18 +208,14 @@ function minimize() {
   border-radius: 6px;
   display: flex;
   flex-direction: column;
-
   position: absolute;
   top: 0;
   left: 0;
-
   overflow: hidden;
   resize: both;
-
   min-width: 600px;
   min-height: 450px;
   will-change: transform;
-
   background: rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);

@@ -8,7 +8,9 @@ export const useDeskTopCondition = defineStore('DeskTopCondition', {
         displayOrder: [] as string[], // 专门控制窗口显示顺序
         bottomBarOrder: [] as string[], // 底部任务栏顺序
         minimizedWindows: {} as Record<string, boolean>,
-        volume:0.1 as number,
+        isMuted: false as boolean,
+        volume:Number(localStorage.getItem("volume") ?? 0.1),
+        volumeIcon:'volume' as string,
         windowOffset: {
             x: 15,
             y: 15,
@@ -27,7 +29,17 @@ export const useDeskTopCondition = defineStore('DeskTopCondition', {
             return (id: string) => state.minimizedWindows[id] ?? false
         },
         getVolume: (state) => {
-            return state.volume
+            if (state.isMuted){
+                return 0
+            }else {
+                return state.volume
+            }
+        },
+        getVolumeIcon: (state) => {
+            if (state.isMuted || Number(state.volume) === 0) {
+                return 'no_audio'
+            }
+            return 'volume'
         },
         getApp: (state) => {
             return state.application
@@ -55,6 +67,12 @@ export const useDeskTopCondition = defineStore('DeskTopCondition', {
                 this.displayOrder.splice(index, 1)
                 this.displayOrder.push(id)
             }
+        },
+        mute(){
+            this.isMuted = !this.isMuted;
+        },
+        unMute(){
+            this.isMuted = false;
         },
         setVolume(volume: number) {
             this.volume = volume

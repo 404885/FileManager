@@ -3,6 +3,7 @@ import {onMounted, ref} from "vue";
 import Peer, {DataConnection, PeerError} from "peerjs";
 import ViewContainerV2 from "@/components/Container/ViewContainerV2.vue";
 
+
 const emit = defineEmits(['close'])
 const props = defineProps<{
   id: string,
@@ -58,7 +59,7 @@ onMounted(()=>{
       <div class="control">
         <p>
           <el-input v-model="PeerId" style="width: 240px" placeholder="连接对象ID" clearable/>
-          <el-button type="primary" @click="connect" >连接对象ID</el-button>
+          <el-button type="primary" @click="connect">连接对象ID</el-button>
         </p>
         <p>
           <el-input style="width: 240px" placeholder="发送信息" clearable/>

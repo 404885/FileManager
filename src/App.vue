@@ -20,9 +20,6 @@ const backgroundVideo = ref<HTMLVideoElement | null>(null)
 const deskTopStore =useDeskTopCondition()
 
 
-
-
-
 async function onRightClick(e: MouseEvent) {
   e.stopPropagation()
   const result = await Util.asyncOpenComponent(MenuContainerV1,'桌面右键菜单', {
@@ -95,7 +92,7 @@ onMounted(() => {
         <video ref="backgroundVideo"
                autoplay
                loop
-               src="./assets/video/senrenbanka.mp4"
+               src="./assets/video/meme.mp4"
                :muted="false"/>
       </div>
       <DeskTopIcon v-for="(app, index) in applications"
@@ -171,6 +168,7 @@ onMounted(() => {
   position: absolute;
   bottom: 0;
   flex: 1;
+  z-index: 9999;
   width: 100%;
 }
 
