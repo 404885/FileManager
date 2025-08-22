@@ -62,12 +62,12 @@ onMounted(() => {
         cursorChecker: () => 'default',
         allowFrom: '.view-container',
         ignoreFrom: '.content',
-        modifiers: [
-          interact.modifiers.restrictRect({
-            restriction: 'parent', // 限制在父容器
-            endOnly: true,         // 结束时修正
-          }),
-        ],
+        // modifiers: [
+        //   interact.modifiers.restrictRect({
+        //     restriction: 'parent', // 限制在父容器
+        //     endOnly: true,         // 结束时修正
+        //   }),
+        // ],
         listeners: {
           start() {
             el.classList.add('interacting')
@@ -75,6 +75,11 @@ onMounted(() => {
           move(event) {
             containerProperty.value.x += event.dx
             containerProperty.value.y += event.dy
+
+            if (containerProperty.value.y < 0) {
+              containerProperty.value.y = 0
+            }
+
             updateTransform()
           },
           end() {

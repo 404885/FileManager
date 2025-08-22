@@ -84,6 +84,9 @@ onUnmounted(() => {
   flex-direction: column;
   padding: 3px 10px 0 10px;
 }
+.hour{
+  margin: 0 auto;
+}
 .time-wrapper:hover{
   background: rgba(255, 255, 255, 0.66);
   user-select: none;

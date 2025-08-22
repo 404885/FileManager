@@ -92,7 +92,7 @@ onMounted(() => {
         <video ref="backgroundVideo"
                autoplay
                loop
-               src="./assets/video/meme.mp4"
+               src="./assets/video/senrenbanka.mp4"
                :muted="false"/>
       </div>
       <DeskTopIcon v-for="(app, index) in applications"
