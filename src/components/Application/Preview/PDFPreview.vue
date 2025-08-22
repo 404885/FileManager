@@ -1,443 +1,62 @@
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import VuePdfEmbed from 'vue-pdf-embed'
+
+const pdfRef = ref<InstanceType<typeof VuePdfEmbed> | null>(null)
+const source = ref<ArrayBuffer | null>(null)
+const page = ref(1)
+const pageCount = ref(0)
+const scale = ref(1)
+
+onMounted(async () => {
+  const url = 'F:\\WebStormProject\\FileManager\\public\\testFile\\2024詹勇_毕业设计说明书（论文） - 副本.pdf'
+  window.electronAPI.openFileByPath(url).then(result =>{
+    if (result.success){
+      source.value = new Uint8Array(result.buffer).buffer
+
+    }else {
+      console.error(result.error)
+    }
+  })
+})
+
+function onLoaded(pdf: any) {
+  pageCount.value = pdf.numPages
+}
+function prevPage() { if(page.value>1) page.value-- }
+function nextPage() { if(page.value<pageCount.value) page.value++ }
+function zoomIn() { scale.value += 0.1 }
+function zoomOut() { if(scale.value>0.2) scale.value -= 0.1 }
+</script>
+
 <template>
-  <div class="pdf-wrapper">
-    <!-- 工具条 -->
+  <div>
     <div class="toolbar">
-      <div class="left">
-        <input
-            v-model="urlInput"
-            class="url-input"
-            type="text"
-            placeholder="输入 PDF 直链后回车加载"
-            @keyup.enter="loadFromInput"
-        />
-        <button class="btn" @click="loadFromInput">加载</button>
-      </div>
-      <div class="center">
-        <button class="btn" @click="zoomOut">-</button>
-        <span class="scale">{{ Math.round(scale * 100) }}%</span>
-        <button class="btn" @click="zoomIn">+</button>
-        <button class="btn" @click="fitWidth">适配宽度</button>
-        <button class="btn" @click="resetZoom">100%</button>
-      </div>
-      <div class="right">
-        <input
-            class="page-input"
-            type="number"
-            :min="1"
-            :max="numPages || 1"
-            v-model.number="jumpTarget"
-            @keyup.enter="jumpTo(jumpTarget)"
-        />
-        <span class="page-info">/ {{ numPages || 0 }}</span>
-        <button class="btn" @click="jumpTo(jumpTarget)">跳转</button>
-      </div>
+      <button @click="prevPage" :disabled="page===1">上一页</button>
+      <span>{{ page }} / {{ pageCount }}</span>
+      <button @click="nextPage" :disabled="page===pageCount">下一页</button>
+      <button @click="zoomOut">缩小</button>
+      <button @click="zoomIn">放大</button>
     </div>
 
-    <!-- 内容区 -->
-    <div ref="viewerEl" class="viewer" @scroll="onScroll">
-      <template v-if="loading">
-        <div class="loading">正在加载 PDF…</div>
-      </template>
-
-      <template v-else-if="errorMsg">
-        <div class="error">{{ errorMsg }}</div>
-      </template>
-
-      <template v-else>
-        <div
-            v-for="i in numPages"
-            :key="i"
-            class="page"
-            :class="{ active: i === currentPage }"
-            :style="{ width: pageCssWidth + 'px' }"
-            :data-page="i"
-            ref="pageContainers"
-        >
-          <canvas :ref="el => (canvasRefs[i - 1] = el as HTMLCanvasElement)"></canvas>
-          <div class="page-number">第 {{ i }} 页</div>
-        </div>
-      </template>
-    </div>
+    <vue-pdf-embed
+        v-if="source"
+        ref="pdfRef"
+        :source="source"
+        :page="page"
+        :scale="scale"
+        class="pdf"
+        annotation-layer
+        text-layer
+        @loaded="onLoaded"
+    />
   </div>
 </template>
 
-<script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref, watch, nextTick } from 'vue'
-import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf'
-// 本地 worker（Vite: ?url 会生成静态资源 URL）
-import pdfWorker from "pdfjs-dist/build/pdf.worker.min.mjs?url";
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
-
-type SrcType = string | Uint8Array | ArrayBuffer
-
-const props = defineProps<{
-  /** 可以传直链 URL、Uint8Array、ArrayBuffer，或不传用输入框加载 */
-  src?: SrcType
-  /** 初始缩放，默认 1.2（更清晰） */
-  initialScale?: number
-  /** 单页最大 CSS 宽度（像素），用于限制过宽页面的展示宽度 */
-  maxPageCssWidth?: number
-}>()
-
-const emit = defineEmits<{
-  (e: 'loaded', info: { numPages: number }): void
-  (e: 'pagechange', page: number): void
-  (e: 'error', msg: string): void
-}>()
-
-// UI 状态
-const viewerEl = ref<HTMLDivElement | null>(null)
-const loading = ref(false)
-const errorMsg = ref('')
-const numPages = ref(0)
-const currentPage = ref(1)
-const jumpTarget = ref(1)
-const scale = ref(props.initialScale ?? 1.2)
-
-// 画布与页面容器
-const canvasRefs: HTMLCanvasElement[] = []
-const pageContainers = ref<HTMLDivElement[]>([] as unknown as HTMLDivElement[])
-
-let pdfDoc: any | null = null
-let baseViewportWidth = 0 // 用于“适配宽度”基准宽度
-let pageCssWidth = 0 // 当前 css 宽度（不等于 canvas 像素宽度）
-const urlInput = ref(typeof props.src === 'string' ? (props.src as string) : '')
-
-const dpr = Math.max(1, window.devicePixelRatio || 1)
-
-// --------------- 加载与渲染 ---------------
-async function loadDocument(source: SrcType) {
-  cleanup()
-  loading.value = true
-  errorMsg.value = ''
-  try {
-    const task =
-        typeof source === 'string'
-            ? pdfjsLib.getDocument({ url: source, withCredentials: false })
-            : pdfjsLib.getDocument({ data: new Uint8Array(source) })
-
-    pdfDoc = await task.promise
-    numPages.value = pdfDoc.numPages
-    jumpTarget.value = 1
-    currentPage.value = 1
-
-    await nextTick()
-    await renderAllPages()
-
-    emit('loaded', { numPages: numPages.value })
-  } catch (err: any) {
-    errorMsg.value = `加载失败：${err?.message || err}`
-    emit('error', errorMsg.value)
-  } finally {
-    loading.value = false
-    initPageObserver()
-  }
-}
-
-async function renderAllPages() {
-  if (!pdfDoc) return
-  // 预先获取第一页，确定“适配宽度”的基准
-  const firstPage = await pdfDoc.getPage(1)
-  const vpAtScale1 = firstPage.getViewport({ scale: 1 })
-  baseViewportWidth = vpAtScale1.width
-  computeCssWidth()
-
-  // 顺序渲染所有页（稳定 & 简单）
-  for (let i = 1; i <= numPages.value; i++) {
-    await renderPage(i)
-  }
-}
-
-async function renderPage(pageNum: number) {
-  if (!pdfDoc) return
-  const page = await pdfDoc.getPage(pageNum)
-  const viewport = page.getViewport({ scale: scale.value })
-  const canvas = canvasRefs[pageNum - 1]
-  if (!canvas) return
-
-  // 让画布在高分屏更清晰：物理像素 = CSS 像素 * DPR
-  const cssWidth = viewport.width
-  const cssHeight = viewport.height
-  canvas.style.width = cssWidth + 'px'
-  canvas.style.height = cssHeight + 'px'
-  canvas.width = Math.floor(cssWidth * dpr)
-  canvas.height = Math.floor(cssHeight * dpr)
-
-  const ctx = canvas.getContext('2d')!
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0) // 以 DPR 缩放绘制
-
-  await page.render({
-    canvasContext: ctx,
-    viewport,
-    // optional: intent: 'print'
-  }).promise
-}
-
-function computeCssWidth() {
-  const container = viewerEl.value
-  if (!container || baseViewportWidth === 0) return
-  const padding = 16 // .viewer 的左右内边距之和的一半（看下面样式）
-  const available = container.clientWidth - padding * 2
-  const widthAtScale = baseViewportWidth * scale.value
-  pageCssWidth = Math.min(
-      props.maxPageCssWidth ?? 1400,
-      Math.floor(Math.min(available, widthAtScale))
-  )
-}
-
-// 重新渲染（缩放/窗口变化）
-let rerenderPending = false
-async function rerenderAll() {
-  if (!pdfDoc || rerenderPending) return
-  rerenderPending = true
-  computeCssWidth()
-  // 使用 requestAnimationFrame 节流
-  requestAnimationFrame(async () => {
-    for (let i = 1; i <= numPages.value; i++) {
-      await renderPage(i)
-    }
-    rerenderPending = false
-  })
-}
-
-// --------------- 工具条操作 ---------------
-function zoomIn() {
-  scale.value = +(scale.value * 1.1).toFixed(3)
-  rerenderAll()
-}
-function zoomOut() {
-  scale.value = +(scale.value / 1.1).toFixed(3)
-  rerenderAll()
-}
-function resetZoom() {
-  scale.value = props.initialScale ?? 1.2
-  rerenderAll()
-}
-function fitWidth() {
-  // 目标：当前 CSS 宽度 ≈ 容器宽度
-  const container = viewerEl.value
-  if (!container || baseViewportWidth === 0) return
-  const padding = 16
-  const available = container.clientWidth - padding * 2
-  const targetScale = available / baseViewportWidth
-  scale.value = +targetScale.toFixed(3)
-  rerenderAll()
-}
-function jumpTo(page: number) {
-  const p = Math.max(1, Math.min(numPages.value || 1, Math.floor(page)))
-  jumpTarget.value = p
-  // 定位到对应页
-  const container = viewerEl.value
-  const pageEl = pageContainers.value?.[p - 1]
-  if (container && pageEl) {
-    pageEl.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
-}
-
-// --------------- 滚动 & 当前页计算 ---------------
-let io: IntersectionObserver | null = null
-function initPageObserver() {
-  // 销毁旧的
-  io?.disconnect()
-  const container = viewerEl.value
-  if (!container) return
-
-  io = new IntersectionObserver(
-      entries => {
-        // 找到可见比例最大的那个页
-        let maxRatio = 0
-        let visiblePage = currentPage.value
-        for (const e of entries) {
-          const ratio = e.intersectionRatio
-          if (ratio > maxRatio) {
-            maxRatio = ratio
-            const el = e.target as HTMLDivElement
-            visiblePage = Number(el.dataset.page || 1)
-          }
-        }
-        if (visiblePage !== currentPage.value) {
-          currentPage.value = visiblePage
-          jumpTarget.value = visiblePage
-          emit('pagechange', visiblePage)
-        }
-      },
-      {
-        root: container,
-        rootMargin: '0px',
-        threshold: buildThresholdList(),
-      }
-  )
-
-  // 观察所有页
-  nextTick(() => {
-    pageContainers.value?.forEach(el => io?.observe(el))
-  })
-}
-
-function buildThresholdList() {
-  // 生成 0..1 步长 0.05 的阈值，提升“当前页”判断稳定性
-  const thresholds: number[] = []
-  const steps = 20
-  for (let i = 0; i <= steps; i++) thresholds.push(i / steps)
-  return thresholds
-}
-
-function onScroll() {
-  // 如需懒加载/虚拟化，可在这里加逻辑；当前实现一次性渲染全部
-}
-
-// --------------- 清理 ---------------
-function cleanup() {
-  // 清空画布引用
-  canvasRefs.length = 0
-  pageContainers.value = [] as unknown as HTMLDivElement[]
-  numPages.value = 0
-  currentPage.value = 1
-}
-
-// --------------- 事件绑定 ---------------
-function handleResize() {
-  fitWidth()
-}
-onMounted(async () => {
-  window.addEventListener('resize', handleResize)
-
-  // 若父组件传了 src，就直接加载；否则等待用户输入
-  if (props.src) {
-    await loadDocument(props.src)
-    // 首次自适应宽度（可按需注释）
-    fitWidth()
-  } else {
-    // 默认填入一个示例 URL（可改）
-    urlInput.value =
-        'https://fs-im-kefu.7moor-fs1.com/ly/4d2c3f00-7d4c-11e5-af15-41bf63ae4ea0/49cbaa5b6cd3a0e0/Y0_STEAM_MANGA_CH1+2_UK.pdf'
-  }
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', handleResize)
-  io?.disconnect()
-})
-
-// --------------- 输入加载 ---------------
-function loadFromInput() {
-  if (!urlInput.value) return
-  loadDocument(urlInput.value)
-}
-
-// 监听外部 src 变化（可选）
-watch(
-    () => props.src,
-    (val) => {
-      if (val) loadDocument(val)
-    }
-)
-</script>
-
 <style scoped>
-.pdf-wrapper {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 480px;
-  background: #0b0c0f;
-}
-
-.toolbar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 8px;
-  padding: 10px;
-  background: #14161a;
-  border-bottom: 1px solid #1e2127;
-  color: #e6e6e6;
-  font-size: 14px;
-}
-.toolbar .left,
-.toolbar .center,
-.toolbar .right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  justify-content: center;
-}
-.toolbar .left { justify-content: flex-start; }
-.toolbar .right { justify-content: flex-end; }
-
-.url-input {
-  width: 420px;
-  max-width: 100%;
-  padding: 6px 8px;
-  border: 1px solid #2a2f37;
-  background: #0f1115;
-  color: #e6e6e6;
-  border-radius: 8px;
-  outline: none;
-}
-.page-input {
-  width: 72px;
-  padding: 6px 8px;
-  border: 1px solid #2a2f37;
-  background: #0f1115;
-  color: #e6e6e6;
-  border-radius: 8px;
-  text-align: center;
-  outline: none;
-}
-.page-info { opacity: 0.75; }
-
-.btn {
-  padding: 6px 10px;
-  border-radius: 8px;
-  border: 1px solid #2a2f37;
-  background: #0f1115;
-  color: #e6e6e6;
-  cursor: pointer;
-}
-.btn:hover { background: #171a20; }
-.scale { width: 56px; text-align: center; opacity: 0.9; }
-
-.viewer {
-  position: relative;
-  overflow: auto;
-  flex: 1;
-  padding: 16px;
-}
-
-.loading, .error {
-  color: #e6e6e6;
-  text-align: center;
-  margin-top: 24px;
-  opacity: 0.9;
-}
-
-.page {
-  position: relative;
-  margin: 0 auto 18px;
-  padding: 12px 12px 28px;
-  background: #111317;
-  border: 1px solid #1e2127;
-  border-radius: 14px;
-  box-shadow: 0 6px 20px rgba(0,0,0,.35);
-  transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease;
-}
-.page.active {
-  border-color: #3b82f6;
-  box-shadow: 0 8px 26px rgba(37,99,235,.25);
-}
-.page-number {
-  position: absolute;
-  bottom: 6px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 12px;
-  color: #b8c1cc;
-  opacity: .8;
-}
-canvas { display: block; }
+  .pdf{
+    width: 100%;
+    height: 100vh;
+    overflow: auto;
+  }
 </style>

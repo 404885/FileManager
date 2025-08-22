@@ -6,6 +6,7 @@ electron.contextBridge.exposeInMainWorld("electronAPI", {
   openFileDialog: () => electron.ipcRenderer.invoke("open-file-dialog"),
   openDirectoryDialog: () => electron.ipcRenderer.invoke("open-directory-dialog"),
   openFile: (filePath) => electron.ipcRenderer.invoke("open-file", filePath),
+  openFileByPath: (filePath) => electron.ipcRenderer.invoke("open-file-by-path", filePath),
   svgTransform: (filePath) => electron.ipcRenderer.invoke("svg-to-symbol", filePath),
   svgsTransform: (folderPath) => electron.ipcRenderer.invoke("svgs-to-symbol", folderPath),
   windowControls: {

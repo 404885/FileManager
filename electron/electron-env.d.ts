@@ -29,6 +29,7 @@ declare global{
     ipcRenderer: import('electron').IpcRenderer,
     electronAPI: {
       openFile: (filePath: string) => Promise<string>
+      openFileByPath: (filePath: string) => Promise<{ success: boolean; buffer?: import('buffer').Buffer; error?: string }>;
       openFileDialog: () => Promise<
           | { canceled: true }
           | {

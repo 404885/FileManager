@@ -40,7 +40,7 @@ export function RegisterIpcEvent(resourcesPath: string) {
         if (canceled || filePaths.length === 0) return { canceled: true }
 
         const filePath = filePaths[0]
-        const content = await fs.readFile(filePath, 'utf-8')
+        const content = await fs.readFile(filePath)
         const stats = await fs.stat(filePath)
 
         const fileName = path.basename(filePath)
@@ -101,7 +101,6 @@ export function RegisterIpcEvent(resourcesPath: string) {
             files: tree
         }
     })
-    ipcMain.handle('close-directory-dialog', async () => {})
     ipcMain.handle('open-file', async (_event, filePath) => {
         try {
             return await shell.openPath(filePath) // 空字符串表示成功
@@ -111,6 +110,15 @@ export function RegisterIpcEvent(resourcesPath: string) {
         }
     })
 
+    ipcMain.handle('open-file-by-path', async (_event, filePath) => {
+        try {
+            const buffer = await fs.readFile(filePath)
+            return { success: true, buffer } // Buffer 类型
+        } catch (err: any) {
+            console.error('读取文件失败:', err)
+            return { success: false, error: err.message || '未知错误' }
+        }
+    })
 
     // 异步写法
     ipcMain.handle('svg-to-symbol', async (_event, filePath: string) => {

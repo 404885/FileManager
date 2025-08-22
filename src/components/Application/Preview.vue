@@ -18,11 +18,7 @@ function close(){
 <template>
   <teleport to="#window-view">
     <ViewContainerV2 :title="props.title" @close="close" :id="props.id" :icon="icon">
-      <PDFPreview  :initialScale="1.0" :maxPageCssWidth="1200"
-                    @loaded="e => console.log('pages:', e.numPages)"
-                    @pagechange="p => console.log('current page:', p)"
-                    @error="msg => console.error(msg)"
-      />
+      <PDFPreview/>
     </ViewContainerV2>
   </teleport>
 </template>
