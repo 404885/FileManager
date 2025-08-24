@@ -17,7 +17,7 @@ const menu = ref<HTMLElement | null>(null)
 // 点击外部区域关闭
 function handleClickOutside(e: MouseEvent) {
   if (menu.value && !menu.value.contains(e.target as Node)) {
-    emit('close', "dsa")
+    emit('close')
   }
 }
 
@@ -45,7 +45,10 @@ onBeforeUnmount(() => {
       :style="[{ top: `${props.position.y}px`, left: `${props.position.x}px` }, props.customStyle]"
       :class="props.customClass">
     <div class="context-item" v-for="item of props.data" @click="handleClick(item)">
-      {{item.name}}
+      <svg aria-hidden="true" class="context-item-icon" :style="{width: '1.5em',height: '1.5em'}">
+        <use :href="'#icon-'+item.icon"/>
+      </svg>
+      <span class="context-item-name">{{item.name}}</span>
     </div>
     <slot />
   </div>
@@ -56,20 +59,16 @@ onBeforeUnmount(() => {
 .context-menu {
   position: absolute;
   background: white;
-  width: 100px;
   z-index: 1000;
   border-radius: 6px;
-  padding-left: 4px;
-  padding-right: 4px;
+  padding: 4px 4px;
   font-size: 14px;
   user-select: none;
   transition: box-shadow 0.3s ease;
 }
-
-
 .context-item {
-  padding: 6px 6px 6px 10px;
-  margin: 4px 0;
+  display: flex;
+  padding: 6px 6px 6px 2px;
   border-radius: 3px;
   font-size: 13px;
   cursor: pointer;
@@ -89,5 +88,11 @@ onBeforeUnmount(() => {
   opacity: 0.7;
   box-shadow: none;
   font-style: italic;
+}
+.context-item-icon{
+  margin-right: 5px;
+}
+.context-item-name{
+  margin-right: auto;
 }
 </style>

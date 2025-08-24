@@ -1,62 +1,49 @@
-<script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import VuePdfEmbed from 'vue-pdf-embed'
-
-const pdfRef = ref<InstanceType<typeof VuePdfEmbed> | null>(null)
-const source = ref<ArrayBuffer | null>(null)
-const page = ref(1)
-const pageCount = ref(0)
-const scale = ref(1)
-
-onMounted(async () => {
-  const url = 'F:\\WebStormProject\\FileManager\\public\\testFile\\2024詹勇_毕业设计说明书（论文） - 副本.pdf'
-  window.electronAPI.openFileByPath(url).then(result =>{
-    if (result.success){
-      source.value = new Uint8Array(result.buffer).buffer
-
-    }else {
-      console.error(result.error)
-    }
-  })
-})
-
-function onLoaded(pdf: any) {
-  pageCount.value = pdf.numPages
-}
-function prevPage() { if(page.value>1) page.value-- }
-function nextPage() { if(page.value<pageCount.value) page.value++ }
-function zoomIn() { scale.value += 0.1 }
-function zoomOut() { if(scale.value>0.2) scale.value -= 0.1 }
-</script>
-
 <template>
-  <div>
-    <div class="toolbar">
-      <button @click="prevPage" :disabled="page===1">上一页</button>
-      <span>{{ page }} / {{ pageCount }}</span>
-      <button @click="nextPage" :disabled="page===pageCount">下一页</button>
-      <button @click="zoomOut">缩小</button>
-      <button @click="zoomIn">放大</button>
-    </div>
-
-    <vue-pdf-embed
-        v-if="source"
-        ref="pdfRef"
-        :source="source"
-        :page="page"
-        :scale="scale"
-        class="pdf"
-        annotation-layer
-        text-layer
-        @loaded="onLoaded"
-    />
+  <div class="pdf-viewer">
+    <canvas ref="canvas"></canvas>
   </div>
 </template>
 
+<script setup lang="ts">
+import {getDocument,GlobalWorkerOptions} from 'pdfjs-dist'
+import PDFWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
+import {onBeforeUnmount, onMounted, ref} from "vue";
+
+GlobalWorkerOptions.workerSrc = PDFWorker
+
+const url = 'F:\\WebStormProject\\FileManager\\public\\testFile\\2024詹勇_毕业设计说明书（论文） - 副本.pdf'
+
+const canvas = ref<HTMLCanvasElement | null>(null)
+let loadingTask: any = null
+
+async function renderFirstPageFromUrl(buffer:Uint8Array) {
+  loadingTask = getDocument(buffer)
+  console.log(buffer)
+  const pdf = await loadingTask.promise
+  const page = await pdf.getPage(1)
+  const viewport = page.getViewport({ scale: 1.5 })
+  const c = canvas.value!
+  c.width = Math.floor(viewport.width)
+  c.height = Math.floor(viewport.height)
+  const ctx = c.getContext('2d')!
+  await page.render({ canvasContext: ctx, viewport }).promise
+}
+
+onMounted(async () => {
+  const result = await window.electronAPI.openFileByPath(url)
+
+  renderFirstPageFromUrl(result.buffer!).catch(console.error)
+})
+
+onBeforeUnmount(() => {
+  if (loadingTask && loadingTask.destroy) loadingTask.destroy()
+})
+</script>
+
 <style scoped>
-  .pdf{
-    width: 100%;
-    height: 100vh;
-    overflow: auto;
-  }
+.pdf-viewer canvas {
+  width: 100%;
+  height: auto;
+  display:block;
+}
 </style>

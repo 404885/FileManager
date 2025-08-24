@@ -19,14 +19,29 @@ const backgroundVideo = ref<HTMLVideoElement | null>(null)
 const deskTopStore =useDeskTopCondition()
 
 
-async function onRightClick(e: MouseEvent) {
+async function onDeskTopRightClick(e: MouseEvent) {
   e.stopPropagation()
   const result = await Util.asyncOpenComponent(MenuContainerV1,'桌面右键菜单', {
     position: { x: e.clientX, y: e.clientY },
     data:  [
-      { name: "Option 1", icon: "icon1", click: () => {}},
-      { name: "Option 2", icon: "icon2", click: () => {}},
-      { name: "Option 3", icon: "icon2", click: () => {}},
+      { name: "壁纸", icon: "wallpaper_roll", click: () => {}},
+      { name: "新建笔记", icon: "md", click: () => {}},
+      { name: "刷新", icon: "refresh", click: () => {}},
+    ],
+  })
+  if (result){
+    console.log(result)
+  }
+}
+
+async function onBottomBarRightClick(e: MouseEvent) {
+  e.stopPropagation()
+  const result = await Util.asyncOpenComponent(MenuContainerV1,'底边栏右键菜单', {
+    position: { x: e.clientX, y: e.clientY - 100 },
+    data:  [
+      { name: "壁纸", icon: "wallpaper_roll", click: () => {}},
+      { name: "新建笔记", icon: "md", click: () => {}},
+      { name: "刷新", icon: "refresh", click: () => {}},
     ],
   })
   if (result){
@@ -129,7 +144,7 @@ onMounted(() => {
     <TitleBar/>
   </div>
   <div class="window-home">
-    <div id="window-view" ref="desktop" class="window-view" @contextmenu.stop="onRightClick">
+    <div id="window-view" ref="desktop" class="window-view" @contextmenu="onDeskTopRightClick">
       <div class="window-background" @pointerdown="onPointerDown">
         <video ref="backgroundVideo"
                autoplay
@@ -148,7 +163,7 @@ onMounted(() => {
           @click="handleClick(app)"
           @contextmenu="app.contextMenu"/>
       <div class="window-bottom">
-        <BottomBar :applications="applications" />
+        <BottomBar :applications="applications" @contextmenu="onBottomBarRightClick"/>
       </div>
       <div
           v-if="isSelecting"
