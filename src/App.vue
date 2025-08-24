@@ -146,11 +146,11 @@ onMounted(() => {
   <div class="window-home">
     <div id="window-view" ref="desktop" class="window-view" @contextmenu="onDeskTopRightClick">
       <div class="window-background" @pointerdown="onPointerDown">
-        <video ref="backgroundVideo"
-               autoplay
-               loop
-               src="./assets/video/senrenbanka.mp4"
-               :muted="false"/>
+<!--        <video ref="backgroundVideo"-->
+<!--               autoplay-->
+<!--               loop-->
+<!--               src="./assets/video/senrenbanka.mp4"-->
+<!--               :muted="false"/>-->
       </div>
       <DeskTopIcon v-for="(app, index) in applications"
           :key="app.id"
@@ -219,7 +219,7 @@ onMounted(() => {
   position: relative;
   width: 100%;
   height: 100%;
-  background-image: url('https://via.placeholder.com/150');
+  background: url('./assets/background/bustup_020_002.png') no-repeat center;
   background-size: contain;
 
   z-index: -1;
