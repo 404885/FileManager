@@ -7,6 +7,7 @@ export const useDeskTopCondition = defineStore('DeskTopCondition', {
         application: {} as Record<string, {id:string,icon:string}>, // 改成对象存储，方便查找
         displayOrder: [] as string[], // 专门控制窗口显示顺序
         bottomBarOrder: [] as string[], // 底部任务栏顺序
+        activateMenu: '' as string,
         minimizedWindows: {} as Record<string, boolean>,
         isMuted: false as boolean,
         volume:Number(localStorage.getItem("volume") ?? 0.1),
@@ -49,6 +50,9 @@ export const useDeskTopCondition = defineStore('DeskTopCondition', {
                 .map(id => state.application[id])
                 .filter(Boolean)
         },
+        getActivateMenu: (state) =>{
+            return state.activateMenu
+        },
     },
     actions: {
         init(app: {id:string, icon:string}) {
@@ -76,6 +80,9 @@ export const useDeskTopCondition = defineStore('DeskTopCondition', {
         },
         setVolume(volume: number) {
             this.volume = volume
+        },
+        setActivateMenu(activateMenu: string = '') {
+          this.activateMenu = activateMenu
         },
         updateIconBox(box: DraggableContainer) {
             this.iconBoxes[box.id] = box

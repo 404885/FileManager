@@ -35,9 +35,9 @@ onBeforeUnmount(() => {
 
 <template>
   <Teleport v-if="target" :to="target">
-    <transition name="el-zoom-in-bottom">
+    <transition name="slide-right">
       <div v-if="deskTopStore.getActivateMenu === props.type" class="BottomBarMenu" ref="BottomBarMenu">
-        <div class="ClockMenu-wrapper">
+        <div class="WindowsMenu-wrapper">
 
         </div>
       </div>
@@ -49,10 +49,10 @@ onBeforeUnmount(() => {
 .BottomBarMenu{
   z-index: 9999;
 }
-.ClockMenu-wrapper{
+.WindowsMenu-wrapper{
   position: absolute;
-  width: 20vw;
-  height: 60vh;
+  width: 25vw;
+  height: 100vh;
   display: flex;
   bottom: 36px;
   right: 0;
@@ -60,5 +60,24 @@ onBeforeUnmount(() => {
   flex-direction: column;
   background: rgba(230, 230, 230, 0.8);
   box-shadow: inset 0 0 1px rgba(255, 255, 255, 0.3), 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+/* 进入和离开动画 */
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* 初始状态：从右边移进来 */
+.slide-right-enter-from,
+.slide-right-leave-to {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+/* 结束状态：在原位 */
+.slide-right-enter-to,
+.slide-right-leave-from {
+  transform: translateX(0);
+  opacity: 1;
 }
 </style>

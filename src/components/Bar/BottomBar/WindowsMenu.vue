@@ -37,7 +37,7 @@ onBeforeUnmount(() => {
   <Teleport v-if="target" :to="target">
     <transition name="el-zoom-in-bottom">
       <div v-if="deskTopStore.getActivateMenu === props.type" class="BottomBarMenu" ref="BottomBarMenu">
-        <div class="ClockMenu-wrapper">
+        <div class="WindowsMenu-wrapper">
 
         </div>
       </div>
@@ -49,13 +49,13 @@ onBeforeUnmount(() => {
 .BottomBarMenu{
   z-index: 9999;
 }
-.ClockMenu-wrapper{
+.WindowsMenu-wrapper{
   position: absolute;
-  width: 20vw;
+  width: 35vw;
   height: 60vh;
   display: flex;
   bottom: 36px;
-  right: 0;
+  left: 0;
   z-index: 9999;
   flex-direction: column;
   background: rgba(230, 230, 230, 0.8);

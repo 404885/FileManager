@@ -87,8 +87,8 @@ onMounted(() => {
     <TitleBar/>
   </div>
   <div class="window-home">
-    <div id="window-view" ref="desktop" class="window-view" @contextmenu="onRightClick">
-      <div id="wallpaper" class="window-background">
+    <div id="window-view" ref="desktop" class="window-view" @contextmenu.stop="onRightClick">
+      <div class="window-background">
         <video ref="backgroundVideo"
                autoplay
                loop

@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import {onMounted, onUnmounted, ref} from "vue";
 import ClockMenu from "@/components/Bar/BottomBar/ClockMenu.vue";
+import {useDeskTopCondition} from "@/pinia/DeskTopCondition.ts";
 
-const visible = ref(false);
+const Menu = 'clock'
+const deskTopStore = useDeskTopCondition()
 
 const currentTime = ()=>{
   const now = new Date()
@@ -30,7 +32,11 @@ const handlePointerDown = (e:PointerEvent)=>{
 const handlePointerUp = (e:PointerEvent)=>{
   const el = e.currentTarget as HTMLElement
   el.style.background = 'rgba(255,255,255,0.66)'
-  visible.value=!visible.value
+  if (deskTopStore.getActivateMenu === Menu){
+    deskTopStore.setActivateMenu()
+  }else {
+    deskTopStore.setActivateMenu(Menu)
+  }
 }
 function hover(e: MouseEvent,hoverColor: string = '') {
   const el = e.currentTarget as HTMLElement
@@ -69,7 +75,7 @@ onUnmounted(() => {
       </span>
     </div>
   </div>
-  <ClockMenu v-model:visible="visible"/>
+  <ClockMenu :type="Menu"/>
 </template>
 
 <style scoped>

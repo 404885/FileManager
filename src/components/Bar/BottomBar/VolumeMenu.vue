@@ -4,6 +4,10 @@ import {useDeskTopCondition} from "@/pinia/DeskTopCondition.ts";
 
 const deskTopStore = useDeskTopCondition()
 
+const props = defineProps<{
+  type:string,
+}>()
+
 watch(()=>deskTopStore.volume,(newValue,_oldValue)=>{
   if (Number(newValue) !== 0)
     deskTopStore.unMute()
@@ -11,20 +15,12 @@ watch(()=>deskTopStore.volume,(newValue,_oldValue)=>{
 
 const BottomBarMenu = ref<HTMLElement | null>(null)
 
-const emit = defineEmits<{
-  (e: 'update:visible', value: boolean): void
-}>()
-
-const props = defineProps<{
-  visible: boolean;
-}>()
-
 function handleClickOutside(e: MouseEvent) {
   // 更健壮：如果没有元素直接 return
   const el = BottomBarMenu.value
   if (!el) return
   if (!el.contains(e.target as Node)) {
-    emit('update:visible', false)
+    deskTopStore.setActivateMenu()
   }
 }
 const target = ref<string | null>(null)
@@ -45,7 +41,7 @@ onBeforeUnmount(() => {
 <template>
   <Teleport v-if="target" :to="target">
     <transition name="el-zoom-in-bottom">
-      <div v-if="props.visible" class="BottomBarMenu" ref="BottomBarMenu">
+      <div v-if="deskTopStore.getActivateMenu===props.type" class="BottomBarMenu" ref="BottomBarMenu">
         <div class="volumeMenu-wrapper">
           <div class="volumeMenu">
             <svg class="icon" aria-hidden="true" @pointerdown="deskTopStore.mute()">

@@ -1,19 +1,10 @@
 <script lang="ts" setup>
-import {watch} from "vue";
 import {useDeskTopCondition} from "@/pinia/DeskTopCondition.ts";
-import VolumeMenu from "@/components/Bar/BottomBar/VolumeMenu.vue";
-import {debounce} from "@/utils/util.ts";
+import NotificationMenu from "@/components/Bar/BottomBar/NotificationMenu.vue";
 
-const Menu = 'volume'
+const Menu = 'notification';
 const deskTopStore = useDeskTopCondition()
 
-const saveVolume = debounce((value: number) => {
-  localStorage.setItem("volume", String(value))
-}, 500) // 500ms 后才执行一次
-
-watch(()=>deskTopStore.getVolume,(newValue,_oldValue)=>{
-  saveVolume(Number(newValue))
-},{immediate:true})
 
 const handlePointerDown = (e:PointerEvent)=>{
   const el = e.currentTarget as HTMLElement
@@ -47,10 +38,10 @@ function iconLeave(e: MouseEvent) {
        @mouseenter="iconHover"
        @mouseleave="iconLeave">
     <svg class="icon" aria-hidden="true">
-      <use :href="'#icon-'+deskTopStore.getVolumeIcon"/>
+      <use :href="'#icon-comments'"/>
     </svg>
   </div>
-  <VolumeMenu :type="Menu"/>
+  <NotificationMenu :type="Menu"/>
 </template>
 
 <style scoped>

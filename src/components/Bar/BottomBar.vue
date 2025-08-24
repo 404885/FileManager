@@ -5,15 +5,11 @@ import {useDeskTopCondition} from "@/pinia/DeskTopCondition.ts";
 import Sortable from "sortablejs";
 import Clock from "@/components/Bar/BottomBar/Clock.vue";
 import Volume from "@/components/Bar/BottomBar/Volume.vue";
+import Windows from "@/components/Bar/BottomBar/Windows.vue";
+import Notification from "@/components/Bar/BottomBar/Notification.vue";
 
 const deskTopStore = useDeskTopCondition()
 
-const controls = ref([
-  {
-    icon:'windows8',
-    hoverColor:'#007aff',
-  },
-])
 
 function toggleWindow(id: string) {
   if (deskTopStore.isMinimized(id)) {
@@ -47,7 +43,7 @@ onMounted(() => {
 <template>
   <div class="window-bottom-controls">
     <div class="left-controls">
-      <BottomBarIcon v-for="(control,_index) in controls" :key="_index" :icon="control.icon" :hoverColor="control.hoverColor"/>
+      <Windows/>
     </div>
     <div class="mid-controls" ref="midControls">
       <BottomBarIcon
@@ -61,8 +57,8 @@ onMounted(() => {
     </div>
     <div class="right-controls">
       <Volume/>
-      <Clock />
-      <BottomBarIcon :icon="'comments'"/>
+      <Clock/>
+      <Notification/>
     </div>
   </div>
 </template>

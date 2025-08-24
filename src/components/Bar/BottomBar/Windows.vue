@@ -1,19 +1,10 @@
 <script lang="ts" setup>
-import {watch} from "vue";
 import {useDeskTopCondition} from "@/pinia/DeskTopCondition.ts";
-import VolumeMenu from "@/components/Bar/BottomBar/VolumeMenu.vue";
-import {debounce} from "@/utils/util.ts";
+import WindowsMenu from "@/components/Bar/BottomBar/WindowsMenu.vue";
 
-const Menu = 'volume'
+const Menu = 'windows'
 const deskTopStore = useDeskTopCondition()
 
-const saveVolume = debounce((value: number) => {
-  localStorage.setItem("volume", String(value))
-}, 500) // 500ms 后才执行一次
-
-watch(()=>deskTopStore.getVolume,(newValue,_oldValue)=>{
-  saveVolume(Number(newValue))
-},{immediate:true})
 
 const handlePointerDown = (e:PointerEvent)=>{
   const el = e.currentTarget as HTMLElement
@@ -33,10 +24,12 @@ const handlePointerUp = (e:PointerEvent)=>{
 function iconHover(e: MouseEvent) {
   const el = e.currentTarget as HTMLElement
   el.style.background = 'rgba(255,255,255,0.66)'
+  el.style.fill = '#007aff'
 }
 function iconLeave(e: MouseEvent) {
   const el = e.currentTarget as HTMLElement
   el.style.background = ''
+  el.style.fill = ''
 }
 </script>
 
@@ -47,10 +40,10 @@ function iconLeave(e: MouseEvent) {
        @mouseenter="iconHover"
        @mouseleave="iconLeave">
     <svg class="icon" aria-hidden="true">
-      <use :href="'#icon-'+deskTopStore.getVolumeIcon"/>
+      <use :href="'#icon-windows8'"/>
     </svg>
   </div>
-  <VolumeMenu :type="Menu"/>
+  <WindowsMenu :type="Menu"/>
 </template>
 
 <style scoped>
