@@ -11,7 +11,6 @@ import {Applications} from "@/utils/type.ts"
 import MenuContainerV1 from "@/components/Container/MenuContainerV1.vue";
 
 
-
 const applications = Data.applicationData
 // 容器引用 & 宽度
 const desktop = ref<HTMLElement | null>(null)
@@ -72,6 +71,49 @@ watch(()=>deskTopStore.getVolume, (newVal) => {
   }
 })
 
+const isSelecting = ref(false);
+const selectionBox = ref({ x: 0, y: 0, w: 0, h: 0 });
+const startPoint = ref({ x: 0, y: 0 });
+
+function onPointerDown(e: PointerEvent) {
+  const rect = desktop.value!.getBoundingClientRect()
+  startPoint.value = {
+    x: e.clientX - rect.left,
+    y: e.clientY - rect.top
+  }
+  selectionBox.value = {
+    x: startPoint.value.x,
+    y: startPoint.value.y,
+    w: 0,
+    h: 0
+  }
+  isSelecting.value = true
+
+  window.addEventListener("pointermove", onPointerMove)
+  window.addEventListener("pointerup", onPointerUp)
+}
+
+function onPointerMove(e: PointerEvent) {
+  if (!isSelecting.value) return
+  const rect = desktop.value!.getBoundingClientRect()
+  const currentX = e.clientX - rect.left
+  const currentY = e.clientY - rect.top
+
+  const x = Math.min(startPoint.value.x, currentX)
+  const y = Math.min(startPoint.value.y, currentY)
+  const w = Math.abs(currentX - startPoint.value.x)
+  const h = Math.abs(currentY - startPoint.value.y)
+
+  selectionBox.value = { x, y, w, h }
+}
+
+function onPointerUp() {
+  isSelecting.value = false;
+  // 移除全局事件
+  window.removeEventListener("pointermove", onPointerMove);
+  window.removeEventListener("pointerup", onPointerUp);
+}
+
 onMounted(() => {
   nextTick(updateContainerWidth)
   window.addEventListener("resize", updateContainerWidth)
@@ -88,7 +130,7 @@ onMounted(() => {
   </div>
   <div class="window-home">
     <div id="window-view" ref="desktop" class="window-view" @contextmenu.stop="onRightClick">
-      <div class="window-background">
+      <div class="window-background" @pointerdown="onPointerDown">
         <video ref="backgroundVideo"
                autoplay
                loop
@@ -108,6 +150,16 @@ onMounted(() => {
       <div class="window-bottom">
         <BottomBar :applications="applications" />
       </div>
+      <div
+          v-if="isSelecting"
+          class="selection-box"
+          :style="{
+        left: selectionBox.x + 'px',
+        top: selectionBox.y + 'px',
+        width: selectionBox.w + 'px',
+        height: selectionBox.h + 'px'
+      }"
+      />
     </div>
   </div>
 </template>
@@ -172,5 +224,10 @@ onMounted(() => {
   width: 100%;
 }
 
-
+.selection-box {
+  position: fixed;
+  border: 1px #3399ff solid;
+  background-color: rgba(51, 153, 255, 0.2);
+  pointer-events: none;
+}
 </style>

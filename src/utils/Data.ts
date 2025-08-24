@@ -70,7 +70,6 @@ export const applicationData = reactive<Applications[]>([
         name:'资源管理器',
         icon:'file_explorer',
         dblclick(){
-            console.log(this.id)
             Util.openComponent(ResourceFolder, this.id,{ title: '资源管理器',id:crypto.randomUUID(),icon:this.icon,}, false)
         },
         async contextMenu(e:MouseEvent){

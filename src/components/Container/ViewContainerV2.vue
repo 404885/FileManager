@@ -90,6 +90,7 @@ onMounted(() => {
       // 缩放限制在父容器内
     .resizable({
         edges:  { top: true, left: true, bottom: true, right: true },
+        margin: 6,
         ignoreFrom: '.content',
         modifiers: [
           // 大小范围限制
