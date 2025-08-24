@@ -11,7 +11,6 @@ node_modules
 dist
 dist-ssr
 *.local
-主页.html
 
 # Editor directories and files
 .vscode/*
