@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import {Component, Data, Util, vResize} from "@/utils";
-import BreadCrumb from "@/components/Application/ResourceFolder/ShowTable/BreadCrumb.vue";
 import ViewContainerV2 from "@/components/Container/ViewContainerV2.vue";
 import SwitchDialog from '../Dialog/SwitchDialog.vue';
 import IconContainer from "@/components/Container/IconContainer.vue";
-import Table from "@/components/Application/ResourceFolder/ShowTable/Table.vue";
 import ShowTable from "@/components/Application/ResourceFolder/ShowTable/ShowTable.vue";
+
+
+
 
 const emit = defineEmits(['close'])
 const props = defineProps<{
@@ -15,6 +16,7 @@ const props = defineProps<{
 }>()
 
 
+console.log(props.id)
 
 function open() {
   Component.openDialog({
@@ -34,6 +36,7 @@ const itemClick = (action: string) => {
     }
   }
 }
+
 const context = (e: MouseEvent) => {
   e.stopPropagation()
 }
@@ -53,14 +56,10 @@ const context = (e: MouseEvent) => {
                 <IconContainer size="20px" :link-mode="false" :name="item.icon"/>
               </div>
             </div>
-<!--            <div class="resource-sidebar-title">工作空间</div>-->
-<!--            <div class="resource-sidebar-tree">-->
-<!--              <TreeContainer></TreeContainer>-->
-<!--            </div>-->
           </div>
 
 
-        <ShowTable></ShowTable>
+        <ShowTable :id="props.id"></ShowTable>
 
 
         </div>

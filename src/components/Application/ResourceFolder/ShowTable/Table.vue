@@ -1,11 +1,21 @@
 <script setup lang="ts">
-import { Data,Util } from "@/utils";
-import {ElPopover, ElTable, ElTableColumn, ElMessage, ElDialog, ElButton, ElTag} from 'element-plus'
-import { onMounted, ref, onBeforeUnmount } from "vue";
-import { VXETableNode } from "@/utils/type.ts";
+import {Data, Util} from "@/utils";
+import {ElMessage, ElPopover, ElTable, ElTableColumn, ElTag} from 'element-plus'
+import {onMounted, ref} from "vue";
+import {VXETableNode} from "@/utils/type.ts";
 import IconContainer from "@/components/Container/IconContainer.vue";
 import ShowTableDialog from "@/components/Application/ResourceFolder/ShowTable/ShowTableDialog.vue";
-import TagExpand from "@/components/Application/ResourceFolder/ShowTable/TagExpand.vue";
+import ExpandTag from "@/components/Application/ResourceFolder/ShowTable/ExpandTag.vue";
+import ExpandName from "@/components/Application/ResourceFolder/ShowTable/ExpandName.vue";
+import { useResourceCondition } from "@/pinia/ResourceCondition.ts";
+
+
+const props = defineProps<{
+  id: string;
+}>()
+
+
+const resFolder = useResourceCondition()
 
 const tableData = ref<VXETableNode[]>([])
 const proxy = ref<HTMLElement | null>(null)
@@ -25,19 +35,19 @@ const fields = ref([
 
 
 
-const handleDragend = (newWidth: number, oldWidth: number, column: any) => {
+const handleDragend =  (newWidth: number, oldWidth: number, column: any) => {
   // 设置最小宽
   console.log(newWidth, oldWidth, column);
   column.width = newWidth < column?.minWidth ? column.minWidth : column.width = newWidth
 }
 
 
-const handleCellClick = (row: any, column: any, cell: any, event: MouseEvent) => {
+const handleCellClick = (row: any, column: any, cell: any, event: MouseEvent) =>  {
   // 如果存在延时计时器，先清除
   if (clickTimer) clearTimeout(clickTimer);
 
   // 延时触发单击事件
-  clickTimer = setTimeout(() => {
+  clickTimer = setTimeout( () => {
     clickTimer = null; // 执行完毕后清空计时器
     ElMessage({
       message: `单击事件触发: ${row.name}`,
@@ -45,15 +55,17 @@ const handleCellClick = (row: any, column: any, cell: any, event: MouseEvent) =>
       duration: 3000,
     });
 
-    if (column.property === 'tag') {
-      const cellRef = cell
-      const rect = cellRef.getBoundingClientRect();
-      const top = rect.top + window.scrollY;   // 加上滚动偏移
-      const left = rect.left + window.scrollX; // 加上滚动偏移
-      const height = rect.height
-      Util.openComponent(TagExpand, 'id', {dialogVisible: true, cellId: row.id, tag: row.tag, position: { top: top, left: left }, height: height});
-    }
 
+    const rect = cell.getBoundingClientRect();
+
+
+    if (column.property === 'tag') {
+      Util.openComponent(ExpandTag, 'id', { dialogVisible: true, rect: rect, data: row });
+      // Util.openComponent(ExpandTag, 'id', {dialogVisible: true, cellId: row.id, tag: row.tag, position: { top: top, left: left }, height: height});
+    }
+    else if (column.property === 'name') {
+      Util.openComponent(ExpandName, 'id', {dialogVisible: true, rect: rect, data: row, id: props.id });
+    }
 
 
 
@@ -76,6 +88,8 @@ const handleCellDblClick = async (row: any, column: any, cell: any, event: Mouse
 
 
   console.log(row.id, row.type)
+
+
   Util.openComponent(ShowTableDialog, 'id', {dialogVisible: true, cellId: row.id, type: row.type});
   tableData.value = await window.electronAPI.dataOperation.loadTable(1)
 
@@ -90,7 +104,6 @@ const handleCellDblClick = async (row: any, column: any, cell: any, event: Mouse
 
 
 
-
 const handleCellHover = (row: any, column: any) => {
   hoverRow.value = row;
   hoverColumn.value = column.key;
@@ -101,11 +114,20 @@ const handleCellLeave = () => {
   hoverColumn.value = null;
 }
 
+
+const stop = resFolder.$subscribe((mutation, state) => {
+  // 处理逻辑
+})
+
+
 onMounted( async () => {
   tableData.value = await window.electronAPI.dataOperation.loadTable(1)
 
   proxy.value = document.querySelector<HTMLDivElement>('.el-table__column-resize-proxy');
 })
+
+onUnmounted(() => stop())
+
 
 
 
@@ -197,7 +219,6 @@ onMounted( async () => {
 
     </el-table>
   </div>
-
 </template>
 
 <style scoped>

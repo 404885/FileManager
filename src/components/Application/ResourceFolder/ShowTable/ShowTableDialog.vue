@@ -53,21 +53,7 @@ async function close(){
 <template>
 <teleport to="body">
   <el-dialog v-model="dialogVisible" title="输入tag" width="500" align-center>
-    <template>
-
-    </template>
-
-    <el-input-tag v-model="input"/>
-
-
-    <template #footer>
-      <div class="dialog-footer">
-        <el-button @click="emit('close')">Cancel</el-button>
-        <el-button type="primary" @click="close">Confirm</el-button>
-      </div>
-    </template>
-
-
+      xxx
   </el-dialog>
 </teleport>
 

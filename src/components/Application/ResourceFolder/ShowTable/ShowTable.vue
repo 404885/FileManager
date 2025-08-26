@@ -3,6 +3,15 @@
 import Table from "@/components/Application/ResourceFolder/ShowTable/Table.vue";
 import BreadCrumb from "@/components/Application/ResourceFolder/ShowTable/BreadCrumb.vue";
 
+
+
+const props = defineProps<{
+  id: string;
+}>()
+
+console.log(props.id)
+
+
 </script>
 
 <template>
@@ -16,7 +25,7 @@ import BreadCrumb from "@/components/Application/ResourceFolder/ShowTable/BreadC
     </div>
 
     <div class="resource-container-table">
-      <Table></Table>
+      <Table :id="props.id"></Table>
     </div>
 
   </div>

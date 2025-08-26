@@ -136,4 +136,19 @@
 /* ----------------- el table 组件样式重置------------------ */
 .el-dialog{
     margin: 0;
+    padding: 0;
+}
+
+.el-dialog__header{
+    display: none;
+}
+
+.el-dialog__body{
+    height: 100%;
+}
+
+/* ----------------- el input 组件样式重置------------------ */
+.el-input__wrapper {
+    box-shadow: none !important; /* 去掉默认边框 */
+    border: none !important;     /* 去掉可能的边框 */
 }

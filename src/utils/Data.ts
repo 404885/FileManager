@@ -3,7 +3,6 @@ import { reactive } from "vue";
 import { Applications } from "@/utils/type.ts";
 import {Util} from "@/utils/index.ts";
 import ResourceFolder from "@/components/Application/ResourceFolder.vue";
-import MenuContainerV1 from "@/components/Container/MenuContainerV1.vue";
 import WebBrowser from "@/components/Application/WebBrowser.vue";
 import SystemSetting from "@/components/Application/SystemSetting.vue";
 
@@ -71,19 +70,10 @@ export const applicationData = reactive<Applications[]>([
         icon:'file_explorer',
         dblclick(){
             console.log(this.id)
-            Util.openComponent(ResourceFolder, this.id,{ title: '资源管理器',id:crypto.randomUUID(),icon:this.icon,}, false)
+            Util.openComponent(ResourceFolder, this.id,{ title: '资源管理器', id:crypto.randomUUID(), icon:this.icon,}, false)
         },
         async contextMenu(e:MouseEvent){
             e.stopPropagation()
-            // const result = await Util.asyncOpenComponent(MenuContainerV1,'1', {
-            //     position: { x: e.clientX, y: e.clientY },
-            //     data:  [
-            //         { name: "O2 1", icon: "icon1", click: () => {}},
-            //         { name: "Op3ion 2", icon: "icon2", click: () => {}},
-            //         { name: "1n 3", icon: "icon2", click: () => {}},
-            //     ],
-            // })
-            // console.log(result)
         },
     },
     {

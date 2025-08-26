@@ -71,3 +71,10 @@ export interface WallPaper{
     tag?:string,
     description?: string,
 }
+
+export interface cellProps {
+    dialogVisible: boolean
+    rect: DOMRect
+    data: any
+    id: string
+}

@@ -83,7 +83,7 @@ const drop = async (draggingNode: {data: ElTreeNode} , dropNode: {data: ElTreeNo
   const parentId = dropNode.data.id === 0 ? null : dropNode.data.id;
   const result = await window.electronAPI.dataOperation.execute(
       `UPDATE ${tableName} SET associated_folder = ? WHERE ID = ?;`,
-      [parentId,draggingNode.data.id]
+      [parentId, draggingNode.data.id]
   )
   // 更新成功
   if (result){
