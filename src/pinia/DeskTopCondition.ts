@@ -12,6 +12,7 @@ export const useDeskTopCondition = defineStore('DeskTopCondition', {
         isMuted: false as boolean,
         volume:Number(localStorage.getItem("volume") ?? 0.1),
         volumeIcon:'volume' as string,
+        now:  new Date(),
         windowOffset: {
             x: 15,
             y: 15,
@@ -60,6 +61,7 @@ export const useDeskTopCondition = defineStore('DeskTopCondition', {
                 this.application[app.id] = app
                 this.displayOrder.push(app.id)
                 this.bottomBarOrder.push(app.id) // 初始化时加到任务栏
+                this.minimizedWindows[app.id] = false
             }
         },
         setBottomBarOrder(newOrder: string[]) {
@@ -121,15 +123,28 @@ export const useDeskTopCondition = defineStore('DeskTopCondition', {
             this.minimizedWindows[id] = false
             this.bringToFront(id)
         },
+        minimizeAllWindow(){
+            for (const key in this.minimizedWindows) {
+                this.minimizedWindows[key] = true
+            }
+        },
         removeApplication(id: string) {
             if (this.application[id]) {
                 delete this.application[id]
             }
-            const index = this.displayOrder.findIndex(appId => appId === id)
-            if (index !== -1) {
-                this.displayOrder.splice(index, 1)
+
+            // 删除 displayOrder
+            this.displayOrder = this.displayOrder.filter(appId => appId !== id)
+
+            // 删除 bottomBarOrder
+            if (this.bottomBarOrder) {
+                this.bottomBarOrder = this.bottomBarOrder.filter(appId => appId !== id)
             }
-            delete this.minimizedWindows[id]
+
+            // 删除最小化状态
+            if (this.minimizedWindows[id]) {
+                delete this.minimizedWindows[id]
+            }
         },
         resetWindowOffset() {
             this.windowOffset.x = 0;

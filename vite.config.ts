@@ -3,8 +3,7 @@ import path from 'node:path'
 import electron from 'vite-plugin-electron/simple'
 import vue from '@vitejs/plugin-vue'
 import { fileURLToPath } from "node:url";
-import { createSvgIconsPlugin } from "vite-plugin-svg-icons";
-
+//import { createSvgIconsPlugin } from "vite-plugin-svg-icons";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [

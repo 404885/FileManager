@@ -8,6 +8,7 @@ const deskTopStore = useDeskTopCondition()
 
 const currentTime = ()=>{
   const now = new Date()
+  deskTopStore.now = now
   const y = now.getFullYear()
   const m = String(now.getMonth() + 1)
   const d = String(now.getDate())
@@ -17,8 +18,9 @@ const currentTime = ()=>{
   return [`${y}/${m}/${d}`,`${h}:${min}:${s}`]
 }
 
-const date =ref<string>()
-const time =ref<string>()
+const date = ref('')
+const time = ref('')
+
 function update() {
   const [d, t] = currentTime()
   date.value = d
@@ -75,7 +77,7 @@ onUnmounted(() => {
       </span>
     </div>
   </div>
-  <ClockMenu :type="Menu"/>
+  <ClockMenu :type="Menu" v-model:time="time" v-model:date="date"/>
 </template>
 
 <style scoped>

@@ -9,6 +9,7 @@ import {DESKTOP_ICON_SIZE} from "@/utils/constant.ts";
 import {useClickHandler} from "@/utils/util.ts";
 import {Applications} from "@/utils/type.ts"
 import MenuContainerV1 from "@/components/Container/MenuContainerV1.vue";
+import WallPaper from "@/components/Application/WallPaper.vue";
 
 
 const applications = Data.applicationData
@@ -24,9 +25,17 @@ async function onDeskTopRightClick(e: MouseEvent) {
   const result = await Util.asyncOpenComponent(MenuContainerV1,'桌面右键菜单', {
     position: { x: e.clientX, y: e.clientY },
     data:  [
-      { name: "壁纸", icon: "wallpaper_roll", click: () => {}},
-      { name: "新建笔记", icon: "md", click: () => {}},
-      { name: "刷新", icon: "refresh", click: () => {}},
+      { name: "壁纸", icon: "wallpaper_roll",
+        click: () => {Util.openComponent(WallPaper,'wallpaper',{id:'wallpaper',icon: "wallpaper_roll",title:'壁纸'})}
+      },
+      { name: "新建笔记", icon: "md",
+        click: () => {
+
+        }
+      },
+      { name: "刷新", icon: "refresh",
+        click: () => {}
+      },
     ],
   })
   if (result){
@@ -36,12 +45,20 @@ async function onDeskTopRightClick(e: MouseEvent) {
 
 async function onBottomBarRightClick(e: MouseEvent) {
   e.stopPropagation()
+  const iconEl = (e.target as HTMLElement).closest('[data-id]')
+  const appId = iconEl?.getAttribute('data-id')
   const result = await Util.asyncOpenComponent(MenuContainerV1,'底边栏右键菜单', {
-    position: { x: e.clientX, y: e.clientY - 100 },
+    position: { x: e.clientX, y: e.clientY - 30 },
     data:  [
-      { name: "壁纸", icon: "wallpaper_roll", click: () => {}},
-      { name: "新建笔记", icon: "md", click: () => {}},
-      { name: "刷新", icon: "refresh", click: () => {}},
+      {
+        name: "关闭",
+        icon: "delete",
+        click: () => {
+          if (appId){
+            deskTopStore.removeApplication(appId)
+          }
+        }
+      },
     ],
   })
   if (result){
@@ -144,7 +161,7 @@ onMounted(() => {
     <TitleBar/>
   </div>
   <div class="window-home">
-    <div id="window-view" ref="desktop" class="window-view" @contextmenu="onDeskTopRightClick">
+    <div id="window-view" ref="desktop" class="window-view"  @contextmenu="onDeskTopRightClick">
       <div class="window-background" @pointerdown="onPointerDown">
 <!--        <video ref="backgroundVideo"-->
 <!--               autoplay-->

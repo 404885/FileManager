@@ -487,7 +487,8 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
       webviewTag: true,
-      autoplayPolicy: "no-user-gesture-required"
+      autoplayPolicy: "no-user-gesture-required",
+      webSecurity: false
     }
   });
   win.webContents.on("did-finish-load", () => {

@@ -1,10 +1,8 @@
 <script lang="ts" setup>
 import {useDeskTopCondition} from "@/pinia/DeskTopCondition.ts";
-import NotificationMenu from "@/components/Bar/BottomBar/NotificationMenu.vue";
 
-const Menu = 'notification';
+const Menu = 'BackToDeskTop';
 const deskTopStore = useDeskTopCondition()
-
 
 const handlePointerDown = (e:PointerEvent)=>{
   const el = e.currentTarget as HTMLElement
@@ -15,6 +13,7 @@ const handlePointerUp = (e:PointerEvent)=>{
   const el = e.currentTarget as HTMLElement
   el.style.background = 'rgba(255,255,255,0.66)'
   el.style.opacity = '1'
+  deskTopStore.minimizeAllWindow()
   if (deskTopStore.getActivateMenu === Menu){
     deskTopStore.setActivateMenu()
   }else {
@@ -32,30 +31,20 @@ function iconLeave(e: MouseEvent) {
 </script>
 
 <template>
-  <div class="Notification-wrapper"
+  <div class="BackToDeskTop-wrapper"
        @pointerdown.stop="handlePointerDown"
        @pointerup.stop="handlePointerUp"
        @mouseenter="iconHover"
        @mouseleave="iconLeave">
-    <svg class="icon" aria-hidden="true">
-      <use :href="'#icon-comments'"/>
-    </svg>
   </div>
-  <NotificationMenu :type="Menu"/>
 </template>
 
 <style scoped>
-.Notification-wrapper {
-  display: flex;
-  height: 36px;
-  width: 36px;
-  position: relative;
-
+.BackToDeskTop-wrapper {
+  height: 100%;
+  width: 6px;
+  border-left: 1px solid rgba(128, 128, 128, 0.5);
   transition: background 0.2s ease;
-}
-.icon{
-  margin: auto;
-  width: 1em;
-  height: 1em;
+  margin-left: 6px;
 }
 </style>

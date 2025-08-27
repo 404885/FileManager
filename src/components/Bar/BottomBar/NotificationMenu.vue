@@ -37,7 +37,7 @@ onBeforeUnmount(() => {
   <Teleport v-if="target" :to="target">
     <transition name="slide-right">
       <div v-if="deskTopStore.getActivateMenu === props.type" class="BottomBarMenu" ref="BottomBarMenu">
-        <div class="WindowsMenu-wrapper">
+        <div class="NotificationMenu-wrapper">
 
         </div>
       </div>
@@ -49,7 +49,7 @@ onBeforeUnmount(() => {
 .BottomBarMenu{
   z-index: 9999;
 }
-.WindowsMenu-wrapper{
+.NotificationMenu-wrapper{
   position: absolute;
   width: 25vw;
   height: 100vh;

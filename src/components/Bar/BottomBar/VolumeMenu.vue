@@ -91,6 +91,7 @@ onBeforeUnmount(() => {
   height: 2px;
   padding: 10px;
   background: transparent;
+  --percent: 0%
 }
 /* 轨道 */
 .volume-slider::-webkit-slider-runnable-track{

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {onMounted, ref} from "vue";
+import {onMounted, ref, watch} from "vue";
 import interact from 'interactjs'
 import {DraggableContainer} from "@/utils/type.ts";
 import {useDeskTopCondition} from "@/pinia/DeskTopCondition.ts";
@@ -54,6 +54,18 @@ function updateTransform() {
   el.style.width     = `${w}px`;
   el.style.height    = `${h}px`;
 }
+
+watch(
+    () => store.displayOrder,   // 监听 getter
+    (newVal, _oldVal) => {
+      const exists = newVal.includes(props.id)
+      if (!exists) {
+        emit("close")
+      }
+    },
+    { deep: true } // 数组内部变化也能捕捉
+)
+
 onMounted(() => {
   const el = viewContainer.value!
   interact(el)
@@ -123,9 +135,7 @@ onMounted(() => {
   })
   bringToFront()
 })
-
 function close(){
-  emit('close')
   store.removeApplication(props.id)
 }
 function maximize() {
@@ -146,7 +156,7 @@ function maximize() {
     containerProperty.value.x = 0
     containerProperty.value.y = 0
     containerProperty.value.width = parentRect.width
-    containerProperty.value.height = parentRect.height
+    containerProperty.value.height = parentRect.height - 36
 
     isMaximized.value = true
   } else {
@@ -188,7 +198,11 @@ function minimize() {
 </script>
 
 <template>
-  <div class="view-container" ref="viewContainer" v-show="!store.isMinimized(containerProperty.id)" :style="{zIndex:store.computeZIndex(containerProperty.id)}" @mousedown="bringToFront()">
+  <div class="view-container"
+       ref="viewContainer"
+       v-show="!store.isMinimized(containerProperty.id)"
+       :style="{zIndex:store.computeZIndex(containerProperty.id)}"
+       @mousedown="bringToFront()">
     <div class="title-bar" @dblclick="onTitleBarDblclick">
       <div class="traffic-lights-wrapper">
         <div class="traffic-lights">

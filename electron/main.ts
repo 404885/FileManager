@@ -41,6 +41,7 @@ function createWindow() {
       nodeIntegration: false,
       webviewTag: true,
       autoplayPolicy: 'no-user-gesture-required',
+      webSecurity: false,
     },
   })
   // Test active push message to Renderer-process.
