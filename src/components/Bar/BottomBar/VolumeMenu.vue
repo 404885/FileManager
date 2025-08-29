@@ -27,8 +27,8 @@ const target = ref<string | null>(null)
 onMounted(() => {
   // 用 pointerdown 也可以更早拦截，按需替换
   nextTick(() => {
-    if (document.querySelector('#window-view')) {
-      target.value = '#window-view'
+    if (document.querySelector('body')) {
+      target.value = 'body'
     }
   })
   document.addEventListener('pointerup', handleClickOutside)

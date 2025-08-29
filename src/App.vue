@@ -25,6 +25,11 @@ async function onDeskTopRightClick(e: MouseEvent) {
   const result = await Util.asyncOpenComponent(MenuContainerV1,'桌面右键菜单', {
     position: { x: e.clientX, y: e.clientY },
     data:  [
+      { name: "全部窗口最小化",
+        click: () => {
+          deskTopStore.minimizeAllWindow()
+        }
+      },
       { name: "壁纸", icon: "wallpaper_roll",
         click: () => {Util.openComponent(WallPaper,'wallpaper',{id:'wallpaper',icon: "wallpaper_roll",title:'壁纸'})}
       },
@@ -32,9 +37,6 @@ async function onDeskTopRightClick(e: MouseEvent) {
         click: () => {
 
         }
-      },
-      { name: "刷新", icon: "refresh",
-        click: () => {}
       },
     ],
   })
@@ -179,9 +181,7 @@ onMounted(() => {
           :y="positions[index].y"
           @click="handleClick(app)"
           @contextmenu="app.contextMenu"/>
-      <div class="window-bottom">
-        <BottomBar :applications="applications" @contextmenu="onBottomBarRightClick"/>
-      </div>
+
       <div
           v-if="isSelecting"
           class="selection-box"
@@ -193,6 +193,9 @@ onMounted(() => {
       }"
       />
     </div>
+  </div>
+  <div class="window-bottom">
+    <BottomBar :applications="applications" @contextmenu="onBottomBarRightClick"/>
   </div>
 </template>
 

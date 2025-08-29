@@ -43,8 +43,9 @@ function iconLeave(e: MouseEvent) {
 .BackToDeskTop-wrapper {
   height: 100%;
   width: 6px;
-  border-left: 1px solid rgba(128, 128, 128, 0.5);
+  border: 1px solid rgba(128, 128, 128, 0.38);
   transition: background 0.2s ease;
   margin-left: 6px;
+  margin-right: 2px;
 }
 </style>

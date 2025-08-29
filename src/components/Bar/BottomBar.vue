@@ -7,7 +7,6 @@ import Clock from "@/components/Bar/BottomBar/Clock.vue";
 import Volume from "@/components/Bar/BottomBar/Volume.vue";
 import Windows from "@/components/Bar/BottomBar/Windows.vue";
 import Notification from "@/components/Bar/BottomBar/Notification.vue";
-import BackToDeskTop from "@/components/Bar/BottomBar/BackToDeskTop.vue";
 
 const deskTopStore = useDeskTopCondition()
 
@@ -61,7 +60,6 @@ onMounted(() => {
       <Volume/>
       <Clock/>
       <Notification/>
-      <BackToDeskTop/>
     </div>
   </div>
 </template>
