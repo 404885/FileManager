@@ -10,7 +10,7 @@ const props = defineProps<{
 }>()
 
 const YOUR_DEPLOYED_DOMAIN = '404885.dpdns.org';
-const YOUR_GEMINI_API_KEY = 'AIzaSyCrbIePTjKzUiAlm2YkXaUEyvZCoyc0tH8'; // ⚠ 建议只在后端用
+const YOUR_GEMINI_API_KEY = ''; // ⚠ 建议只在后端用
 const MODEL_NAME = 'gemini-2.5-flash';
 
 const input = ref('')
