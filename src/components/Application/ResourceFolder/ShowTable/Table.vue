@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import {Data, Util} from "@/utils";
-import {ElMessage, ElPopover, ElTable, ElTableColumn, ElTag} from 'element-plus'
-import {onMounted, ref} from "vue";
-import {VXETableNode} from "@/utils/type.ts";
+import {ElMessage, ElPopover, ElTable, ElTableColumn, ElTag, ElButton} from 'element-plus'
+import {onMounted, ref, onUnmounted} from "vue";
+import { VXETableNode } from "@/utils/type.ts";
 import IconContainer from "@/components/Container/IconContainer.vue";
 import ShowTableDialog from "@/components/Application/ResourceFolder/ShowTable/ShowTableDialog.vue";
 import ExpandTag from "@/components/Application/ResourceFolder/ShowTable/ExpandTag.vue";
@@ -14,15 +14,11 @@ const props = defineProps<{
   id: string;
 }>()
 
-
 const resFolder = useResourceCondition()
-
 const tableData = ref<VXETableNode[]>([])
 const proxy = ref<HTMLElement | null>(null)
 let clickTimer: ReturnType<typeof setTimeout> | null = null;
 const clickDelay = 200;
-
-
 const hoverRow = ref<any>(null);
 const hoverColumn = ref<string | null>(null);
 
@@ -33,6 +29,12 @@ const fields = ref([
 ])
 
 
+const hover = ref([
+  { label: '编辑', bool: false, icon: 'edit' },
+  { label: '收藏', bool: false, icon: 'like' },
+  { label: '删除', bool: false ,icon: 'remove'},
+])
+
 
 
 const handleDragend =  (newWidth: number, oldWidth: number, column: any) => {
@@ -40,9 +42,7 @@ const handleDragend =  (newWidth: number, oldWidth: number, column: any) => {
   console.log(newWidth, oldWidth, column);
   column.width = newWidth < column?.minWidth ? column.minWidth : column.width = newWidth
 }
-
-
-const handleCellClick = (row: any, column: any, cell: any, event: MouseEvent) =>  {
+const handleCellClick = (row: any, column: any, cell: any) =>  {
   // 如果存在延时计时器，先清除
   if (clickTimer) clearTimeout(clickTimer);
 
@@ -55,13 +55,11 @@ const handleCellClick = (row: any, column: any, cell: any, event: MouseEvent) =>
       duration: 3000,
     });
 
-
     const rect = cell.getBoundingClientRect();
 
-
     if (column.property === 'tag') {
-      Util.openComponent(ExpandTag, 'id', { dialogVisible: true, rect: rect, data: row });
-      // Util.openComponent(ExpandTag, 'id', {dialogVisible: true, cellId: row.id, tag: row.tag, position: { top: top, left: left }, height: height});
+
+      Util.openComponent(ExpandTag, 'id', { dialogVisible: true, rect: rect, data: row, id: props.id });
     }
     else if (column.property === 'name') {
       Util.openComponent(ExpandName, 'id', {dialogVisible: true, rect: rect, data: row, id: props.id });
@@ -72,8 +70,7 @@ const handleCellClick = (row: any, column: any, cell: any, event: MouseEvent) =>
 
   }, clickDelay);
 };
-
-const handleCellDblClick = async (row: any, column: any, cell: any, event: MouseEvent) => {
+const handleCellDblClick = async (row: any, column: any, cell: any) => {
   // 双击时清除单击延时
   if (clickTimer) {
     clearTimeout(clickTimer);
@@ -96,33 +93,35 @@ const handleCellDblClick = async (row: any, column: any, cell: any, event: Mouse
   if (column.property === 'tag') {
     console.log('点击了tag')
     console.log(cell, row, column)
-
   }
 
 };
-
-
-
-
 const handleCellHover = (row: any, column: any) => {
   hoverRow.value = row;
   hoverColumn.value = column.key;
 }
-
 const handleCellLeave = () => {
   hoverRow.value = null;
   hoverColumn.value = null;
 }
 
+const tagSplit = (tag?: string | null) => {
+  if (!tag) return []
+  return tag.split(/[,，]/) .map(t => t.trim()).filter(t => t.length > 0) // 过滤掉空字符串
+}
 
-const stop = resFolder.$subscribe((mutation, state) => {
-  // 处理逻辑
+
+const stop = resFolder.$subscribe(async (mutation, state) => {
+  console.log(mutation, state);
+  resFolder.setDataChange(1)
+  tableData.value = await window.electronAPI.dataOperation.loadTable(1)
 })
+
+
 
 
 onMounted( async () => {
   tableData.value = await window.electronAPI.dataOperation.loadTable(1)
-
   proxy.value = document.querySelector<HTMLDivElement>('.el-table__column-resize-proxy');
 })
 
@@ -151,8 +150,6 @@ onUnmounted(() => stop())
 
       <el-table-column type="index" label="Id" :index="index => index" align="center" width="60" :resizable="false"></el-table-column>
 
-
-
       <el-table-column v-for="item of fields" :prop="item.key" :label="item.label" :width="item.width" :min-width="item.minWidth" :resizable="true">
         <template #expand>dsa</template>
 
@@ -165,20 +162,22 @@ onUnmounted(() => stop())
               <span class="ellipsis">{{ table.row[item.key] }}</span>
             </template>
 
+
             <template v-else-if="item.key === 'tag' ">
-
-
-
-              <div class="ellipsis-tag">
-                <el-tag v-for="tag in table.row[item.key]" :key="tag" class="tag-item" type="primary">
+              <div class="tag-container">
+                <el-tag
+                    v-for="tag in tagSplit(table.row[item.key])"
+                    :key="tag"
+                    class="tag-item"
+                    type="primary">
                   {{ tag }}
                 </el-tag>
               </div>
-
-
-
-
             </template>
+
+
+
+
 
             <template v-else>
               <span class="">{{ table.row[item.key] }}</span>
@@ -190,9 +189,7 @@ onUnmounted(() => stop())
         </template>
       </el-table-column>
 
-
-
-      <el-table-column label="" align="right" header-align="left">
+      <el-table-column label="" prop="default" align="right" header-align="left">
         <template #header>
           <el-popover placement="left-end" >
             <template #reference>
@@ -208,12 +205,15 @@ onUnmounted(() => stop())
 
         <template #default="button">
           <div class="edit-icon" v-show="hoverRow === button.row && hoverColumn === button.key">
-            <button>1</button>
-            <button>2</button>
-            <button>2</button>
+            <el-button
+                v-for="i of hover"
+                class="hover-btn"
+                @mouseenter="i.bool = true"
+                @mouseleave="i.bool = false">
+              <IconContainer :link-mode="false" :name="i.icon" />
+              <span class="btn-text" v-show="i.bool">{{ i.label }}</span>
+            </el-button>
           </div>
-
-
         </template>
       </el-table-column>
 
@@ -227,17 +227,74 @@ onUnmounted(() => stop())
 
 /* 省略号效果 */
 .ellipsis {
-  width: 90%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.ellipsis-tag {
-  width: 100%;
+
+.tag-container {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.tag-item + .tag-item {
+  margin-left: 5px;
+}
+
+
+.edit-icon {
+  position: relative;       /* 脱离文档流 */
+}
+
+.btn-text{
+  margin-left: 4px;
+  margin-right: 4px;
+  color: black;
+  font-size: 14px;
+}
+
+.hover-btn {
+  border: 1px solid rgba(255, 255, 255, 0.6); /* 半透明白色，玻璃感 */
+  height: 26px;
+  min-width: 26px;          /* 保证按钮最小宽度是圆形 */
+  align-items: center;
+  padding: 0;
+  margin-top: 7px;
+  margin-bottom: 7px;
+  border-radius: 50%;
+  overflow: hidden;         /* 裁掉多余内容 */
+
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(6px);
+
+  /* 分层阴影：下方硬阴影 + 柔光晕 */
+  box-shadow:
+      0 1px 3px rgba(0,0,0,0.3),
+      0 2px 6px rgba(0,0,0,0.15);
+  transition: border-radius 0.15s ease, width 0.15s ease 0.15s,
+  background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-btn:hover {
+  border: 1px solid rgba(255, 255, 255, 0.6); /* 半透明白色，玻璃感 */
+  max-width: 100px;          /* 展开 */
+  border-radius: 4px;      /* 圆角矩形 */
+  box-shadow:
+      0 1px 3px rgba(0,0,0,0.3),
+      0 2px 6px rgba(0,0,0,0.15);
+}
+
+.hover-btn:active {
+  background: rgba(255, 255, 255, 0.2);
+  /* 按下去阴影更贴近，减少扩散 */
+  box-shadow:
+      0 1px 3px rgba(0,0,0,0.3),
+      0 2px 6px rgba(0,0,0,0.15);
+  transform: translateY(1px); /* 模拟压下去 */
+}
+
+
+
 
 
 
@@ -249,9 +306,6 @@ onUnmounted(() => stop())
       0 0 10px rgba(0, 0, 0, 0.2);
   border-radius: 6px;
 }
-
-
-
 /* 表头 hover 效果 */
 :deep(.el-table__header th:not(:last-child, :first-child):hover) {
   background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(240,240,240,0.9));
@@ -265,10 +319,6 @@ onUnmounted(() => stop())
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
   background-color: #e9ecf1;
 }
-
-
-
-
 /* 表体单元格 hover，排除第一列和最后一列 */
 :deep(.el-table__body-wrapper td:not(:first-child, :last-child):hover) {
   background-color: #e6f7ff !important; /* 浅蓝色背景 */
@@ -278,7 +328,6 @@ onUnmounted(() => stop())
   outline-offset: -1px; /* 确保描边在单元格内部 */
   transition: all 0.2s ease;
 }
-
 /* 表体单元格点击效果 */
 :deep(.el-table__body-wrapper td:not(:first-child, :last-child):active) {
   background-color: #bae7ff !important; /* 更深的蓝色背景 */
@@ -286,6 +335,10 @@ onUnmounted(() => stop())
   outline-offset: -2px;
   transform: none;
   box-shadow: none;
+}
+
+:deep(.el-table__body td:last-child) {
+  padding: 0 !important;
 }
 
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { ElDialog, ElInput } from "element-plus";
+import {ElDialog, ElInput, ElTag} from "element-plus";
 import { ref } from "vue";
 import { cellProps } from "@/utils/type.ts";
 
@@ -12,9 +12,14 @@ const props = defineProps<cellProps>()
 
 const { top, left, height, width } = props.rect;
 const dialogVisible = ref(props.dialogVisible)
-const input = ref(props.data)
 
 
+const tagSplit = (tag?: string | null) => {
+  if (!tag) return []
+  return tag.split(/[,，]/) .map(t => t.trim()).filter(t => t.length > 0) // 过滤掉空字符串
+}
+
+console.log(props.data.tag)
 
 </script>
 
@@ -23,13 +28,25 @@ const input = ref(props.data)
     <el-dialog
         v-model="dialogVisible"
         :modal="false"
-        :style="{ position: 'fixed', top: `${top}px`, left: `${left}px`, zIndex: 9999, height: `${height}px`, width: `${2*width}px` }"
+        :style="{ position: 'fixed', top: `${top}px`, left: `${left}px`, zIndex: 9999, height: `2${height}px`, width: `${1.5*width}px` }"
         :show-close="false">
 
 
       <template #default>
         <div class="dialog-content">
-          <el-input v-model="input" class="el-input" autofocus />
+          <div class="content-title">
+            <el-tag
+              v-for="tag in tagSplit(props.data.tag)"
+              :key="tag"
+              class="tag-item"
+              type="primary">
+            {{ tag }}
+          </el-tag>
+          </div>
+          <div class="content-option">
+
+          </div>
+
         </div>
       </template>
 
@@ -44,8 +61,8 @@ const input = ref(props.data)
 .dialog-content {
   height: 100%;
   display: flex;
-  flex-direction: row;
-  padding-left: 4px;
+  flex-direction: column;
+  padding: 10px;
   align-items: center;
 }
 

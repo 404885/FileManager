@@ -33,10 +33,8 @@ watch(dialogVisible,  async (newVal) => {
 
     if (result) {
       emit("close")
-      resFolder.setDataChange(props.data)
+      resFolder.setDataChange(result)
     }
-
-
   }
 });
 
@@ -50,7 +48,6 @@ watch(dialogVisible,  async (newVal) => {
         :modal="false"
         :style="{ position: 'fixed', top: `${top}px`, left: `${left}px`, zIndex: 9999, height: `${height}px`, width: `${2*width}px` }"
         :show-close="false">
-
 
       <template #default>
         <div class="dialog-content">

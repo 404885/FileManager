@@ -200,6 +200,8 @@ onMounted(() => {
 </template>
 
 <style scoped>
+
+
 .window-home {
   display: flex;
   background: white;

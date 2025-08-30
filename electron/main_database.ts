@@ -63,6 +63,8 @@ export function initDatabase() {
       type TEXT NOT NULL,
       description TEXT,
       tag TEXT,
+      liked INTEGER DEFAULT 0,
+      deleted INTEGER DEFAULT 0,
       connected_workspace INTEGER DEFAULT 1,
       associated_folder INTEGER NULL DEFAULT NULL,
       create_time INTEGER,
