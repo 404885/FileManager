@@ -298,7 +298,6 @@ onUnmounted(() => stop())
 
 
 
-
 :deep(.el-table) {
   background: rgba(255, 255, 255, 0.4);
   box-shadow:
@@ -321,10 +320,9 @@ onUnmounted(() => stop())
 }
 /* 表体单元格 hover，排除第一列和最后一列 */
 :deep(.el-table__body-wrapper td:not(:first-child, :last-child):hover) {
-  background-color: #e6f7ff !important; /* 浅蓝色背景 */
+  background-color: rgba(0, 0, 0, 0.1) !important; /* 浅蓝色背景 */
   cursor: pointer;
   /* 柔和的蓝色框选效果 */
-  outline: 1px solid #91d5ff;
   outline-offset: -1px; /* 确保描边在单元格内部 */
   transition: all 0.2s ease;
 }

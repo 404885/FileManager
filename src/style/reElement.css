@@ -154,3 +154,8 @@
 }
 
 /* ----------------- el notification 组件样式重置------------------ */
+
+/* ----------------- el divider 组件样式重置------------------ */
+.el-divider--horizontal{
+    margin: 10px 0 !important;
+}
