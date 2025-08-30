@@ -24,7 +24,6 @@ function RegisterIpcEvent(resourcesPath) {
   ipcMain.on("webview-id", (_event, id) => {
     const wc = webContents.fromId(id);
     wc == null ? void 0 : wc.setWindowOpenHandler(({ url }) => {
-      console.log(url);
       wc.loadURL(url);
       return { action: "deny" };
     });
@@ -36,7 +35,7 @@ function RegisterIpcEvent(resourcesPath) {
     });
     if (canceled || filePaths.length === 0) return { canceled: true };
     const filePath = filePaths[0];
-    const content = await fs.readFile(filePath, "utf-8");
+    const content = await fs.readFile(filePath);
     const stats = await fs.stat(filePath);
     const fileName = path.basename(filePath);
     return { canceled: false, name: fileName, path: filePath, content, stats };
@@ -88,14 +87,21 @@ function RegisterIpcEvent(resourcesPath) {
       files: tree
     };
   });
-  ipcMain.handle("close-directory-dialog", async () => {
-  });
   ipcMain.handle("open-file", async (_event, filePath) => {
     try {
       return await shell.openPath(filePath);
     } catch (err) {
       console.error("打开文件失败:", err);
       return "error";
+    }
+  });
+  ipcMain.handle("open-file-by-path", async (_event, filePath) => {
+    try {
+      const buffer = await fs.readFile(filePath);
+      return { success: true, buffer };
+    } catch (err) {
+      console.error("读取文件失败:", err);
+      return { success: false, error: err.message || "未知错误" };
     }
   });
   ipcMain.handle("svg-to-symbol", async (_event, filePath) => {
@@ -227,7 +233,7 @@ function initDatabase() {
       )
     `).run();
   db.prepare(`
-    CREATE TABLE icon_map (
+    CREATE TABLE IF NOT EXISTS icon_map (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       extension TEXT NOT NULL UNIQUE,     -- 扩展名，比如 pdf、docx、mp4
       icon_name TEXT NOT NULL          -- 对应图标名，比如：pdf、word、video
@@ -481,7 +487,8 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
       webviewTag: true,
-      autoplayPolicy: "no-user-gesture-required"
+      autoplayPolicy: "no-user-gesture-required",
+      webSecurity: false
     }
   });
   win.webContents.on("did-finish-load", () => {

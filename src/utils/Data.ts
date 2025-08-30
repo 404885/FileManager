@@ -4,7 +4,9 @@ import { Applications } from "@/utils/type.ts";
 import {Util} from "@/utils/index.ts";
 import ResourceFolder from "@/components/Application/ResourceFolder.vue";
 import WebBrowser from "@/components/Application/WebBrowser.vue";
-import SystemSetting from "@/components/Application/SystemSetting.vue";
+import Preview from "@/components/Application/Preview.vue";
+import Chat from "@/components/Application/Chat.vue";
+import Gemini from "@/components/Application/Gemini.vue";
 
 export const nodeData = [
     { label: '工作空间', icon: 'pdf', action: '', key: 'workspace'},
@@ -69,11 +71,19 @@ export const applicationData = reactive<Applications[]>([
         name:'资源管理器',
         icon:'file_explorer',
         dblclick(){
-            console.log(this.id)
-            Util.openComponent(ResourceFolder, this.id,{ title: '资源管理器', id:crypto.randomUUID(), icon:this.icon,}, false)
+            Util.openComponent(ResourceFolder, this.id,{ title: '资源管理器',id:crypto.randomUUID(),icon:this.icon,}, false)
         },
         async contextMenu(e:MouseEvent){
             e.stopPropagation()
+            // const result = await Util.asyncOpenComponent(MenuContainerV1,'1', {
+            //     position: { x: e.clientX, y: e.clientY },
+            //     data:  [
+            //         { name: "O2 1", icon: "icon1", click: () => {}},
+            //         { name: "Op3ion 2", icon: "icon2", click: () => {}},
+            //         { name: "1n 3", icon: "icon2", click: () => {}},
+            //     ],
+            // })
+            // console.log(result)
         },
     },
     {
@@ -103,7 +113,7 @@ export const applicationData = reactive<Applications[]>([
         name:'通讯',
         icon:'messages',
         dblclick(){
-            // Util.openComponent(Chat,this.id,{title:'通讯',id:crypto.randomUUID(),icon:this.icon,})
+            Util.openComponent(Chat,this.id,{title:'通讯',id:this.id,icon:this.icon,})
         },
         contextMenu(e:MouseEvent){
             e.stopPropagation()
@@ -111,10 +121,21 @@ export const applicationData = reactive<Applications[]>([
     },
     {
         id: crypto.randomUUID(),
-        name: '设置',
-        icon:'setting',
+        name: 'PDF',
+        icon:'pdf',
         dblclick(){
-            Util.openComponent(SystemSetting,this.id,{title:'设置',id:crypto.randomUUID(),icon:this.icon,})
+            Util.openComponent(Preview,this.id,{title:'PDF预览',id:crypto.randomUUID(),icon:this.icon,type:'pdf',src:'F:\\WebStormProject\\FileManager\\public\\testFile\\2024詹勇_毕业设计说明书（论文） - 副本.pdf'},false)
+        },
+        contextMenu(e:MouseEvent){
+            e.stopPropagation()
+        },
+    },
+    {
+        id: crypto.randomUUID(),
+        name: 'Gemini',
+        icon:'google',
+        dblclick(){
+            Util.openComponent(Gemini,this.id,{title:'Gemini',id:this.id,icon:this.icon})
         },
         contextMenu(e:MouseEvent){
             e.stopPropagation()

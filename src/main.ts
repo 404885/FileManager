@@ -2,8 +2,9 @@ import App from './App.vue'
 import {createApp} from 'vue'
 import {createPinia} from "pinia";
 
-import VxeUITable from 'vxe-table'
-import VxeUIAll from 'vxe-pc-ui'
+import {GlobalWorkerOptions} from 'pdfjs-dist'
+import worker from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+GlobalWorkerOptions.workerSrc = worker;
 
 import './style/base.css'
 
@@ -20,10 +21,10 @@ await injectSymbol()
 const pinia = createPinia()
 
 
-export const app = createApp(App) // 直接将创建的 app 实例赋值给导出的 app 变量
+const app = createApp(App)
     .use(ElementPlus)
     .use(pinia)
     .use(router)
-    .use(VxeUIAll)
-    .use(VxeUITable)
     .mount('#app')
+
+export default app

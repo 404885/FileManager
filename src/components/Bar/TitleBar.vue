@@ -28,10 +28,10 @@ export default defineComponent({
 
 <template>
   <div class="window-controls">
-    <button class="window-btn close" @click="close"></button>
-    <button class="window-btn minimize" @click="minimize"></button>
-    <button class="window-btn maximize" @click="maximize"></button>
-    <button class="window-btn pin" :class="{ pinned: isPinned }" @click="toggle"></button>
+    <button class="window-btn close" @click="close" title="关闭"></button>
+    <button class="window-btn minimize" @click="minimize" title="最小化"></button>
+    <button class="window-btn maximize" @click="maximize" title="最大化"></button>
+    <button class="window-btn pin" :class="{ pinned: isPinned }" @click="toggle" title="固定"></button>
   </div>
 </template>
 

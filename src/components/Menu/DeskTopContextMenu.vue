@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import MenuContainer from '@/components/Container/MenuContainer.vue'
 import {CSSProperties, reactive} from "vue";
 import {ContextMenuRow} from "@/utils/type.ts";
 import ContextMenuIcon from "@/components/Icon/ContextMenuIcon.vue";
 import {Util} from "@/utils";
 import WallPaper from "@/components/Application/WallPaper.vue";
+import MenuContainerV1 from "@/App.vue";
 
 const emit = defineEmits(['close'])
 defineProps<{
@@ -30,11 +30,9 @@ const rows = reactive<ContextMenuRow[]>([
 </script>
 
 <template>
-  <teleport to="body">
-    <MenuContainer :position="position" :customStyle="{}" @close="close">
-      <ContextMenuIcon v-for="(row,index) in rows" :key="index" :row="row"/>
-    </MenuContainer>
-  </teleport>
+  <MenuContainerV1 :position="position" :customStyle="{}" @close="close">
+    <ContextMenuIcon v-for="(row,index) in rows" :key="index" :row="row"/>
+  </MenuContainerV1>
 </template>
 
 <style scoped>

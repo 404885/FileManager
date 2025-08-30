@@ -9,7 +9,7 @@ import {DESKTOP_ICON_SIZE} from "@/utils/constant.ts";
 import {useClickHandler} from "@/utils/util.ts";
 import {Applications} from "@/utils/type.ts"
 import MenuContainerV1 from "@/components/Container/MenuContainerV1.vue";
-
+import WallPaper from "@/components/Application/WallPaper.vue";
 
 
 const applications = Data.applicationData
@@ -20,17 +20,47 @@ const backgroundVideo = ref<HTMLVideoElement | null>(null)
 const deskTopStore =useDeskTopCondition()
 
 
-
-
-
-async function onRightClick(e: MouseEvent) {
+async function onDeskTopRightClick(e: MouseEvent) {
   e.stopPropagation()
   const result = await Util.asyncOpenComponent(MenuContainerV1,'桌面右键菜单', {
     position: { x: e.clientX, y: e.clientY },
     data:  [
-      { name: "Option 1", icon: "icon1", click: () => {}},
-      { name: "Option 2", icon: "icon2", click: () => {}},
-      { name: "Option 3", icon: "icon2", click: () => {}},
+      { name: "全部窗口最小化",
+        click: () => {
+          deskTopStore.minimizeAllWindow()
+        }
+      },
+      { name: "壁纸", icon: "wallpaper_roll",
+        click: () => {Util.openComponent(WallPaper,'wallpaper',{id:'wallpaper',icon: "wallpaper_roll",title:'壁纸'})}
+      },
+      { name: "新建笔记", icon: "md",
+        click: () => {
+
+        }
+      },
+    ],
+  })
+  if (result){
+    console.log(result)
+  }
+}
+
+async function onBottomBarRightClick(e: MouseEvent) {
+  e.stopPropagation()
+  const iconEl = (e.target as HTMLElement).closest('[data-id]')
+  const appId = iconEl?.getAttribute('data-id')
+  const result = await Util.asyncOpenComponent(MenuContainerV1,'底边栏右键菜单', {
+    position: { x: e.clientX, y: e.clientY - 30 },
+    data:  [
+      {
+        name: "关闭",
+        icon: "delete",
+        click: () => {
+          if (appId){
+            deskTopStore.removeApplication(appId)
+          }
+        }
+      },
     ],
   })
   if (result){
@@ -75,6 +105,49 @@ watch(()=>deskTopStore.getVolume, (newVal) => {
   }
 })
 
+const isSelecting = ref(false);
+const selectionBox = ref({ x: 0, y: 0, w: 0, h: 0 });
+const startPoint = ref({ x: 0, y: 0 });
+
+function onPointerDown(e: PointerEvent) {
+  const rect = desktop.value!.getBoundingClientRect()
+  startPoint.value = {
+    x: e.clientX - rect.left,
+    y: e.clientY - rect.top
+  }
+  selectionBox.value = {
+    x: startPoint.value.x,
+    y: startPoint.value.y,
+    w: 0,
+    h: 0
+  }
+  isSelecting.value = true
+
+  window.addEventListener("pointermove", onPointerMove)
+  window.addEventListener("pointerup", onPointerUp)
+}
+
+function onPointerMove(e: PointerEvent) {
+  if (!isSelecting.value) return
+  const rect = desktop.value!.getBoundingClientRect()
+  const currentX = e.clientX - rect.left
+  const currentY = e.clientY - rect.top
+
+  const x = Math.min(startPoint.value.x, currentX)
+  const y = Math.min(startPoint.value.y, currentY)
+  const w = Math.abs(currentX - startPoint.value.x)
+  const h = Math.abs(currentY - startPoint.value.y)
+
+  selectionBox.value = { x, y, w, h }
+}
+
+function onPointerUp() {
+  isSelecting.value = false;
+  // 移除全局事件
+  window.removeEventListener("pointermove", onPointerMove);
+  window.removeEventListener("pointerup", onPointerUp);
+}
+
 onMounted(() => {
   nextTick(updateContainerWidth)
   window.addEventListener("resize", updateContainerWidth)
@@ -90,9 +163,13 @@ onMounted(() => {
     <TitleBar/>
   </div>
   <div class="window-home">
-    <div id="window-view" ref="desktop" class="window-view" @contextmenu="onRightClick">
-      <div id="wallpaper" class="window-background">
-        <video ref="backgroundVideo" autoplay loop src="" :muted="false"/>
+    <div id="window-view" ref="desktop" class="window-view"  @contextmenu="onDeskTopRightClick">
+      <div class="window-background" @pointerdown="onPointerDown">
+<!--        <video ref="backgroundVideo"-->
+<!--               autoplay-->
+<!--               loop-->
+<!--               src="./assets/video/senrenbanka.mp4"-->
+<!--               :muted="false"/>-->
       </div>
       <DeskTopIcon v-for="(app, index) in applications"
           :key="app.id"
@@ -104,10 +181,21 @@ onMounted(() => {
           :y="positions[index].y"
           @click="handleClick(app)"
           @contextmenu="app.contextMenu"/>
-      <div class="window-bottom">
-        <BottomBar :applications="applications" />
-      </div>
+
+      <div
+          v-if="isSelecting"
+          class="selection-box"
+          :style="{
+        left: selectionBox.x + 'px',
+        top: selectionBox.y + 'px',
+        width: selectionBox.w + 'px',
+        height: selectionBox.h + 'px'
+      }"
+      />
     </div>
+  </div>
+  <div class="window-bottom">
+    <BottomBar :applications="applications" @contextmenu="onBottomBarRightClick"/>
   </div>
 </template>
 
@@ -151,7 +239,7 @@ onMounted(() => {
   position: relative;
   width: 100%;
   height: 100%;
-  background-image: url('https://via.placeholder.com/150');
+  background: url('./assets/background/bustup_020_002.png') no-repeat center;
   background-size: contain;
 
   z-index: -1;
@@ -167,8 +255,14 @@ onMounted(() => {
   position: absolute;
   bottom: 0;
   flex: 1;
+  z-index: 9999;
   width: 100%;
 }
 
-
+.selection-box {
+  position: fixed;
+  border: 1px #3399ff solid;
+  background-color: rgba(51, 153, 255, 0.2);
+  pointer-events: none;
+}
 </style>

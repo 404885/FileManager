@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {onMounted, ref} from "vue";
+import {onMounted, ref, watch} from "vue";
 import interact from 'interactjs'
 import {DraggableContainer} from "@/utils/type.ts";
 import {useDeskTopCondition} from "@/pinia/DeskTopCondition.ts";
@@ -54,13 +54,32 @@ function updateTransform() {
   el.style.width     = `${w}px`;
   el.style.height    = `${h}px`;
 }
+
+watch(
+    () => store.displayOrder,   // 监听 getter
+    (newVal, _oldVal) => {
+      const exists = newVal.includes(props.id)
+      if (!exists) {
+        emit("close")
+      }
+    },
+    { deep: true } // 数组内部变化也能捕捉
+)
+
 onMounted(() => {
   const el = viewContainer.value!
   interact(el)
       // 拖拽限制在父容器内
     .draggable({
-        allowFrom: '.title-bar',
+        cursorChecker: () => 'default',
+        allowFrom: '.view-container',
         ignoreFrom: '.content',
+        // modifiers: [
+        //   interact.modifiers.restrictRect({
+        //     restriction: 'parent', // 限制在父容器
+        //     endOnly: true,         // 结束时修正
+        //   }),
+        // ],
         listeners: {
           start() {
             el.classList.add('interacting')
@@ -68,6 +87,11 @@ onMounted(() => {
           move(event) {
             containerProperty.value.x += event.dx
             containerProperty.value.y += event.dy
+
+            if (containerProperty.value.y < 0) {
+              containerProperty.value.y = 0
+            }
+
             updateTransform()
           },
           end() {
@@ -77,13 +101,14 @@ onMounted(() => {
       })
       // 缩放限制在父容器内
     .resizable({
-        edges:  { top: false, left: true, bottom: true, right: true },
+        edges:  { top: true, left: true, bottom: true, right: true },
+        margin: 6,
         ignoreFrom: '.content',
         modifiers: [
           // 大小范围限制
-          interact.modifiers.restrictSize({
-            min: { width: 600, height: 450 },
-          }),
+          // interact.modifiers.restrictSize({
+          //   min: { width: 600, height: 450 },
+          // }),
           // 缩放后依然保持在父容器内部
           interact.modifiers.restrictEdges({
             outer: 'parent',         // 外边界限制在父元素
@@ -110,9 +135,7 @@ onMounted(() => {
   })
   bringToFront()
 })
-
 function close(){
-  emit('close')
   store.removeApplication(props.id)
 }
 function maximize() {
@@ -133,7 +156,7 @@ function maximize() {
     containerProperty.value.x = 0
     containerProperty.value.y = 0
     containerProperty.value.width = parentRect.width
-    containerProperty.value.height = parentRect.height
+    containerProperty.value.height = parentRect.height - 36
 
     isMaximized.value = true
   } else {
@@ -150,7 +173,7 @@ function maximize() {
   updateTransform()
 }
 
-function onTitlebarDblclick(e: MouseEvent) {
+function onTitleBarDblclick(e: MouseEvent) {
   const target = e.target as HTMLElement
 
   if (
@@ -175,13 +198,17 @@ function minimize() {
 </script>
 
 <template>
-  <div class="view-container" ref="viewContainer" v-show="!store.isMinimized(containerProperty.id)" :style="{zIndex:store.computeZIndex(containerProperty.id)}" @mousedown="bringToFront()">
-    <div class="title-bar" @dblclick="onTitlebarDblclick">
+  <div class="view-container"
+       ref="viewContainer"
+       v-show="!store.isMinimized(containerProperty.id)"
+       :style="{zIndex:store.computeZIndex(containerProperty.id)}"
+       @mousedown="bringToFront()">
+    <div class="title-bar" @dblclick="onTitleBarDblclick">
       <div class="traffic-lights-wrapper">
         <div class="traffic-lights">
           <div class="traffic-light red" @click="close" title="关闭"></div>
-          <div class="traffic-light yellow" @click="minimize" data-action="minimize" title="最小化"></div>
-          <div class="traffic-light green" @click="maximize" data-action="maximize" title="最大化"></div>
+          <div class="traffic-light yellow" @click="minimize" title="最小化"></div>
+          <div class="traffic-light green" @click="maximize" title="最大化"></div>
         </div>
       </div>
       <span class="title">{{ props.title || '默认应用'}}</span>
@@ -201,18 +228,14 @@ function minimize() {
   border-radius: 6px;
   display: flex;
   flex-direction: column;
-
   position: absolute;
   top: 0;
   left: 0;
-
   overflow: hidden;
   resize: both;
-
   min-width: 600px;
   min-height: 450px;
   will-change: transform;
-
   background: rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -232,7 +255,6 @@ function minimize() {
   border-bottom: 1px solid #e0e0e0; /* Subtle separator */
   will-change: transform;
   background: transparent;
-  cursor: pointer;
 }
 .traffic-lights-wrapper{
   height: 100%;

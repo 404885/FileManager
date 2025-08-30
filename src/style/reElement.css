@@ -133,7 +133,7 @@
 
 
 
-/* ----------------- el table 组件样式重置------------------ */
+/* ----------------- el dialog 组件样式重置------------------ */
 .el-dialog{
     margin: 0;
     padding: 0;
@@ -152,3 +152,5 @@
     box-shadow: none !important; /* 去掉默认边框 */
     border: none !important;     /* 去掉可能的边框 */
 }
+
+/* ----------------- el notification 组件样式重置------------------ */

@@ -3,8 +3,7 @@ import path from 'node:path'
 import electron from 'vite-plugin-electron/simple'
 import vue from '@vitejs/plugin-vue'
 import { fileURLToPath } from "node:url";
-import { createSvgIconsPlugin } from "vite-plugin-svg-icons";
-
+//import { createSvgIconsPlugin } from "vite-plugin-svg-icons";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -29,6 +28,10 @@ export default defineConfig({
       renderer: process.env.NODE_ENV === 'test' ? undefined : {},
     }),
   ],
+  define: {
+    'global': {}, // pdf.js 依赖 global
+    'process.env': {} // 可能还会用到 process.env
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
