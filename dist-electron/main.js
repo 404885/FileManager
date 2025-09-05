@@ -241,6 +241,13 @@ function initDatabase() {
       icon_name TEXT NOT NULL          -- 对应图标名，比如：pdf、word、video
     )
     `).run();
+  db.prepare(`
+    CREATE TABLE IF NOT EXISTS tag (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      class TEXT NOT NULL
+    )
+    `).run();
   console.log("DataBase has initialized", dbPath);
 }
 function RegisterDataBaseOperations() {

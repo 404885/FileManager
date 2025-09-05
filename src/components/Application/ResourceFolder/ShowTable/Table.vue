@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {Data, Util} from "@/utils";
-import {ElMessage, ElPopover, ElTable, ElTableColumn, ElTag, ElButton} from 'element-plus'
+import {ElMessage, ElPopover, ElTable, ElTableColumn, ElTag, ElButton, ElBadge} from 'element-plus'
 import {onMounted, ref, onUnmounted} from "vue";
 import { VXETableNode } from "@/utils/type.ts";
 import IconContainer from "@/components/Container/IconContainer.vue";
@@ -14,34 +14,39 @@ const props = defineProps<{
   id: string;
 }>()
 
+// 资源管理器pinia实例
 const resFolder = useResourceCondition()
+// table数据
 const tableData = ref<VXETableNode[]>([])
+// 拖拽条实例获取
 const proxy = ref<HTMLElement | null>(null)
+// 单双击区分
 let clickTimer: ReturnType<typeof setTimeout> | null = null;
 const clickDelay = 200;
+// 行尾的button显示
 const hoverRow = ref<any>(null);
 const hoverColumn = ref<string | null>(null);
-
-
+// 悬浮button信息
+const hover = ref([
+  { label: '编辑', bool: false, icon: 'edit' },
+  { label: '收藏', bool: false, icon: 'like' },
+  { label: '删除', bool: false ,icon: 'remove'},
+])
+// 表头字段数据
 const fields = ref([
   { key: 'name', label: 'Name', width: 180, minWidth: 200 },
   { key: 'tag', label: 'Tag', width: 140, minWidth: 160 },
 ])
 
 
-const hover = ref([
-  { label: '编辑', bool: false, icon: 'edit' },
-  { label: '收藏', bool: false, icon: 'like' },
-  { label: '删除', bool: false ,icon: 'remove'},
-])
-
-
-
+// 拖拽条拖拽最小列宽
 const handleDragend =  (newWidth: number, oldWidth: number, column: any) => {
   // 设置最小宽
   console.log(newWidth, oldWidth, column);
   column.width = newWidth < column?.minWidth ? column.minWidth : column.width = newWidth
 }
+
+// 单元格单击
 const handleCellClick = (row: any, column: any, cell: any) =>  {
   // 如果存在延时计时器，先清除
   if (clickTimer) clearTimeout(clickTimer);
@@ -64,12 +69,16 @@ const handleCellClick = (row: any, column: any, cell: any) =>  {
     else if (column.property === 'name') {
       Util.openComponent(ExpandName, 'id', {dialogVisible: true, rect: rect, data: row, id: props.id });
     }
+    else {
+
+    }
 
 
 
 
   }, clickDelay);
 };
+// 单元格双击
 const handleCellDblClick = async (row: any, column: any, cell: any) => {
   // 双击时清除单击延时
   if (clickTimer) {
@@ -84,33 +93,25 @@ const handleCellDblClick = async (row: any, column: any, cell: any) => {
   });
 
 
-  console.log(row.id, row.type)
-
-
-  Util.openComponent(ShowTableDialog, 'id', {dialogVisible: true, cellId: row.id, type: row.type});
-  tableData.value = await window.electronAPI.dataOperation.loadTable(1)
-
-  if (column.property === 'tag') {
-    console.log('点击了tag')
-    console.log(cell, row, column)
-  }
-
 };
+// 进入单元格
 const handleCellHover = (row: any, column: any) => {
   hoverRow.value = row;
   hoverColumn.value = column.key;
 }
+// 离开单元格
 const handleCellLeave = () => {
   hoverRow.value = null;
   hoverColumn.value = null;
 }
 
+// tag分割
 const tagSplit = (tag?: string | null) => {
   if (!tag) return []
   return tag.split(/[,，]/) .map(t => t.trim()).filter(t => t.length > 0) // 过滤掉空字符串
 }
 
-
+// 停止state订阅
 const stop = resFolder.$subscribe(async (mutation, state) => {
   console.log(mutation, state);
   resFolder.setDataChange(1)
@@ -125,7 +126,9 @@ onMounted( async () => {
   proxy.value = document.querySelector<HTMLDivElement>('.el-table__column-resize-proxy');
 })
 
-onUnmounted(() => stop())
+onUnmounted(
+    () => stop()
+)
 
 
 
@@ -148,46 +151,53 @@ onUnmounted(() => stop())
         @cell-click="handleCellClick"
         @cell-dblclick="handleCellDblClick">
 
-      <el-table-column type="index" label="Id" :index="index => index" align="center" width="60" :resizable="false"></el-table-column>
+      <el-table-column  label="Id" :index="index => index" align="center" width="60" :resizable="false" type="expand">
 
-      <el-table-column v-for="item of fields" :prop="item.key" :label="item.label" :width="item.width" :min-width="item.minWidth" :resizable="true">
-        <template #expand>dsa</template>
+        1
+      </el-table-column>
+
+      <el-table-column
+          v-for="item of fields"
+          :prop="item.key"
+          :label="item.label"
+          :width="item.width"
+          :min-width="item.minWidth"
+          :resizable="true">
 
         <template #default="table">
-
-          <div style="display: flex; flex-direction: row; align-items: center; gap: 6px; width: 100%;">
+          <div class="table-column">
 
             <template v-if="item.key === 'name' " >
-              <IconContainer :link-mode="true" :file-type="table.row.type"></IconContainer>
-              <span class="ellipsis">{{ table.row[item.key] }}</span>
-            </template>
-
-
-            <template v-else-if="item.key === 'tag' ">
-              <div class="tag-container">
-                <el-tag
-                    v-for="tag in tagSplit(table.row[item.key])"
-                    :key="tag"
-                    class="tag-item"
-                    type="primary">
-                  {{ tag }}
-                </el-tag>
+              <div class="table-column-name">
+                <IconContainer :link-mode="true" :file-type="table.row.type"></IconContainer>
+                <span class="table-column-name-ellipsis">{{ table.row[item.key] }}</span>
               </div>
             </template>
 
-
-
-
+            <template v-else-if="item.key === 'tag' ">
+              <div class="table-column-tag">
+                  <el-tag
+                      v-for="tag in tagSplit(table.row[item.key])"
+                      :key="tag"
+                      class="dialog-content-title-tag-item dialog-content-title-tag-self"
+                      type="primary">
+                    {{ tag }}
+                  </el-tag>
+                <IconContainer v-if="tagSplit(table.row[item.key]).length > 1" :link-mode="false" name="more"/>
+              </div>
+            </template>
 
             <template v-else>
               <span class="">{{ table.row[item.key] }}</span>
             </template>
 
-
-
           </div>
         </template>
+
       </el-table-column>
+
+
+
 
       <el-table-column label="" prop="default" align="right" header-align="left">
         <template #header>
@@ -224,27 +234,45 @@ onUnmounted(() => stop())
 <style scoped>
 
 
-
-/* 省略号效果 */
-.ellipsis {
+.table-column {
+  margin: auto;
+}
+.table-column-name {
+  display: flex;
+}
+.table-column-name-ellipsis {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.tag-container {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+
+.table-column-tag {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
-.tag-item + .tag-item {
+
+
+
+
+
+
+
+
+.dialog-content-title-tag-item {
   margin-left: 5px;
 }
-
-
-.edit-icon {
-  position: relative;       /* 脱离文档流 */
+.dialog-content-title-tag-item:not(:first-child) {
+  display: none;
 }
+.dialog-content-title-tag-self {
+  color: black;
+  background: whitesmoke;
+  border: #1d4ed8 solid 1px;
+}
+
+
 
 .btn-text{
   margin-left: 4px;
@@ -335,8 +363,9 @@ onUnmounted(() => stop())
   box-shadow: none;
 }
 
-:deep(.el-table__body td:last-child) {
+:deep(.el-table__body td) {
   padding: 0 !important;
+  height: 42px !important;
 }
 
 

@@ -1,0 +1,79 @@
+<!-- demo.html -->
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>Tag + 余量徽章 Demo</title>
+    <style>
+        .tag-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: sans-serif;
+        }
+        .tag {
+            background: #409eff;
+            color: white;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        .badge {
+            position: relative;
+            background: #eee;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .badge:hover {
+            background: #ddd;
+        }
+        .tooltip {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: black;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            display: none;
+        }
+        .badge:hover .tooltip {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="tag-container" id="tagBox"></div>
+
+<script>
+    const tags = ["Vue", "Electron", "Element Plus", "Pinia", "SQLite"];
+
+    const box = document.getElementById("tagBox");
+
+    if (tags.length === 1) {
+        box.innerHTML = `<span class="tag">${tags[0]}</span>`;
+    } else if (tags.length > 1) {
+        const firstTag = `<span class="tag">${tags[0]}</span>`;
+        const badge = `
+      <div class="badge">
+        +${tags.length - 1}
+        <div class="tooltip">${tags.slice(1).join(", ")}</div>
+      </div>`;
+        box.innerHTML = firstTag + badge;
+    }
+</script>
+
+</body>
+</html>

@@ -254,7 +254,6 @@ onMounted(() => {
   object-fit: cover;
 }
 .window-bottom{
-  position: absolute;
   bottom: 0;
   flex: 1;
   z-index: 9999;
