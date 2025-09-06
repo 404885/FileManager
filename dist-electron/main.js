@@ -244,8 +244,9 @@ function initDatabase() {
   db.prepare(`
     CREATE TABLE IF NOT EXISTS tag (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      class TEXT NOT NULL
+      name TEXT NOT NULL UNIQUE,
+      class TEXT NOT NULL,
+      connected_workspace INTEGER DEFAULT 1      
     )
     `).run();
   console.log("DataBase has initialized", dbPath);
@@ -445,6 +446,17 @@ function RegisterDataBaseOperations() {
       parentId: "p_" + row.associated_folder
     }));
     return nodes;
+  });
+  ipcMain.handle("loadTags", async (_e, tags) => {
+    if (!db) initDatabase();
+    const placeholders = tags.map(() => "?").join(", ");
+    const sql = `SELECT name, class, connected_workspace FROM tag WHERE name IN (${placeholders})`;
+    const rows = db.prepare(sql).all(tags);
+    return rows.map((row) => ({
+      tag: row.tag,
+      class: row.class,
+      connected_workspace: row.connected_workspace
+    }));
   });
   ipcMain.handle("saveAsWallpaper", async (_e, file) => {
     if (!db) initDatabase();

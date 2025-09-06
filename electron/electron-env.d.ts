@@ -1,4 +1,4 @@
-import {ElTreeNode, FileNode, VXETableNode, WallPaper} from "@/utils/type.ts";
+import {ElTreeNode, FileNode, VXETableNode, WallPaper, Tag} from "@/utils/type.ts";
 
 export {};
 
@@ -77,6 +77,7 @@ declare global{
         loadTree: (workspace: number,keyword?: string) => Promise<ElTreeNode[]>,
         loadTable: (workspace: number,associatedFolder:number | null = null) => Promise<VXETableNode[]>,
         loadTableV2: (workspace: number) => Promise<VXETableNode[]>,
+        loadTags: (tags: string[]) => Promise<Tag[]>,
         saveAsWallpaper: (file: WallPaper) => Promise<{ success: boolean,lastInsertRowid?: number,reason?: string,error?: any}>,
       }
     }

@@ -111,9 +111,10 @@ const tagSplit = (tag?: string | null) => {
   return tag.split(/[,，]/) .map(t => t.trim()).filter(t => t.length > 0) // 过滤掉空字符串
 }
 
+const tagStore = ref()
+
 // 停止state订阅
-const stop = resFolder.$subscribe(async (mutation, state) => {
-  console.log(mutation, state);
+const stop = resFolder.$subscribe(async (_mutation, _state) => {
   resFolder.setDataChange(1)
   tableData.value = await window.electronAPI.dataOperation.loadTable(1)
 })
@@ -124,6 +125,8 @@ const stop = resFolder.$subscribe(async (mutation, state) => {
 onMounted( async () => {
   tableData.value = await window.electronAPI.dataOperation.loadTable(1)
   proxy.value = document.querySelector<HTMLDivElement>('.el-table__column-resize-proxy');
+
+  tagStore.value = await window.electronAPI.dataOperation.queryAll(`SELECT * FROM tag WHERE connected_workspace = 1;`);
 })
 
 onUnmounted(

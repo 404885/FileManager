@@ -112,8 +112,9 @@ export function initDatabase() {
     db.prepare(`
     CREATE TABLE IF NOT EXISTS tag (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      class TEXT NOT NULL
+      name TEXT NOT NULL UNIQUE,
+      class TEXT NOT NULL,
+      connected_workspace INTEGER DEFAULT 1      
     )
     `).run();
 
@@ -127,11 +128,12 @@ export function RegisterDataBaseOperations() {
         if (!db) initDatabase();
         return db.prepare(sql).all(params);  // 同步执行，但包装在 async 里
     });
-
     ipcMain.handle('queryOne', async (_e: IpcMainInvokeEvent, sql: string, params: any[] = []) => {
         if (!db) initDatabase();
         return db.prepare(sql).get(params);
     });
+
+
 
     ipcMain.handle('execute', async (_e: IpcMainInvokeEvent, sql: string, params: any[] = []) => {
         if (!db) initDatabase();
@@ -377,6 +379,20 @@ export function RegisterDataBaseOperations() {
 
     });
 
+    ipcMain.handle('loadTags', async (_e: IpcMainInvokeEvent, tags: string[]) => {
+        if (!db) initDatabase();
+        // 构建 SQL 查询占位符
+        const placeholders = tags.map(() => '?').join(', ');
+        const sql = `SELECT name, class, connected_workspace FROM tag WHERE name IN (${placeholders})`;
+        // 执行查询并返回结果
+        const rows = db.prepare(sql).all(tags);
+        // 返回一个列表，每个元素是一个对象，包含 tag 和 class
+        return rows.map((row: { tag: string, class: string, connected_workspace: number }) => ({
+            tag: row.tag,
+            class: row.class,
+            connected_workspace: row.connected_workspace
+        }));
+    });
 
     ipcMain.handle('saveAsWallpaper', async (_e, file: WallPaper) => {
         if (!db) initDatabase();
@@ -407,6 +423,7 @@ export function RegisterDataBaseOperations() {
             return { success: false, error: err.message };
         }
     });
+
 }
 
 

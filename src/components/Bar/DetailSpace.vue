@@ -40,7 +40,8 @@ async function load() {
     isLoading.value = true
     data.value = await window.electronAPI.dataOperation.loadTree(store.currentWorkspace)
     isLoading.value = false
-  } catch (err) {
+  }
+  catch (err) {
     console.error('加载目录结构失败:', err)
     isLoading.value = false
   }

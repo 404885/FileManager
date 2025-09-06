@@ -1,49 +1,111 @@
 <script setup lang="ts">
 
 import {ElDialog, ElDivider, ElTag, ElInput} from "element-plus";
-import { ref, watch} from "vue";
-import { cellProps } from "@/utils/type.ts";
+import { ref, watch,onMounted } from "vue";
+import { cellProps,Tag } from "@/utils/type.ts";
 import IconContainer from "@/components/Container/IconContainer.vue";
 import {useResourceCondition} from "@/pinia/ResourceCondition.ts";
 
 
-
 const emit = defineEmits(['close'])
 const props = defineProps<cellProps>()
-
-const input = ref('')
-
+// 资源管理器pinia实例
 const resFolder = useResourceCondition()
-
+// 父元素的属性
 const { top, left, height, width } = props.rect;
+// 关闭遮罩
 const dialogVisible = ref(props.dialogVisible)
 
 
 
+// tag分割与合并
 const tagSplit = (tag?: string | null) => {
   if (!tag) return []
   return tag.split(/[,，]/) .map(t => t.trim()).filter(t => t.length > 0) // 过滤掉空字符串
 }
-
 const tagJoin = (tags: string[], separator: string = ',') => {
   return tags.map(t => t.trim()).filter(t => t.length > 0).join(separator)
 }
+const getTagString = () => tagJoin(tagList.value, ',')
+
+// 输入tag
+const input = ref('')
+// tag数组
+const tagList = ref(tagSplit(props.data.tag))
+const tagStore = ref<Tag[]>([]);
+const tagSave = ref<Tag[]>([]);
+
 
 function handleInputEnter() {
-  console.log(input.value)
   tagList.value.push(input.value)
   input.value = ''
-  console.log(tagList)
 }
-
 function handleTagClose(tag: any) {
   console.log(tag)
   tagList.value.splice(tagList.value.indexOf(tag), 1)
 }
 
-const getTagString = () => tagJoin(tagList.value, ',')
+const tagSaveList = [
+  {name: 'aaa', connected_workspace: 1, class:''},
+  {name: 'aa1a', connected_workspace: 1, class:''},
+  {name: 'aa321a', connected_workspace: 1, class:''}
+]
 
-const tagList = ref(tagSplit(props.data.tag))
+
+const listTransSave = (tag: string) => {
+  const transformedTag: Tag = {
+    name: tag,  // 标签名称
+    class: '',  // 默认空class，或可以根据需要赋值
+    connected_workspace: 1,  // 默认工作空间ID，可以动态传值
+  };
+  // 将转换后的标签推送到 tagSave
+  tagSave.value.push(transformedTag);
+}
+
+const saveOrUpdateTags = async (tags: Tag[]) => {
+  // 准备插入和更新的 SQL 语句
+  const insertSQL = `INSERT INTO tag (name, class, connected_workspace) VALUES (?, ?, ?);`
+  const updateSQL = `UPDATE tag SET class = ?, connected_workspace = ? WHERE name = ?;`
+
+  // 使用事务来保证批量插入的原子性
+  await window.electronAPI.dataOperation.execute(`BEGIN TRANSACTION;`)
+
+  try {
+    for (let tag of tags) {
+      // 检查标签是否已经存在
+      const existingTag = await window.electronAPI.dataOperation.queryAll(
+          `SELECT * FROM tag WHERE name = ? AND class = ?;`,
+          [tag.name, tag.class]
+      );
+
+      if (existingTag.length > 0) {
+        // 如果标签已存在，更新标签信息
+        await window.electronAPI.dataOperation.execute(
+            updateSQL,
+            [tag.class, tag.connected_workspace, tag.name]
+        );
+      }
+      else {
+        // 如果标签不存在，插入新标签
+        await window.electronAPI.dataOperation.execute(
+            insertSQL,
+            [tag.name, tag.class, tag.connected_workspace]
+        );
+      }
+    }
+
+    // 提交事务
+    await window.electronAPI.dataOperation.execute(`COMMIT;`);
+    return { success: true, message: 'Tags processed successfully' };
+  }
+  catch (error) {
+    // 如果出错，回滚事务
+    await window.electronAPI.dataOperation.execute(`ROLLBACK;`);
+    return { success: false, message: 'Error processing tags', error };
+  }
+};
+
+
 
 watch(dialogVisible,  async (newVal) => {
   if (!newVal) {
@@ -55,13 +117,29 @@ watch(dialogVisible,  async (newVal) => {
         [getTagString(), props.data.id]
     );
 
-    console.log(result);
+    // 示例：逐一转换tagList中的每个标签
+    tagList.value.forEach(tag => listTransSave(tag));
+    console.log(tagSave.value);
+
+    const saveRe = await saveOrUpdateTags(tagSave.value);
+
+    console.log(saveRe)
+
 
     if (result) {
       emit("close")
       resFolder.setDataChange(result)
     }
   }
+});
+
+
+
+onMounted(async () => {
+  tagStore.value = await window.electronAPI.dataOperation.queryAll(
+      `SELECT * FROM tag WHERE connected_workspace = 1;`,
+  );
+  console.log(tagStore.value)
 });
 
 
@@ -94,22 +172,19 @@ watch(dialogVisible,  async (newVal) => {
           </div>
           <el-divider></el-divider>
           <div class="dialog-content-option">
-            <span class="dialog-content-option-text">当前工作空间的tag</span>
+            <span class="dialog-content-option-text">当前工作空间的tag (关闭弹窗后新增)</span>
             <div class="dialog-content-option-list">
-              <div class="dialog-content-option-list-item" v-for="i of 10">
+
+              <div class="dialog-content-option-list-item" v-for="tag of tagStore">
                 <IconContainer :link-mode="false" name="tagMenu"/>
-
-
                 <el-tag
-                    v-for="tag in tagSplit(props.data.tag)"
-                    :key="tag"
+                    :style="tag.class"
                     type="primary">
-                  {{ tag }}
+                  {{ tag.name }}
                 </el-tag>
-
-
                 <IconContainer :link-mode="false" name="more" class="dialog-content-option-list-item-after"/>
               </div>
+
             </div>
 
           </div>

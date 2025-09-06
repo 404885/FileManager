@@ -25,6 +25,7 @@ electron.contextBridge.exposeInMainWorld("electronAPI", {
     loadTree: (workspace, keyword) => electron.ipcRenderer.invoke("loadTree", workspace, keyword),
     loadTable: (workspace, associatedFolder = null) => electron.ipcRenderer.invoke("loadTable", workspace, associatedFolder),
     loadTableV2: (workspace) => electron.ipcRenderer.invoke("loadTableV2", workspace),
+    loadTags: (tags) => electron.ipcRenderer.invoke("loadTags", tags),
     saveAsWallpaper: (file) => electron.ipcRenderer.invoke("saveAsWallpaper", file)
   }
 });

@@ -78,3 +78,9 @@ export interface cellProps {
     data: any
     id: string
 }
+
+export interface Tag {
+    name: string;
+    connected_workspace: number;
+    class: string;
+}
