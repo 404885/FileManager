@@ -1,10 +1,12 @@
 <script setup lang="ts">
 
-import {ElDialog, ElDivider, ElTag, ElInput} from "element-plus";
-import { ref, watch,onMounted } from "vue";
+import { ElDialog, ElDivider, ElTag, ElInput } from "element-plus";
+import { ref, watch,onMounted, computed } from "vue";
 import { cellProps,Tag } from "@/utils/type.ts";
 import IconContainer from "@/components/Container/IconContainer.vue";
 import {useResourceCondition} from "@/pinia/ResourceCondition.ts";
+import {Util} from "@/utils";
+import TagClassSelect from "@/components/Application/ResourceFolder/ShowTable/TagClassSelect.vue";
 
 
 const emit = defineEmits(['close'])
@@ -18,6 +20,7 @@ const dialogVisible = ref(props.dialogVisible)
 
 
 
+
 // tag分割与合并
 const tagSplit = (tag?: string | null) => {
   if (!tag) return []
@@ -27,31 +30,59 @@ const tagJoin = (tags: string[], separator: string = ',') => {
   return tags.map(t => t.trim()).filter(t => t.length > 0).join(separator)
 }
 const getTagString = () => tagJoin(tagList.value, ',')
-
 // 输入tag
 const input = ref('')
 // tag数组
 const tagList = ref(tagSplit(props.data.tag))
 const tagStore = ref<Tag[]>([]);
 const tagSave = ref<Tag[]>([]);
+const tagFilter = computed(() => {
+  return tagStore.value.filter(tag => tag.name.includes(input.value));
+});
+// 用于记录当前悬停的标签索引
+const tagHovered = ref<number | null>(null);
+
 
 
 function handleInputEnter() {
   tagList.value.push(input.value)
+  tagStore.value.push({name:input.value, class: '', connected_workspace: 1})
   input.value = ''
 }
 function handleTagClose(tag: any) {
-  console.log(tag)
   tagList.value.splice(tagList.value.indexOf(tag), 1)
+  tagStore.value.splice(tagList.value.indexOf(tag), 1)
+}
+const handleTagClass = (event: MouseEvent) => {
+  const h = event.target as HTMLElement;
+  const parentElement = h.parentElement;
+  console.log(parentElement);
+  if (parentElement) {
+    const rect = parentElement.getBoundingClientRect();
+    console.log(rect);
+    Util.openComponent(TagClassSelect, 'classSelect', { dialogVisible: true, rect: rect });
+  }
+}
+const handleTagSelect = () => {
+  console.log('TagSelect')
+}
+// 处理鼠标进入事件
+const handleTagEnter = (index: number) => {
+  tagHovered.value = index; // 设置当前悬停的标签索引
+}
+// 处理鼠标离开事件
+// const handleTagLeave = (index: number) => {
+//   if (tagHovered.value === index) {
+//     tagHovered.value = null; // 恢复默认状态
+//   }
+// }
+
+const handleTagDrag = () => {
+
 }
 
-const tagSaveList = [
-  {name: 'aaa', connected_workspace: 1, class:''},
-  {name: 'aa1a', connected_workspace: 1, class:''},
-  {name: 'aa321a', connected_workspace: 1, class:''}
-]
 
-
+// 将input输入的单个string转换为可保存格式
 const listTransSave = (tag: string) => {
   const transformedTag: Tag = {
     name: tag,  // 标签名称
@@ -61,7 +92,10 @@ const listTransSave = (tag: string) => {
   // 将转换后的标签推送到 tagSave
   tagSave.value.push(transformedTag);
 }
+// const confirmUpdate = (tag: string) => {
 
+// }
+// 数据库交互，存储或是更新tag
 const saveOrUpdateTags = async (tags: Tag[]) => {
   // 准备插入和更新的 SQL 语句
   const insertSQL = `INSERT INTO tag (name, class, connected_workspace) VALUES (?, ?, ?);`
@@ -109,7 +143,6 @@ const saveOrUpdateTags = async (tags: Tag[]) => {
 
 watch(dialogVisible,  async (newVal) => {
   if (!newVal) {
-
     const tableName = props.data.type === 'folder' ? 'portfolio' : 'file';
 
     const result = await window.electronAPI.dataOperation.execute(
@@ -117,19 +150,19 @@ watch(dialogVisible,  async (newVal) => {
         [getTagString(), props.data.id]
     );
 
+
     // 示例：逐一转换tagList中的每个标签
     tagList.value.forEach(tag => listTransSave(tag));
-    console.log(tagSave.value);
+    await saveOrUpdateTags(tagSave.value);
 
-    const saveRe = await saveOrUpdateTags(tagSave.value);
-
-    console.log(saveRe)
 
 
     if (result) {
       emit("close")
       resFolder.setDataChange(result)
     }
+
+
   }
 });
 
@@ -139,7 +172,7 @@ onMounted(async () => {
   tagStore.value = await window.electronAPI.dataOperation.queryAll(
       `SELECT * FROM tag WHERE connected_workspace = 1;`,
   );
-  console.log(tagStore.value)
+
 });
 
 
@@ -157,7 +190,6 @@ onMounted(async () => {
       <template #default>
         <div class="dialog-content">
           <div class="dialog-content-title">
-
             <el-tag
               v-for="tag in tagList"
               :key="tag"
@@ -167,28 +199,40 @@ onMounted(async () => {
               type="primary">
               {{ tag }}
             </el-tag>
-
             <el-input v-model="input" @keydown.enter="handleInputEnter" class="dialog-content-title-tag-input" placeholder="Enter Tag ..."/>
           </div>
+
           <el-divider></el-divider>
+
           <div class="dialog-content-option">
-            <span class="dialog-content-option-text">当前工作空间的tag (关闭弹窗后新增)</span>
+            <span class="dialog-content-option-text">当前工作空间的tag</span>
             <div class="dialog-content-option-list">
 
-              <div class="dialog-content-option-list-item" v-for="tag of tagStore">
-                <IconContainer :link-mode="false" name="tagMenu"/>
+              <div
+                  class="dialog-content-option-list-item"
+                  v-for="(tag, index) of tagFilter"
+                  @click="handleTagSelect"
+                  @mouseenter="handleTagEnter(index)"
+                  :class="{ 'hover': tagHovered === index }">
+                <IconContainer :link-mode="false" name="tagMenu" @click.stop="handleTagDrag"/>
                 <el-tag
                     :style="tag.class"
                     type="primary">
                   {{ tag.name }}
                 </el-tag>
-                <IconContainer :link-mode="false" name="more" class="dialog-content-option-list-item-after"/>
+                <IconContainer
+                    :link-mode="false"
+                    name="more"
+                    class="dialog-content-option-list-item-after"
+                    @click.stop="handleTagClass($event)"/>
+              </div>
+
+              <div class="dialog-content-option-list-empty" v-if="tagFilter.length == 0">
+                <span>当前没有标签，尝试添加新标签</span>
               </div>
 
             </div>
-
           </div>
-
         </div>
       </template>
 
@@ -232,14 +276,25 @@ onMounted(async () => {
 
 .dialog-content-option {
   width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 .dialog-content-option-list {
+  height: 100%;
   overflow-y: auto;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
+}
+.dialog-content-option-list-empty {
+  font-size: 13px;
+  display: flex;
+  flex: 1;
+  width: 100%; /* 确保宽度填满父容器 */
+  height: 100%; /* 确保高度填满父容器 */
+  align-items: center;
+  justify-content: center;
 }
 .dialog-content-option-text {
   font-size: 12px;
@@ -260,10 +315,17 @@ onMounted(async () => {
 .dialog-content-option-list-item:hover {
   background-color: #e0e0e0;
 }
+.dialog-content-option-list-item.hover {
+  background-color: #e0e0e0; /* 略深于之前的灰色背景，增加悬浮时的可见度 */
+  color: #333; /* 保持深灰色字体，确保清晰可读 */
+  transition: background-color 0.3s ease, color 0.3s ease; /* 为背景色和文字颜色添加平滑过渡 */
+}
 .dialog-content-option-list-item-after {
   margin-left: auto;
   margin-right: 10px;
 }
+
+
 
 
 

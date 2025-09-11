@@ -4,7 +4,6 @@ import {ElMessage, ElPopover, ElTable, ElTableColumn, ElTag, ElButton, ElBadge} 
 import {onMounted, ref, onUnmounted} from "vue";
 import { VXETableNode } from "@/utils/type.ts";
 import IconContainer from "@/components/Container/IconContainer.vue";
-import ShowTableDialog from "@/components/Application/ResourceFolder/ShowTable/ShowTableDialog.vue";
 import ExpandTag from "@/components/Application/ResourceFolder/ShowTable/ExpandTag.vue";
 import ExpandName from "@/components/Application/ResourceFolder/ShowTable/ExpandName.vue";
 import { useResourceCondition } from "@/pinia/ResourceCondition.ts";
