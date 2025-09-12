@@ -53,13 +53,13 @@ function handleTagClose(tag: any) {
   tagList.value.splice(tagList.value.indexOf(tag), 1)
   tagStore.value.splice(tagList.value.indexOf(tag), 1)
 }
+
+
 const handleTagClass = (event: MouseEvent) => {
   const h = event.target as HTMLElement;
   const parentElement = h.parentElement;
-  console.log(parentElement);
   if (parentElement) {
     const rect = parentElement.getBoundingClientRect();
-    console.log(rect);
     Util.openComponent(TagClassSelect, 'classSelect', { dialogVisible: true, rect: rect });
   }
 }
@@ -92,9 +92,11 @@ const listTransSave = (tag: string) => {
   // 将转换后的标签推送到 tagSave
   tagSave.value.push(transformedTag);
 }
+
 // const confirmUpdate = (tag: string) => {
 
 // }
+
 // 数据库交互，存储或是更新tag
 const saveOrUpdateTags = async (tags: Tag[]) => {
   // 准备插入和更新的 SQL 语句
@@ -156,13 +158,10 @@ watch(dialogVisible,  async (newVal) => {
     await saveOrUpdateTags(tagSave.value);
 
 
-
     if (result) {
       emit("close")
       resFolder.setDataChange(result)
     }
-
-
   }
 });
 
@@ -209,7 +208,7 @@ onMounted(async () => {
             <div class="dialog-content-option-list">
 
               <div
-                  class="dialog-content-option-list-item"
+                  class="select-preview-item"
                   v-for="(tag, index) of tagFilter"
                   @click="handleTagSelect"
                   @mouseenter="handleTagEnter(index)"
@@ -223,7 +222,7 @@ onMounted(async () => {
                 <IconContainer
                     :link-mode="false"
                     name="more"
-                    class="dialog-content-option-list-item-after"
+                    class="select-preview-item-after"
                     @click.stop="handleTagClass($event)"/>
               </div>
 
@@ -302,7 +301,7 @@ onMounted(async () => {
   justify-content: flex-start;
   margin-bottom: 5px;
 }
-.dialog-content-option-list-item {
+.select-preview-item {
   background-color: transparent;
   border-radius: 4px;
   height: 32px;
@@ -312,15 +311,15 @@ onMounted(async () => {
   padding-left: 6px;
   gap: 12px;
 }
-.dialog-content-option-list-item:hover {
+.select-preview-item:hover {
   background-color: #e0e0e0;
 }
-.dialog-content-option-list-item.hover {
+.select-preview-item.hover {
   background-color: #e0e0e0; /* 略深于之前的灰色背景，增加悬浮时的可见度 */
   color: #333; /* 保持深灰色字体，确保清晰可读 */
   transition: background-color 0.3s ease, color 0.3s ease; /* 为背景色和文字颜色添加平滑过渡 */
 }
-.dialog-content-option-list-item-after {
+.select-preview-item-after {
   margin-left: auto;
   margin-right: 10px;
 }

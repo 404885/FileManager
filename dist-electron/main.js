@@ -246,7 +246,8 @@ function initDatabase() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL UNIQUE,
       class TEXT NOT NULL,
-      connected_workspace INTEGER DEFAULT 1      
+      connected_workspace INTEGER DEFAULT 1,
+      preset INTEGER DEFAULT 0
     )
     `).run();
   console.log("DataBase has initialized", dbPath);
