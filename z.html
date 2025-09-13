@@ -1,160 +1,47 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Tag 自定义 Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>选中效果示例</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        .tag {
+        /* 默认按钮样式 */
+        .button {
             display: inline-block;
-            padding: 4px 10px;
-            background: #64b5f6;
-            color: white;
-            border-radius: 6px;
-            border: 1px solid #333;
+            padding: 10px 20px;
+            background-color: #f0f0f0;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: normal;
+            color: #333;
             cursor: pointer;
-            margin: 5px;
-            transition: all 0.3s;
+            transition: all 0.3s ease;  /* 平滑过渡 */
         }
-        .panel {
-            position: absolute;
-            top: 60px;
-            left: 20px;
-            width: 240px;
-            background: #fff;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            padding: 10px;
-            display: none;
-            z-index: 1000;
+
+        /* 悬浮状态 */
+        .button:hover {
+            background-color: #ddd;
         }
-        .panel h4 { margin: 8px 0 4px; font-size: 14px; }
-        .color-options, .border-options, .shape-options {
-            display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
-        }
-        .color-box {
-            width: 24px; height: 24px; border-radius: 4px; cursor: pointer;
-            border: 1px solid #ccc;
-        }
-        .border-sample {
-            padding: 2px 6px; font-size: 12px; cursor: pointer;
-            border-radius: 4px;
-        }
-        .shape-sample {
-            width: 26px; height: 26px; background: #ddd; cursor: pointer;
-            border: 1px solid #aaa;
-        }
-        .shape-square { border-radius: 0; }
-        .shape-soft { border-radius: 6px; }
-        .shape-round { border-radius: 50px; }
-        .btn-row { display: flex; justify-content: space-between; margin-top: 10px; }
-        .btn {
-            flex: 1;
-            margin: 0 3px;
-            padding: 4px 8px;
-            font-size: 12px;
-            border-radius: 6px;
-            border: 1px solid #aaa;
-            background: #f5f5f5;
-            cursor: pointer;
-        }
-        input[type="color"] {
-            border: none;
-            background: none;
-            width: 32px;
-            height: 32px;
-            cursor: pointer;
-            padding: 0;
+
+        /* 点击后的选中效果 */
+        .button.selected {
+            background-color: #007bff;  /* 背景色变为蓝色 */
+            color: white;  /* 字体颜色变为白色 */
+            border-color: #0056b3;  /* 边框颜色变为深蓝色 */
+            font-weight: bold;  /* 字体加粗 */
         }
     </style>
 </head>
 <body>
 
-<div id="tag" class="tag">示例标签</div>
-
-<div class="panel" id="panel">
-    <h4>预览</h4>
-    <div id="preview" class="tag">预览标签</div>
-
-    <h4>颜色</h4>
-    <div class="color-options">
-        <div class="color-box" style="background:#e57373;" data-color="#e57373"></div>
-        <div class="color-box" style="background:#64b5f6;" data-color="#64b5f6"></div>
-        <div class="color-box" style="background:#81c784;" data-color="#81c784"></div>
-        <div class="color-box" style="background:#ffd54f;" data-color="#ffd54f"></div>
-        <input type="color" id="colorPicker" value="#64b5f6">
-    </div>
-
-    <h4>边框</h4>
-    <div class="border-options">
-        <div class="border-sample" style="border:1px solid #333" data-border="1px solid #333">实线</div>
-        <div class="border-sample" style="border:1px dashed #333" data-border="1px dashed #333">虚线</div>
-        <div class="border-sample" style="border:none;background:#f5f5f5" data-border="none">无边框</div>
-    </div>
-
-    <h4>形状</h4>
-    <div class="shape-options">
-        <div class="shape-sample shape-square" data-shape="0"></div>
-        <div class="shape-sample shape-soft" data-shape="6px"></div>
-        <div class="shape-sample shape-round" data-shape="50px"></div>
-    </div>
-
-    <div class="btn-row">
-        <button class="btn" id="applyBtn">应用</button>
-        <button class="btn" id="cancelBtn">取消</button>
-    </div>
-</div>
+<button class="button" onclick="toggleSelect(this)">点击选中</button>
 
 <script>
-    const tag = document.getElementById("tag");
-    const panel = document.getElementById("panel");
-    const preview = document.getElementById("preview");
-    const colorPicker = document.getElementById("colorPicker");
-
-    // 打开面板
-    tag.addEventListener("click", () => {
-        preview.style.cssText = tag.style.cssText;
-        panel.style.display = "block";
-    });
-
-    // 预设颜色
-    document.querySelectorAll(".color-box").forEach(box => {
-        box.addEventListener("click", () => {
-            preview.style.backgroundColor = box.dataset.color;
-            colorPicker.value = box.dataset.color;
-        });
-    });
-
-    // 颜色选择器
-    colorPicker.addEventListener("input", () => {
-        preview.style.backgroundColor = colorPicker.value;
-    });
-
-    // 边框
-    document.querySelectorAll(".border-sample").forEach(opt => {
-        opt.addEventListener("click", () => {
-            preview.style.border = opt.dataset.border;
-        });
-    });
-
-    // 形状
-    document.querySelectorAll(".shape-sample").forEach(opt => {
-        opt.addEventListener("click", () => {
-            preview.style.borderRadius = opt.dataset.shape;
-        });
-    });
-
-    // 应用
-    document.getElementById("applyBtn").addEventListener("click", () => {
-        tag.style.cssText = preview.style.cssText;
-        panel.style.display = "none";
-    });
-
-    // 取消
-    document.getElementById("cancelBtn").addEventListener("click", () => {
-        panel.style.display = "none";
-    });
+    // 切换选中状态
+    function toggleSelect(button) {
+        button.classList.toggle('selected');
+    }
 </script>
 
 </body>

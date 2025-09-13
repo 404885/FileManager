@@ -171,7 +171,6 @@ onMounted(async () => {
   tagStore.value = await window.electronAPI.dataOperation.queryAll(
       `SELECT * FROM tag WHERE connected_workspace = 1;`,
   );
-
 });
 
 

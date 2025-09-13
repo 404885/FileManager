@@ -57,14 +57,14 @@
 }
 
 /* -----------------el popover组件修改------------------ */
-.el-popper {
-    min-width: 0 !important;
-    padding: 0 !important;
+/*.el-popper {*/
+/*    min-width: 0 !important;*/
+/*    padding: 0 !important;*/
 
-    display: flex;
-    justify-content: center; /* 水平居中 */
-    align-items: center;     /* 垂直居中 */
-}
+/*    display: flex;*/
+/*    justify-content: center; !* 水平居中 *!*/
+/*    align-items: center;     !* 垂直居中 *!*/
+/*}*/
 /* ----------------- breadcrumb 组件修改------------------ */
 .el-breadcrumb__inner{
     height: 100%;
@@ -160,5 +160,19 @@
     margin: 10px 0 !important;
 }
 
-/* ----------------- el color picker 组件样式重置------------------ */
+/* ----------------- el slider 组件样式重置------------------ */
+/* 调整滑块大小 */
+.el-slider__button {
+    width: 10px;   /* 默认 16px */
+    height: 10px;  /* 默认 16px */
+}
+
+/* 调整轨道高度 */
+.el-slider__runway {
+    height: 4px;
+}
+
+.el-slider__bar {
+    height: 4px;   /* 和轨道保持一致 */
+}
 

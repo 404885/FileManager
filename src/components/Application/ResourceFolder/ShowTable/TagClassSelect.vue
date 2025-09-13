@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import {ElDialog, ElTag, ElColorPicker, ElSelect, ElButton} from "element-plus";
-import { ref, watch, onMounted } from "vue";
+import {ElDialog, ElTag, ElColorPicker, ElSelect, ElButton, ElOption, ElDivider, ElSlider} from "element-plus";
+import { ref, watch, onMounted, computed } from "vue";
 import IconContainer from "@/components/Container/IconContainer.vue";
 
 const emit = defineEmits(['close']);
@@ -21,6 +21,58 @@ const dialogPosition = ref<{ top: string; left: string }>({
   left: '0px'
 });
 const page = ref(false);
+const radius = ref('');
+const border = ref('')
+const borderWidth = ref(0)
+const backColor = ref('')
+const textColor = ref('')
+const borderColor = ref('')
+const predefineColors = ref([
+  '#ff4500',
+  '#ff8c00',
+  '#ffd700',
+  '#90ee90',
+  '#00ced1',
+  '#1e90ff',
+  '#c71585',
+  'rgba(255, 69, 0, 0.68)',
+  'rgb(255, 120, 0)',
+  'hsv(51, 100, 98)',
+  'hsva(120, 40, 94, 0.5)',
+  'hsl(181, 100%, 37%)',
+  'hsla(209, 100%, 56%, 0.73)',
+  '#c7158577',
+])
+
+
+const tagStyle = computed(() => {
+  const style: Record<string, string> = {}
+  // 背景色 & 文字色
+  if (backColor.value) style.backgroundColor = backColor.value
+  if (textColor.value) style.color = textColor.value
+  // 边框处理
+  if (border.value === "none") {
+    style.border = "none"
+  } else {
+    const width = borderWidth.value > 0 ? `${borderWidth.value}px` : "1px"
+    const type = border.value || "solid"
+    const color = borderColor.value || "#000"
+
+    style.border = `${width} ${type} ${color}`
+  }
+  // 圆角处理
+  switch (radius.value) {
+    case "cycle":
+      style.borderRadius = "50%"
+      break
+    case "round":
+      style.borderRadius = "4px"
+      break
+    default:
+      style.borderRadius = "0px"
+  }
+  return style
+})
 
 
 onMounted(() => {
@@ -63,7 +115,7 @@ onMounted(() => {
 });
 
 watch(dialogVisible, (newVal) => {
-  if (!newVal) emit("close");
+  if (!newVal) emit("close", 'das');
 });
 
 
@@ -84,12 +136,13 @@ watch(dialogVisible, (newVal) => {
       }">
       <div class="select">
         <div class="select-option" v-show="!page">
+
           <div class="select-option-preview">
             <span class="select-option-item-text">预览</span>
             <div class="select-option-preview-tag">
-              <el-tag type="primary" class="select-option-preview-tagS">xxx</el-tag>
-              <el-tag type="primary" class="select-option-preview-tagM">xxx</el-tag>
-              <el-tag type="primary" class="select-option-preview-tagL">xxx</el-tag>
+              <el-tag type="primary" class="select-option-preview-tagS" :style="tagStyle">这是</el-tag>
+              <el-tag type="primary" class="select-option-preview-tagM" :style="tagStyle">tag</el-tag>
+              <el-tag type="primary" class="select-option-preview-tagL" :style="tagStyle">预览</el-tag>
             </div>
 
           </div>
@@ -97,18 +150,19 @@ watch(dialogVisible, (newVal) => {
           <div class="select-option-background">
             <span class="select-option-item-text">颜色</span>
             <div class="select-option-background-color">
+
               <div class="select-option-background-color-picker">
-                <el-color-picker show-alpha append-to="body"/>
+                <el-color-picker show-alpha append-to="body" v-model="backColor" :predefine="predefineColors"/>
                 <span>背景颜色</span>
               </div>
 
               <div class="select-option-background-color-picker">
-                <el-color-picker show-alpha append-to="body"/>
+                <el-color-picker show-alpha append-to="body" v-model="borderColor" :predefine="predefineColors"/>
                 <span>边框颜色</span>
               </div>
 
               <div class="select-option-background-color-picker">
-                <el-color-picker show-alpha append-to="body"/>
+                <el-color-picker show-alpha append-to="body" v-model="textColor" :predefine="predefineColors"/>
                 <span>文字颜色</span>
               </div>
 
@@ -117,26 +171,40 @@ watch(dialogVisible, (newVal) => {
 
           <div class="select-option-border">
             <span class="select-option-item-text">边框</span>
+
             <div class="select-option-border-select">
-              <el-select  placeholder="Select" style="width: 240px" />
+              <el-select  placeholder="Select" style="width: 240px" v-model="border" append-to="body">
+                <el-option label="实线" value="solid" class="select-option-border-select-option">
+                  <el-divider style="border: 1px solid #333; "></el-divider>
+                </el-option>
+                <el-option label="虚线" value="dashed" class="select-option-border-select-option">
+                  <el-divider style="border: 1px dashed #333;"></el-divider>
+                </el-option>
+                <el-option label="无边框" value="none" class="select-option-border-select-option">
+                  hidden
+                </el-option>
+              </el-select>
+            </div>
+            <div class="select-option-border-slider">
+              <el-slider v-model="borderWidth" size="small" style="width: 240px" :min="0" :max="10"/>
             </div>
           </div>
+
           <div class="select-option-radius">
             <span class="select-option-item-text">形状</span>
             <div class="select-option-radius-select">
-              <div class="eee cycle selected"></div>
-              <div class="eee round"></div>
-              <div class="eee"></div>
+              <div class="eee cycle  animate_press" @click="radius = 'cycle' " :class="{'selected': radius === 'cycle'}"></div>
+              <div class="eee round animate_press" @click="radius = 'round' " :class="{'selected': radius === 'round'}"></div>
+              <div class="eee animate_press" @click="radius = 'rect' " :class="{'selected': radius === 'rect'}"></div>
             </div>
           </div>
-
         </div>
 
         <div class="select-method" v-show="page">
-            test
           <div class="select-option-schedule">
             <span class="select-option-item-text">预设方案</span>
             <div class="select-option-schedule-select">
+
             </div>
           </div>
         </div>
@@ -178,12 +246,12 @@ watch(dialogVisible, (newVal) => {
 .select-option-item-text {
   color: #333;
   font-weight: 550;
+
 }
 
 .select-option-preview {
   display: flex;
   flex-direction: column;
-  margin-top: 12px;
 }
 .select-option-preview-tag {
   display: flex;
@@ -192,19 +260,31 @@ watch(dialogVisible, (newVal) => {
   gap: 30px;
   justify-content: center;
 }
-.select-option-preview-tagL {
-  width: 72px;
-  height: 36px;
-  font-size: 12px;
-}
-.select-option-preview-tagM {
-  width: 64px;
-  height: 32px;
-}
+/* S = 基准 */
 .select-option-preview-tagS {
   width: 48px;
   height: 24px;
+  font-size: 12px;
+  line-height: 24px;   /* = height，保证垂直居中 */
+  text-align: center;  /* 水平居中 */
 }
+/* M = 1.25 倍 */
+.select-option-preview-tagM {
+  width: 60px;
+  height: 30px;
+  font-size: 15px;
+  line-height: 30px;   /* 保持和高度一致 */
+  text-align: center;
+}
+/* L = 1.5 倍 */
+.select-option-preview-tagL {
+  width: 72px;
+  height: 36px;
+  font-size: 18px;
+  line-height: 36px;
+  text-align: center;
+}
+
 
 .select-option-background-color{
   margin-top: 12px;
@@ -220,14 +300,29 @@ watch(dialogVisible, (newVal) => {
   font-size: 13px;
 }
 
+
+
 .select-option-border-select {
   display: flex;
   flex-direction: row;
   justify-content: center;
   margin-top: 12px;
-
 }
-
+.select-option-border-select-option {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+.select-option-border-slider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 4px;
+}
+.select-option-radius {
+  margin-top: -6px;
+}
 .select-option-radius-select {
   display: flex;
   flex-direction: row;
@@ -235,19 +330,24 @@ watch(dialogVisible, (newVal) => {
   margin-top: 12px;
   margin-left: 24px;
 }
+
+/* 基本样式 */
 .eee {
   width: 24px;
   height: 24px;
-  background: rgb(176, 181, 184);  /* 偏白背景 */
+  background: #d1e7ff;  /* 默认背景色，淡蓝色 */
   padding: 5px;
-  border: 1px solid rgb(150, 150, 150); /* 设置与背景不同的颜色 */
+  border: 1px solid #8bb9ff; /* 边框颜色，浅蓝色 */
+  cursor: pointer;  /* 添加点击效果 */
+  transition: all 0.3s ease;  /* 平滑过渡效果 */
 }
+/* 选中状态样式 */
 .eee.selected {
-  background: #707070;  /* 选中时背景色加深，更加明显 */
-  border: 2px solid #404040; /* 加粗边框，并且颜色深一点 */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 增加更明显的阴影 */
-  color: white;  /* 选中时将字体颜色改为白色，更突出 */
-  font-weight: bold;  /* 加粗字体 */
+  background: #4a90e2;  /* 选中时背景色，明亮的蓝色 */
+  border-color: #2a70b5; /* 选中时边框颜色，深蓝色 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 增加轻微阴影效果 */
+  color: white;  /* 选中时字体颜色 */
+  font-weight: bold;  /* 字体加粗 */
 }
 .cycle {
   border-radius: 50%;
@@ -278,6 +378,8 @@ watch(dialogVisible, (newVal) => {
   justify-content: center;
   z-index: 10000;
 }
+
+
 
 
 
