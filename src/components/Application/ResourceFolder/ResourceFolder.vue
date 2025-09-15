@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import {Component, Data, Util, vResize} from "@/utils";
+import { Data, Util, vResize } from "@/utils";
 import ViewContainerV2 from "@/components/Container/ViewContainerV2.vue";
-import SwitchDialog from '../Dialog/SwitchDialog.vue';
+import SwitchDialog from '../../Dialog/SwitchDialog.vue';
 import IconContainer from "@/components/Container/IconContainer.vue";
 import ShowTable from "@/components/Application/ResourceFolder/ShowTable/ShowTable.vue";
 
@@ -16,16 +16,6 @@ const props = defineProps<{
 }>()
 
 
-console.log(props.id)
-
-function open() {
-  Component.openDialog({
-    type: "add",
-    props:{
-      title: "创建实体"
-    }
-  })
-}
 
 const itemClick = (action: string) => {
   switch (action) {

@@ -53,10 +53,11 @@ const tagStyle = computed(() => {
   // 边框处理
   if (border.value === "none") {
     style.border = "none"
-  } else {
+  }
+  else {
     const width = borderWidth.value > 0 ? `${borderWidth.value}px` : "1px"
-    const type = border.value || "solid"
-    const color = borderColor.value || "#000"
+    const type = border.value
+    const color = borderColor.value
 
     style.border = `${width} ${type} ${color}`
   }
@@ -186,7 +187,7 @@ watch(dialogVisible, (newVal) => {
               </el-select>
             </div>
             <div class="select-option-border-slider">
-              <el-slider v-model="borderWidth" size="small" style="width: 240px" :min="0" :max="10"/>
+              <el-slider v-model="borderWidth" size="small" style="width: 240px" :min="0" :max="5"/>
             </div>
           </div>
 
@@ -378,8 +379,6 @@ watch(dialogVisible, (newVal) => {
   justify-content: center;
   z-index: 10000;
 }
-
-
 
 
 

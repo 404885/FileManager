@@ -2,7 +2,7 @@
 import { reactive } from "vue";
 import { Applications } from "@/utils/type.ts";
 import {Util} from "@/utils/index.ts";
-import ResourceFolder from "@/components/Application/ResourceFolder.vue";
+import ResourceFolder from "@/components/Application/ResourceFolder/ResourceFolder.vue";
 import WebBrowser from "@/components/Application/WebBrowser.vue";
 import Preview from "@/components/Application/Preview.vue";
 import Chat from "@/components/Application/Chat.vue";

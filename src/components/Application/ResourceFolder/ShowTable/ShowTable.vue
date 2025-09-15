@@ -2,6 +2,8 @@
 
 import Table from "@/components/Application/ResourceFolder/ShowTable/Table.vue";
 import BreadCrumb from "@/components/Application/ResourceFolder/ShowTable/BreadCrumb.vue";
+import {Util} from "@/utils";
+import FileDialog from "@/components/Application/ResourceFolder/Function/FileAdd/FileDialog.vue";
 
 
 
@@ -9,8 +11,10 @@ const props = defineProps<{
   id: string;
 }>()
 
-console.log(props.id)
-
+const open = () => {
+  console.log(props)
+  Util.openComponent(FileDialog, 'dialog', { dialogVisible: true, id: props.id })
+}
 
 </script>
 
@@ -18,9 +22,11 @@ console.log(props.id)
 
   <div class="resource-container">
     <div class="resource-container-bread">
+
       <div class="resource-container-bread-path">
         <BreadCrumb></BreadCrumb>
       </div>
+
       <div class="resource-container-bread-button animate_press" @click="open">新增</div>
     </div>
 

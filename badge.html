@@ -1,78 +1,72 @@
-<!-- demo.html -->
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Tag + 余量徽章 Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件添加与笔记</title>
     <style>
-        .tag-container {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-family: sans-serif;
+        /* 现有样式略... */
+
+        /* 自由笔记区域 */
+        .note-section {
+            margin-top: 20px;
         }
-        .tag {
-            background: #409eff;
+        .note-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .note-textarea {
+            width: 100%;
+            height: 150px;
+            border: 1px solid #d1d9e2;
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 1rem;
+        }
+        .note-button {
+            margin-top: 10px;
+            background-color: #4a90e2;
             color: white;
-            border-radius: 12px;
-            padding: 2px 8px;
-            font-size: 13px;
-            white-space: nowrap;
-        }
-        .badge {
-            position: relative;
-            background: #eee;
-            border-radius: 50%;
-            width: 22px;
-            height: 22px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
             cursor: pointer;
-            transition: background 0.2s;
         }
-        .badge:hover {
-            background: #ddd;
-        }
-        .tooltip {
-            position: absolute;
-            top: -40px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: black;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            white-space: nowrap;
-            display: none;
-        }
-        .badge:hover .tooltip {
-            display: block;
+        .note-button:hover {
+            background-color: #357bd8;
         }
     </style>
 </head>
 <body>
 
-<div class="tag-container" id="tagBox"></div>
+<div class="modal-container">
+    <!-- 现有文件上传区域略... -->
+
+    <!-- 自由笔记区域 -->
+    <div class="note-section">
+        <div class="note-title">自由添加笔记</div>
+        <textarea id="note-text" class="note-textarea" placeholder="在此输入您的笔记或自定义内容..."></textarea>
+        <button id="save-note" class="note-button">保存笔记</button>
+    </div>
+
+</div>
 
 <script>
-    const tags = ["Vue", "Electron", "Element Plus", "Pinia", "SQLite"];
+    document.addEventListener('DOMContentLoaded', () => {
+        const saveNoteButton = document.getElementById('save-note');
+        const noteTextArea = document.getElementById('note-text');
 
-    const box = document.getElementById("tagBox");
-
-    if (tags.length === 1) {
-        box.innerHTML = `<span class="tag">${tags[0]}</span>`;
-    } else if (tags.length > 1) {
-        const firstTag = `<span class="tag">${tags[0]}</span>`;
-        const badge = `
-      <div class="badge">
-        +${tags.length - 1}
-        <div class="tooltip">${tags.slice(1).join(", ")}</div>
-      </div>`;
-        box.innerHTML = firstTag + badge;
-    }
+        // 保存笔记功能
+        saveNoteButton.addEventListener('click', () => {
+            const noteContent = noteTextArea.value.trim();
+            if (noteContent) {
+                alert("笔记已保存: " + noteContent); // 此处可换为实际保存逻辑
+                noteTextArea.value = ''; // 清空文本框
+            } else {
+                alert("请先输入笔记内容！");
+            }
+        });
+    });
 </script>
 
 </body>

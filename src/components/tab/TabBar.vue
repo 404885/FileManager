@@ -3,7 +3,6 @@
 import {ArrowDownBold, Close, Plus, Search} from "@element-plus/icons-vue";
 import Tab from "@/components/tab/Tab.vue";
 import {computed, markRaw, reactive, ref, watch} from "vue";
-import IndexView from "@/view/IndexView.vue";
 
 const active = ref(0)
 

@@ -1,4 +1,3 @@
-import { openDialog,openDialogAsync } from "@/utils/component/Dialog.ts"
 import { openNotification } from "@/utils/component/Notification.ts";
 
 
@@ -33,8 +32,6 @@ export const Data = {
 }
 
 export const Component = {
-    openDialog,
-    openDialogAsync,
     openNotification,
 }
 
