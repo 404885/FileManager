@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import TitleBar from "@/components/Bar/TitleBar.vue";
+import BottomBarV1 from "@/view/DeskTop/BottomBarV1.vue";
+
 import { Util,Data } from "@/utils";
 import BottomBar from "@/components/Bar/BottomBar.vue"
 import {computed, nextTick, onMounted, ref, watch} from "vue";
@@ -10,6 +11,7 @@ import {useClickHandler} from "@/utils/util.ts";
 import {Applications} from "@/utils/type.ts"
 import MenuContainerV1 from "@/components/Container/MenuContainerV1.vue";
 import WallPaper from "@/components/Application/WallPaper.vue";
+import TopBarV1 from "@/view/DeskTop/TopBarV1.vue";
 
 
 const applications = Data.applicationData
@@ -141,12 +143,16 @@ function onPointerMove(e: PointerEvent) {
   selectionBox.value = { x, y, w, h }
 }
 
+
+
 function onPointerUp() {
   isSelecting.value = false;
   // 移除全局事件
   window.removeEventListener("pointermove", onPointerMove);
   window.removeEventListener("pointerup", onPointerUp);
 }
+
+
 
 onMounted(() => {
   nextTick(updateContainerWidth)
@@ -159,10 +165,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="window-title">
-    <TitleBar/>
-  </div>
-  <div class="window-home">
+
+  <div class="window">
+    <TopBarV1></TopBarV1>
+
     <div id="window-view" ref="desktop" class="window-view"  @contextmenu="onDeskTopRightClick">
       <div class="window-background" @pointerdown="onPointerDown">
 <!--        <video ref="backgroundVideo"-->
@@ -181,52 +187,39 @@ onMounted(() => {
           :y="positions[index].y"
           @click="handleClick(app)"
           @contextmenu="app.contextMenu"/>
-
-      <div
-          v-if="isSelecting"
-          class="selection-box"
-          :style="{
-        left: selectionBox.x + 'px',
-        top: selectionBox.y + 'px',
-        width: selectionBox.w + 'px',
-        height: selectionBox.h + 'px'
-      }"
-      />
+<!--      <div-->
+<!--          v-if="isSelecting"-->
+<!--          class="selection-box"-->
+<!--          :style="{-->
+<!--        left: selectionBox.x + 'px',-->
+<!--        top: selectionBox.y + 'px',-->
+<!--        width: selectionBox.w + 'px',-->
+<!--        height: selectionBox.h + 'px'-->
+<!--      }"-->
+<!--      />-->
     </div>
+
+    <BottomBarV1></BottomBarV1>
+
   </div>
-  <div class="window-bottom">
-    <BottomBar :applications="applications" @contextmenu="onBottomBarRightClick"/>
-  </div>
+
 </template>
 
 <style scoped>
 
 
-.window-home {
+.window {
   display: flex;
-  background: white;
+  flex-direction: column;
   height: 100%;
-  background: linear-gradient(to bottom right, #a1c4fd, #c2e9fb);
-  overflow: hidden;
-
-  border-radius: 6px;
-  margin: 0 8px 8px;
-  box-shadow:
-      inset 0 0 1px rgba(255, 255, 255, 0.4), /* 非常轻微的高光 */
-      0 4px 12px rgba(0, 0, 0, 0.06);           /* 原本阴影保持 */
+  width: 100%;
+  background: linear-gradient(135deg, #a6c1ee 0%, #fbc2eb 50%, #a6c1ee 100%);
 }
 
 .window-title {
-  height: 32px;
-  background: #f5f5f5;;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 0 12px;
-  box-sizing: border-box;
-  z-index: 9999;
   -webkit-app-region: drag;
 }
+
 
 .window-view {
   position: relative;
@@ -241,7 +234,7 @@ onMounted(() => {
   position: relative;
   width: 100%;
   height: 100%;
-  background: url('./assets/background/bustup_020_002.png') no-repeat center;
+
   background-size: contain;
 
   z-index: -1;
@@ -253,12 +246,7 @@ onMounted(() => {
   height: 100%;
   object-fit: cover;
 }
-.window-bottom{
-  bottom: 0;
-  flex: 1;
-  z-index: 9999;
-  width: 100%;
-}
+
 
 .selection-box {
   position: fixed;
@@ -266,4 +254,5 @@ onMounted(() => {
   background-color: rgba(51, 153, 255, 0.2);
   pointer-events: none;
 }
+
 </style>

@@ -71,7 +71,7 @@ onMounted(() => {
 
 .sortable-chosen {
   background: rgba(255, 255, 255, 0.4);
-  opacity: 0.8; /* 选中的时候稍微暗一点（可选） */
+  opacity: 0.8;
 }
 .window-bottom-controls {
   display: flex;

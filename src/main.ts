@@ -1,6 +1,7 @@
 import App from './App.vue'
 import {createApp} from 'vue'
 import {createPinia} from "pinia";
+import {injectSymbol} from "@/utils/Map.ts";
 
 import {GlobalWorkerOptions} from 'pdfjs-dist'
 import worker from "pdfjs-dist/build/pdf.worker.min.mjs?url";
@@ -14,7 +15,7 @@ import router from '@/router'
 // import 'virtual:svg-icons-register'
 
 
-import {injectSymbol} from "@/utils/Map.ts";
+
 
 await injectSymbol()
 

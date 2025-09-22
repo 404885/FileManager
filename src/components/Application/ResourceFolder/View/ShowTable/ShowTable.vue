@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
-import Table from "@/components/Application/ResourceFolder/ShowTable/Table.vue";
-import BreadCrumb from "@/components/Application/ResourceFolder/ShowTable/BreadCrumb.vue";
+import Table from "@/components/Application/ResourceFolder/View/ShowTable/Table.vue";
+import BreadCrumb from "@/components/Application/ResourceFolder/View/ShowTable/BreadCrumb.vue";
 import {Util} from "@/utils";
 import FileDialog from "@/components/Application/ResourceFolder/Function/FileAdd/FileDialog.vue";
 

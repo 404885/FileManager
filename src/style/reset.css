@@ -1,5 +1,9 @@
 /* ========== 基础字体与布局 ========== */
 :root {
+    /* 毛玻璃状态的容器所需背景和颜色 */
+    --container-border: rgba(255, 255, 255, 0.4);
+    --container-background: rgba(255, 255, 255, 0.3);
+
     --menu-border: #e2e2e2;             /* 浅灰色边框 */
     --divider-color: #d1d1d1;           /* 更深一点的灰色，用作分割线 */
 

@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文件添加与笔记</title>
+    <title>笔记与文本添加</title>
     <style>
-        /* 全局样式和弹窗背景 */
+        /* 全局样式和弹窗背景 - 保持与原文件一致 */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
             background-color: #f0f2f5;
@@ -29,7 +29,7 @@
             align-items: center;
         }
 
-        .modal-container {
+        .fileAdd {
             width: 90%;
             max-width: 600px;
             background: #fff;
@@ -41,7 +41,7 @@
             overflow: hidden;
         }
 
-        /* 头部和选项卡导航 */
+        /* 头部和选项卡导航 - 保持与原文件一致 */
         .modal-header {
             display: flex;
             justify-content: space-between;
@@ -118,33 +118,6 @@
             margin-bottom: 20px;
         }
 
-        .upload-area {
-            border: 2px dashed #a0b3d6;
-            background-color: #f8fbff;
-            border-radius: 8px;
-            text-align: center;
-            padding: 30px 20px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .upload-area:hover {
-            background-color: #eef4f9;
-        }
-
-        .upload-area p {
-            margin: 0;
-            color: #4a69bd;
-            font-weight: 500;
-        }
-
-        .upload-icon {
-            width: 40px;
-            height: 40px;
-            fill: #4a69bd;
-            margin-bottom: 10px;
-        }
-
         .input-group {
             display: flex;
             gap: 10px;
@@ -175,11 +148,11 @@
         /* 笔记和标签通用输入框 */
         textarea {
             width: 100%;
-            height: 100px;
+            height: 150px;
             padding: 12px;
             border: 1px solid #ddd;
             border-radius: 8px;
-            resize: none;
+            resize: vertical; /* 允许垂直方向调整大小 */
             box-sizing: border-box;
             line-height: 1.5;
         }
@@ -230,48 +203,37 @@
 <body>
 
 <div class="modal-overlay" id="modal-overlay">
-    <div class="modal-container">
+    <div class="fileAdd">
         <div class="modal-header">
-            <h2>文件添加与管理</h2>
+            <h2>文本与链接添加</h2>
             <button class="close-button" id="close-modal">&times;</button>
         </div>
 
         <div class="tab-nav">
-            <button class="tab-button active" data-tab="upload">上传文件</button>
-            <button class="tab-button" data-tab="link">链接添加</button>
-            <button class="tab-button" data-tab="note">添加笔记</button>
+            <button class="tab-button active" data-tab="note">添加笔记</button>
+            <button class="tab-button" data-tab="link">添加链接</button>
             <button class="tab-button" data-tab="tags">添加标签</button>
         </div>
 
-        <div id="upload" class="tab-content active">
-            <div class="section-hint">您可以拖拽文件到此区域或点击这里来选择文件。</div>
-            <div class="section-desc">支持多种文件类型，包括图片、视频、文档等。您可以一次选择多个文件进行批量上传，方便快捷。</div>
-            <div class="upload-area" id="upload-area">
-                <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 12h-6v-6h-2v6h-6v2h6v6h2v-6h6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(45 12 12)"/><path d="M20 18v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2"/></svg>
-                <p>拖拽文件到这里或<span style="text-decoration: underline; cursor: pointer;">点击选择文件</span></p>
-                <input type="file" id="file-input" multiple style="display: none;">
-            </div>
+        <div id="note" class="tab-content active">
+            <div class="section-hint">在这里输入您想要记录的文本或笔记。</div>
+            <div class="section-desc">此区域允许您自由书写，无论是待办事项、灵感闪现还是任何自定义内容，都可在此记录。</div>
+            <textarea id="note-text" placeholder="在此输入您的文本或笔记..."></textarea>
+            <button id="save-note" class="action-button">保存</button>
         </div>
 
         <div id="link" class="tab-content">
-            <div class="section-hint">在此输入有效的网址或文件链接，即可直接添加网络文件。</div>
-            <div class="section-desc">支持常见的在线文档、图片、视频资源链接。输入链接后，点击“添加”即可将文件添加到您的上传列表中。</div>
+            <div class="section-hint">在此输入有效的网址，即可直接添加网络链接。</div>
+            <div class="section-desc">支持常见的网页链接、文章、视频等，输入链接后，点击“添加”即可将其保存。</div>
             <div class="input-group">
-                <input type="text" id="url-input" placeholder="输入文件网址，例如：https://example.com/file.pdf">
+                <input type="text" id="url-input" placeholder="输入网址，例如：https://example.com">
                 <button id="add-url-button">添加</button>
             </div>
         </div>
 
-        <div id="note" class="tab-content">
-            <div class="section-hint">在这里输入您想要记录的笔记或任何自定义内容。</div>
-            <div class="section-desc">此区域允许您自由书写笔记，记录文件相关的备注、重要信息或评论。记录的笔记将与文件一起存储，方便以后查看。</div>
-            <textarea id="note-text" placeholder="在此输入您的笔记..."></textarea>
-            <button id="save-note" class="action-button">保存笔记</button>
-        </div>
-
         <div id="tags" class="tab-content">
-            <div class="section-hint">为您的文件添加一个或多个标签，以便更好地分类和搜索。</div>
-            <div class="section-desc">输入标签名后，按回车键添加标签，您可以使用逗号分隔多个标签，实现文件的高效分类。</div>
+            <div class="section-hint">为您的笔记或链接添加一个或多个标签，以便更好地分类和搜索。</div>
+            <div class="section-desc">输入标签名后，按回车键添加标签，您可以使用逗号分隔多个标签，实现信息的高效分类。</div>
             <div class="input-group">
                 <input type="text" id="tag-input" placeholder="输入标签，按回车或逗号分隔">
             </div>
@@ -284,8 +246,6 @@
     document.addEventListener('DOMContentLoaded', () => {
         const tabs = document.querySelectorAll('.tab-button');
         const contents = document.querySelectorAll('.tab-content');
-        const uploadArea = document.getElementById('upload-area');
-        const fileInput = document.getElementById('file-input');
         const urlInput = document.getElementById('url-input');
         const addUrlButton = document.getElementById('add-url-button');
         const tagInput = document.getElementById('tag-input');
@@ -307,59 +267,25 @@
             });
         });
 
-        // 文件上传功能
-        uploadArea.addEventListener('click', () => {
-            fileInput.click();
-        });
-
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            uploadArea.style.backgroundColor = '#eef4f9';
-        });
-
-        uploadArea.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            uploadArea.style.backgroundColor = '#f8fbff';
-        });
-
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            uploadArea.style.backgroundColor = '#f8fbff';
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                alert(`已选择 ${files.length} 个文件进行上传。`);
-            }
-        });
-
-        fileInput.addEventListener('change', (e) => {
-            const files = e.target.files;
-            if (files.length > 0) {
-                alert(`已选择 ${files.length} 个文件进行上传。`);
-            }
-        });
-
-        // 通过网址添加文件
-        addUrlButton.addEventListener('click', () => {
-            const url = urlInput.value.trim();
-            if (url) {
-                alert(`已添加URL文件：${url}`);
-                urlInput.value = '';
-            } else {
-                alert('请输入有效的网址！');
-            }
-        });
-
-        // 自由笔记保存功能
+        // 文本/笔记保存功能
         saveNoteButton.addEventListener('click', () => {
             const noteContent = noteTextArea.value.trim();
             if (noteContent) {
-                alert("笔记已成功保存！"); // 更友好的提示
-                noteTextArea.value = ''; // 清空文本框
+                alert("笔记已成功保存！");
+                noteTextArea.value = '';
             } else {
-                alert("请先输入笔记内容！");
+                alert("请输入笔记内容！");
+            }
+        });
+
+        // 链接添加功能
+        addUrlButton.addEventListener('click', () => {
+            const url = urlInput.value.trim();
+            if (url) {
+                alert(`已添加链接：${url}`);
+                urlInput.value = '';
+            } else {
+                alert('请输入有效的网址！');
             }
         });
 

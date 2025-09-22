@@ -6,7 +6,7 @@ import { cellProps,Tag } from "@/utils/type.ts";
 import IconContainer from "@/components/Container/IconContainer.vue";
 import {useResourceCondition} from "@/pinia/ResourceCondition.ts";
 import {Util} from "@/utils";
-import TagClassSelect from "@/components/Application/ResourceFolder/ShowTable/TagClassSelect.vue";
+import TagClassSelect from "@/components/Application/ResourceFolder/View/ShowTable/TagClassSelect.vue";
 
 
 const emit = defineEmits(['close'])

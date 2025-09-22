@@ -185,6 +185,4 @@ export function RegisterIpcEvent(resourcesPath: string) {
 
     })
 
-
-
 }

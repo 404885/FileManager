@@ -3,7 +3,7 @@ import { Data, Util, vResize } from "@/utils";
 import ViewContainerV2 from "@/components/Container/ViewContainerV2.vue";
 import SwitchDialog from '../../Dialog/SwitchDialog.vue';
 import IconContainer from "@/components/Container/IconContainer.vue";
-import ShowTable from "@/components/Application/ResourceFolder/ShowTable/ShowTable.vue";
+import ShowTable from "@/components/Application/ResourceFolder/View/ShowTable/ShowTable.vue";
 
 
 

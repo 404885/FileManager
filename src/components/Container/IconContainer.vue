@@ -45,16 +45,19 @@ const resolvedIcon = computed(() => {
 
 <!-- src/components/SvgFileIcon.vue -->
 <template>
+  <!--  -->
   <template v-if="linkMode">
     <svg class="svg-icon" :style="{ width: size, height: size }" :class="customClass" aria-hidden="true">
       <use :href="`#icon-${resolvedIcon}`" />
     </svg>
   </template>
+
   <template v-else>
     <svg class="svg-icon" :style="{ width: size, height: size }" :class="customClass" aria-hidden="true">
       <use :href="`#icon-${name}`" />
     </svg>
   </template>
+
 </template>
 
 <style scoped>

@@ -3,6 +3,8 @@ import {onBeforeUnmount, onMounted, ref} from "vue"
 import interact from "interactjs"
 import { useDeskTopCondition } from "@/pinia/DeskTopCondition.ts"
 
+
+
 const props = defineProps({
   icon: { required: true, type: String },
   name: { required: true, type: String },

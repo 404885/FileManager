@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import {Data, Util} from "@/utils";
-import {ElMessage, ElPopover, ElTable, ElTableColumn, ElTag, ElButton, ElBadge} from 'element-plus'
+import {ElMessage, ElPopover, ElTable, ElTableColumn, ElTag, ElButton, ElSplitter} from 'element-plus'
 import {onMounted, ref, onUnmounted} from "vue";
 import { VXETableNode } from "@/utils/type.ts";
 import IconContainer from "@/components/Container/IconContainer.vue";
-import ExpandTag from "@/components/Application/ResourceFolder/ShowTable/ExpandTag.vue";
-import ExpandName from "@/components/Application/ResourceFolder/ShowTable/ExpandName.vue";
+import ExpandTag from "@/components/Application/ResourceFolder/View/ShowTable/ExpandTag.vue";
+import ExpandName from "@/components/Application/ResourceFolder/View/ShowTable/ExpandName.vue";
 import { useResourceCondition } from "@/pinia/ResourceCondition.ts";
 
 
@@ -154,80 +154,80 @@ onUnmounted(
         @cell-dblclick="handleCellDblClick">
 
       <el-table-column  label="Id" :index="index => index" align="center" width="60" :resizable="false" type="expand">
-
-        1
       </el-table-column>
-
       <el-table-column
-          v-for="item of fields"
-          :prop="item.key"
-          :label="item.label"
-          :width="item.width"
-          :min-width="item.minWidth"
-          :resizable="true">
+              v-for="item of fields"
+              :prop="item.key"
+              :label="item.label"
+              :width="item.width"
+              :min-width="item.minWidth"
+              :resizable="true">
 
-        <template #default="table">
-          <div class="table-column">
+            <template #default="table">
+              <div class="table-column">
 
-            <template v-if="item.key === 'name' " >
-              <div class="table-column-name">
-                <IconContainer :link-mode="true" :file-type="table.row.type"></IconContainer>
-                <span class="table-column-name-ellipsis">{{ table.row[item.key] }}</span>
+                <template v-if="item.key === 'name' " >
+                  <div class="table-column-name">
+                    <IconContainer :link-mode="true" :file-type="table.row.type"></IconContainer>
+                    <span class="table-column-name-ellipsis">{{ table.row[item.key] }}</span>
+                  </div>
+                </template>
+
+                <template v-else-if="item.key === 'tag' ">
+                  <div class="table-column-tag">
+                    <el-tag
+                        v-for="tag in tagSplit(table.row[item.key])"
+                        :key="tag"
+                        class="dialog-content-title-tag-item dialog-content-title-tag-self"
+                        type="primary">
+                      {{ tag }}
+                    </el-tag>
+                    <IconContainer v-if="tagSplit(table.row[item.key]).length > 1" :link-mode="false" name="more"/>
+                  </div>
+                </template>
+
+                <template v-else>
+                  <span class="">{{ table.row[item.key] }}</span>
+                </template>
+
               </div>
             </template>
 
-            <template v-else-if="item.key === 'tag' ">
-              <div class="table-column-tag">
-                  <el-tag
-                      v-for="tag in tagSplit(table.row[item.key])"
-                      :key="tag"
-                      class="dialog-content-title-tag-item dialog-content-title-tag-self"
-                      type="primary">
-                    {{ tag }}
-                  </el-tag>
-                <IconContainer v-if="tagSplit(table.row[item.key]).length > 1" :link-mode="false" name="more"/>
-              </div>
-            </template>
-
-            <template v-else>
-              <span class="">{{ table.row[item.key] }}</span>
-            </template>
-
-          </div>
-        </template>
-
-      </el-table-column>
-
-
-
-
+          </el-table-column>
       <el-table-column label="" prop="default" align="right" header-align="left">
-        <template #header>
-          <el-popover placement="left-end" >
-            <template #reference>
-              <div>+</div>
+            <template #header>
+              <el-popover placement="left-end" >
+                <template #reference>
+                  <div>+</div>
+                </template>
+                <template #default>
+                  <div class="context-menu" ref="container">
+                    <div class="context-menu-item" v-for="item of Data.headData">{{item.label}}</div>
+                  </div>
+                </template>
+              </el-popover>
             </template>
-            <template #default>
-              <div class="context-menu" ref="container">
-                <div class="context-menu-item" v-for="item of Data.headData">{{item.label}}</div>
+
+            <template #default="button">
+              <div class="edit-icon" v-show="hoverRow === button.row && hoverColumn === button.key">
+                <el-button
+                    v-for="i of hover"
+                    class="hover-btn"
+                    @mouseenter="i.bool = true"
+                    @mouseleave="i.bool = false">
+                  <IconContainer :link-mode="false" :name="i.icon" />
+                  <span class="btn-text" v-show="i.bool">{{ i.label }}</span>
+                </el-button>
               </div>
             </template>
-          </el-popover>
-        </template>
+          </el-table-column>
 
-        <template #default="button">
-          <div class="edit-icon" v-show="hoverRow === button.row && hoverColumn === button.key">
-            <el-button
-                v-for="i of hover"
-                class="hover-btn"
-                @mouseenter="i.bool = true"
-                @mouseleave="i.bool = false">
-              <IconContainer :link-mode="false" :name="i.icon" />
-              <span class="btn-text" v-show="i.bool">{{ i.label }}</span>
-            </el-button>
-          </div>
-        </template>
-      </el-table-column>
+
+
+
+
+
+
 
     </el-table>
   </div>

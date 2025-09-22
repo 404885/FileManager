@@ -2,72 +2,125 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文件添加与笔记</title>
+    <title>macOS Desktop Demo</title>
     <style>
-        /* 现有样式略... */
+        /* 页面基础样式和桌面背景 */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow: hidden;
+            background-image: url('https://images.unsplash.com/photo-1598410292723-95c58a8a1130?ixlib=rb-4.0.3&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1920&h=1080');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            color: #ffffff; /* 确保文字颜色可见 */
+        }
 
-        /* 自由笔记区域 */
-        .note-section {
-            margin-top: 20px;
+        /* 顶部菜单栏样式 */
+        .top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 25px;
+
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
         }
-        .note-title {
-            font-weight: bold;
-            margin-bottom: 10px;
+
+        /* 顶部菜单项分组 */
+        .left-menu, .right-menu {
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
-        .note-textarea {
-            width: 100%;
-            height: 150px;
-            border: 1px solid #d1d9e2;
-            border-radius: 6px;
-            padding: 10px;
-            font-size: 1rem;
-        }
-        .note-button {
-            margin-top: 10px;
-            background-color: #4a90e2;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 6px;
+
+        /* 顶部菜单项 */
+        .menu-item {
             cursor: pointer;
+            padding: 0 5px;
+            -webkit-app-region: no-drag;
+            transition: background-color 0.2s ease;
         }
-        .note-button:hover {
-            background-color: #357bd8;
+
+        .menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        /* 底部 Dock 栏样式 */
+        .dock {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            height: 50px;
+            padding: 0 10px;
+
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+
+            -webkit-app-region: drag;
+        }
+
+        /* Dock 图标样式 */
+        .dock-icon {
+            width: 38px;
+            height: 38px;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+            -webkit-app-region: no-drag;
+        }
+
+        .dock-icon:hover {
+            transform: scale(1.2);
         }
     </style>
 </head>
 <body>
 
-<div class="modal-container">
-    <!-- 现有文件上传区域略... -->
-
-    <!-- 自由笔记区域 -->
-    <div class="note-section">
-        <div class="note-title">自由添加笔记</div>
-        <textarea id="note-text" class="note-textarea" placeholder="在此输入您的笔记或自定义内容..."></textarea>
-        <button id="save-note" class="note-button">保存笔记</button>
+<div class="top-bar">
+    <div class="left-menu">
+        <span class="menu-item"></span>
+        <span class="menu-item">Finder</span>
+        <span class="menu-item">文件</span>
+        <span class="menu-item">编辑</span>
+        <span class="menu-item">显示</span>
+        <span class="menu-item">前往</span>
     </div>
-
+    <div class="right-menu">
+        <span class="menu-item">Wi-Fi</span>
+        <span class="menu-item">电量</span>
+        <span class="menu-item">🔍</span>
+        <span class="menu-item">9:41 AM</span>
+    </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const saveNoteButton = document.getElementById('save-note');
-        const noteTextArea = document.getElementById('note-text');
-
-        // 保存笔记功能
-        saveNoteButton.addEventListener('click', () => {
-            const noteContent = noteTextArea.value.trim();
-            if (noteContent) {
-                alert("笔记已保存: " + noteContent); // 此处可换为实际保存逻辑
-                noteTextArea.value = ''; // 清空文本框
-            } else {
-                alert("请先输入笔记内容！");
-            }
-        });
-    });
-</script>
+<div class="dock">
+    <img class="dock-icon" src="https://www.flaticon.com/svg/static/icons/svg/806/806587.svg" alt="Finder">
+    <img class="dock-icon" src="https://www.flaticon.com/svg/static/icons/svg/806/806596.svg" alt="Messages">
+    <img class="dock-icon" src="https://www.flaticon.com/svg/static/icons/svg/806/806585.svg" alt="Mail">
+    <img class="dock-icon" src="https://www.flaticon.com/svg/static/icons/svg/806/806583.svg" alt="Safari">
+    <img class="dock-icon" src="https://www.flaticon.com/svg/static/icons/svg/806/806580.svg" alt="Settings">
+</div>
 
 </body>
 </html>

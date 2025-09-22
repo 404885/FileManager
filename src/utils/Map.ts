@@ -1,35 +1,3 @@
-// const defaultMappings = [
-//     ['pdf', 'pdf'],
-//     ['docx', 'word'],
-//     ['doc', 'word'],
-//     ['xlsx', 'excel'],
-//     ['xls', 'excel'],
-//     ['png', 'photo'],
-//     ['jpg', 'photo'],
-//     ['jpeg', 'photo'],
-//     ['gif', 'photo'],
-//     ['svg', 'photo'],
-//     ['mp4', 'video'],
-//     ['mp3', 'audio'],
-//     ['zip', 'zip'],
-//     ['rar', 'zip'],
-//     ['7z', 'zip'],
-//     ['txt', 'txt'],
-//     ['json', 'code'],
-//     ['js', 'code'],
-//     ['ts', 'code'],
-//     ['html', 'code'],
-//     ['css', 'code']
-// ];
-//
-// function extractPaths(node:any) {
-//     if (!node) return []
-//
-//     const childrenPaths = (node.children || []).flatMap(extractPaths)
-//     return node.path ? [node.path, ...childrenPaths] : childrenPaths
-// }
-
-
 export async function netSymbol() {
 
 }
@@ -93,34 +61,8 @@ export async function createMap(map: any){
 export async function injectSymbol() {
     if (document.getElementById('__svg-symbols__')) return
 
-    // let data = await window.electronAPI.dataOperation.queryAll('SELECT * FROM icon')
-    // let symbols = data.map(s => s.icon_value)
-
     let result = await window.electronAPI.svgsTransform('./icon')
     const symbols = result.symbols as unknown as string[];
-
-
-
-    // let pathall = []
-    // const res = await window.electronAPI.openDirectoryDialog()
-    // if (!res.canceled) {
-    //     const node = res.files
-    //     pathall = extractPaths(node)
-    //     console.log(pathall)
-    // }
-    // await transSymbol(pathall)
-
-
-    // if (!data || data.length === 0) {
-    //     symbols = await createSymbol('/sprite.svg');
-    //
-    //     for (const [ext, icon] of defaultMappings) {
-    //         await window.electronAPI.dataOperation.execute(
-    //             `INSERT OR IGNORE INTO icon_map (extension, icon_name) VALUES (?, ?)`,
-    //             [ext, icon]
-    //         );
-    //     }
-    // }
 
     // 构造完整 SVG 内容
     const rawSvg = `<svg id="__svg__icons__dom__" xmlns="http://www.w3.org/2000/svg" style="position: absolute; width: 0; height: 0;"> ${symbols.join('\n')}</svg>`
