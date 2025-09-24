@@ -27,6 +27,11 @@ const itemClick = (action: string) => {
   }
 }
 
+const close = () => {
+  emit('close')
+
+}
+
 const context = (e: MouseEvent) => {
   e.stopPropagation()
 }
@@ -35,7 +40,7 @@ const context = (e: MouseEvent) => {
 
 <template>
   <teleport to="#window-view">
-    <ViewContainerV2 :title="props.title" :id="props.id" :icon="props.icon" @close="emit('close')" @contextmenu="context">
+    <ViewContainerV2 :title="props.title" :id="props.id" :icon="props.icon" @close="close" @contextmenu="context">
       <div class="resource">
           <div class="resource-sidebar" v-resize="{ storageKey: 'my-panel-width', max: 300, min: 100}">
 

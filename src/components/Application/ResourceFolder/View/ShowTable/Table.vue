@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {Data, Util} from "@/utils";
-import {ElMessage, ElPopover, ElTable, ElTableColumn, ElTag, ElButton, ElSplitter} from 'element-plus'
+import {ElMessage, ElPopover, ElTable, ElTableColumn, ElTag, ElButton } from 'element-plus'
 import {onMounted, ref, onUnmounted} from "vue";
 import { VXETableNode } from "@/utils/type.ts";
 import IconContainer from "@/components/Container/IconContainer.vue";
@@ -15,6 +15,7 @@ const props = defineProps<{
 
 // 资源管理器pinia实例
 const resFolder = useResourceCondition()
+console.log(resFolder.currentFolder, resFolder.currentSpace)
 // table数据
 const tableData = ref<VXETableNode[]>([])
 // 拖拽条实例获取
@@ -37,6 +38,14 @@ const fields = ref([
   { key: 'tag', label: 'Tag', width: 140, minWidth: 160 },
 ])
 
+const tableLoad = async () => {
+  if (resFolder.currentFolder === -1) {
+    tableData.value = await window.electronAPI.dataOperation.loadTable(resFolder.currentSpace);
+  }
+  else {
+    tableData.value = await window.electronAPI.dataOperation.loadTable(resFolder.currentSpace, resFolder.currentFolder);
+  }
+}
 
 // 拖拽条拖拽最小列宽
 const handleDragend =  (newWidth: number, oldWidth: number, column: any) => {
@@ -62,19 +71,13 @@ const handleCellClick = (row: any, column: any, cell: any) =>  {
     const rect = cell.getBoundingClientRect();
 
     if (column.property === 'tag') {
-
       Util.openComponent(ExpandTag, 'id', { dialogVisible: true, rect: rect, data: row, id: props.id });
     }
     else if (column.property === 'name') {
       Util.openComponent(ExpandName, 'id', {dialogVisible: true, rect: rect, data: row, id: props.id });
     }
     else {
-
     }
-
-
-
-
   }, clickDelay);
 };
 // 单元格双击
@@ -83,6 +86,18 @@ const handleCellDblClick = async (row: any, column: any, cell: any) => {
   if (clickTimer) {
     clearTimeout(clickTimer);
     clickTimer = null;
+  }
+
+  if (column.property === 'name') {
+    console.log(row)
+    if (row.type === 'folder'){
+      resFolder.setFolderChange(row.id)
+    }
+    else {
+      const re = await window.electronAPI.openFile(row.file_path)
+      console.log(re)
+    }
+
   }
 
   ElMessage({
@@ -114,15 +129,14 @@ const tagStore = ref()
 
 // 停止state订阅
 const stop = resFolder.$subscribe(async (_mutation, _state) => {
-  resFolder.setDataChange(1)
-  tableData.value = await window.electronAPI.dataOperation.loadTable(1)
+  await tableLoad()
 })
 
 
 
 
 onMounted( async () => {
-  tableData.value = await window.electronAPI.dataOperation.loadTable(1)
+  await tableLoad()
   proxy.value = document.querySelector<HTMLDivElement>('.el-table__column-resize-proxy');
 
   tagStore.value = await window.electronAPI.dataOperation.queryAll(`SELECT * FROM tag WHERE connected_workspace = 1;`);

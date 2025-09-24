@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import BottomBarV1 from "@/view/DeskTop/BottomBarV1.vue";
+import Docker from "@/view/DeskTop/Docker/Docker.vue";
 
 import { Util,Data } from "@/utils";
 import BottomBar from "@/components/Bar/BottomBar.vue"
@@ -11,7 +11,8 @@ import {useClickHandler} from "@/utils/util.ts";
 import {Applications} from "@/utils/type.ts"
 import MenuContainerV1 from "@/components/Container/MenuContainerV1.vue";
 import WallPaper from "@/components/Application/WallPaper.vue";
-import TopBarV1 from "@/view/DeskTop/TopBarV1.vue";
+import TopBarV1 from "@/view/DeskTop/Title/TopBarV1.vue";
+import TitleBar from "@/components/Bar/TitleBar.vue";
 
 
 const applications = Data.applicationData
@@ -199,7 +200,7 @@ onMounted(() => {
 <!--      />-->
     </div>
 
-    <BottomBarV1></BottomBarV1>
+    <Docker></Docker>
 
   </div>
 

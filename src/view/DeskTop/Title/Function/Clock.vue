@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {onMounted, onUnmounted, ref} from "vue";
-import ClockMenu from "@/components/Bar/BottomBar/ClockMenu.vue";
+import ClockMenu from "@/view/DeskTop/Title/Function/ClockMenu.vue";
 import {useDeskTopCondition} from "@/pinia/DeskTopCondition.ts";
 
 const Menu = 'clock'

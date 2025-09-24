@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import Clock from "@/view/DeskTop/Title/Function/Clock.vue";
 
 const currentTime = ref('');
+
 
 onMounted(() => {
   const updateTime = () => {
@@ -20,11 +22,12 @@ onMounted(() => {
   updateTime();
   setInterval(updateTime, 60000);
 });
+
 </script>
 
 <template>
-  <div class="menu-bar">
-    <div class="left-section">
+  <div class="window-topbar" @click="console.log('dsa')">
+    <div class="window-topbar-left">
       <img
           src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Apple_logo_white.svg/1010px-Apple_logo_white.svg.png"
           alt="Apple Logo"
@@ -36,32 +39,21 @@ onMounted(() => {
       <span class="menu-item">查看</span>
       <span class="menu-item">帮助</span>
     </div>
-
-    <div class="right-section">
-      <div class="icon-container">
-        <i class="fas fa-wifi"></i>
-      </div>
-      <div class="icon-container">
-        <i class="fas fa-battery-half"></i>
-      </div>
-      <div class="icon-container">
-        <i class="fas fa-search"></i>
-      </div>
-      <div class="icon-container">
-        <i class="fas fa-volume-up"></i>
-      </div>
+    <div class="window-topbar-middle"></div>
+    <div class="window-topbar-right">
       <div class="time-display">{{ currentTime }}</div>
+      <Clock></Clock>
     </div>
   </div>
 </template>
 
 <style scoped>
-.menu-bar {
+.window-topbar {
   width: 100%;
   height: 28px;
 
   display: flex;
-  justify-content: space-between;
+  flex-direction: row;
   align-items: center;
   padding: 0 15px;
 
@@ -74,15 +66,21 @@ onMounted(() => {
   font-size: 13px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
-  -webkit-app-region: drag;
+  user-select: none;
 }
 
-.left-section,
-.right-section {
+.window-topbar-left,
+.window-topbar-right {
   display: flex;
   align-items: center;
+  width: fit-content;
   height: 100%;
   gap: 18px;
+}
+.window-topbar-middle {
+  flex: 1;
+  height: 100%;
+  -webkit-app-region: drag;
 }
 
 .apple-logo {
@@ -100,14 +98,8 @@ onMounted(() => {
   font-weight: bold;
 }
 
-.icon-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-}
 
-.right-section i {
+.window-topbar-right-section i {
   color: #fff;
   font-size: 15px;
 }

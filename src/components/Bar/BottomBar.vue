@@ -3,7 +3,7 @@ import {onMounted, ref} from "vue";
 import BottomBarIcon from "@/components/Icon/BottomBarIcon.vue";
 import {useDeskTopCondition} from "@/pinia/DeskTopCondition.ts";
 import Sortable from "sortablejs";
-import Clock from "@/components/Bar/BottomBar/Clock.vue";
+import Clock from "@/view/DeskTop/Title/Function/Clock.vue";
 import Volume from "@/components/Bar/BottomBar/Volume.vue";
 import Windows from "@/components/Bar/BottomBar/Windows.vue";
 import Notification from "@/components/Bar/BottomBar/Notification.vue";
@@ -58,7 +58,7 @@ onMounted(() => {
     </div>
     <div class="right-controls">
       <Volume/>
-      <Clock/>
+
       <Notification/>
     </div>
   </div>

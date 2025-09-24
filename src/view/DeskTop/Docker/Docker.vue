@@ -82,7 +82,7 @@ onMounted(() => {
   left: 50%;
   transform: translate(-50%);
 
-  margin: 10px;
+  margin: 16px;
   padding-left: 10px;
   padding-right: 10px;
   height: 48px;
