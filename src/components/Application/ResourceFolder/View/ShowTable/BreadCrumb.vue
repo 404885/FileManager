@@ -2,20 +2,21 @@
 import { Util } from "@/utils";
 import {onMounted, ref, computed} from "vue";
 import {VXETableNode} from "@/utils/type.ts";
-import {useTreeCondition} from "@/pinia/TreeCondition.ts";
+
+import {useResourceCondition} from "@/pinia/ResourceCondition.ts";
 
 
-const store = useTreeCondition()
+const store = useResourceCondition()
 const breadData = ref<VXETableNode[]>([])
 
 
 // 表格初始化
 const initData = async () => {
-  breadData.value = await Util.idToPathList(store.currentFolder, store.currentWorkspace)
+  breadData.value = await Util.idToPathList(store.currentFolder, store.currentSpace)
 }
 // 点击面包屑实现跳转
 const breadClick = (id: number) => {
-  store.setCurrentFolder(id)
+  store.setFolderChange(id)
 }
 
 
@@ -24,8 +25,7 @@ onMounted(() =>  {
   initData()
 });
 
-store.$subscribe((mutation, state) => {
-  console.log('变化了！', mutation, state)
+store.$subscribe(() => {
   initData()
 })
 

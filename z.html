@@ -1,331 +1,418 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>笔记与文本添加</title>
+    <title>精致记忆闪卡</title>
     <style>
-        /* 全局样式和弹窗背景 - 保持与原文件一致 */
+        :root {
+            --card-width: 90%;
+            --card-max-width: 600px;
+            --card-height: 400px;
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --color-bg: #f0f2f5;
+            --color-card-front: #ffffff;
+            --color-card-back: #4CAF50;
+            --color-text-front: #333;
+            --color-text-back: #fff;
+            --color-border: #ddd;
+            --color-progress-bar: #66bb6a;
+            --color-button-bg: #e0e0e0;
+            --color-button-text: #555;
+            --color-button-hover: #ccc;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-            background-color: #f0f2f5;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.4);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .fileAdd {
-            width: 90%;
-            max-width: 600px;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-            padding: 24px;
+            font-family: var(--font-main);
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--color-bg);
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
-        /* 头部和选项卡导航 - 保持与原文件一致 */
-        .modal-header {
+        .container {
+            width: 100%;
+            max-width: var(--card-max-width);
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background-color: var(--color-border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--color-progress-bar);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .card-container {
+            width: 100%;
+            perspective: 1000px;
+            transition: transform 0.3s ease;
+        }
+
+        .card {
+            width: 100%;
+            min-height: var(--card-height);
+            height: auto;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .card.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            box-sizing: border-box;
+            border-radius: 20px;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .card-front {
+            background-color: var(--color-card-front);
+            color: var(--color-text-front);
+        }
+
+        .card-back {
+            background-color: var(--color-card-back);
+            color: var(--color-text-back);
+            transform: rotateY(180deg);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #777;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .card-back .card-title {
+            color: #e0e0e0;
+        }
+
+        .card-question {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .card-answer {
+            font-size: 1.2rem;
+            text-align: left;
+            width: 100%;
+            line-height: 1.8;
+        }
+
+        ul {
+            text-align: left;
+            width: 100%;
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .navigation {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 15px;
-        }
-
-        .modal-header h2 {
-            margin: 0;
-            font-size: 1.5em;
-            color: #1a237e;
-        }
-
-        .close-button {
-            background: none;
-            border: none;
-            font-size: 2em;
-            cursor: pointer;
-            color: #999;
-            transition: color 0.2s;
-        }
-
-        .close-button:hover {
-            color: #555;
-        }
-
-        .tab-nav {
-            display: flex;
-            margin-bottom: 20px;
-        }
-
-        .tab-nav button {
-            flex: 1;
-            padding: 12px 0;
-            background: none;
-            border: none;
-            border-bottom: 2px solid transparent;
-            font-size: 1em;
-            cursor: pointer;
-            color: #555;
-            transition: color 0.3s, border-bottom-color 0.3s;
-        }
-
-        .tab-nav button.active {
-            color: #4a69bd;
-            border-bottom-color: #4a69bd;
-            font-weight: bold;
-        }
-
-        /* 内容区 */
-        .tab-content {
-            display: none;
-            padding: 10px 0;
-            flex-grow: 1;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .section-hint {
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 10px;
-            line-height: 1.4;
-        }
-
-        .section-desc {
-            font-size: 0.9em;
-            color: #666;
-            line-height: 1.5;
-            margin-bottom: 20px;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .input-group input {
-            flex-grow: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-        }
-
-        .input-group button {
-            padding: 10px 20px;
-            background-color: #4a69bd;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .input-group button:hover {
-            background-color: #354e96;
-        }
-
-        /* 笔记和标签通用输入框 */
-        textarea {
             width: 100%;
-            height: 150px;
-            padding: 12px;
-            border: 1px solid #ddd;
+            max-width: var(--card-max-width);
+            margin-top: 20px;
+        }
+
+        .nav-button {
+            padding: 12px 25px;
+            border: none;
             border-radius: 8px;
-            resize: vertical; /* 允许垂直方向调整大小 */
-            box-sizing: border-box;
-            line-height: 1.5;
-        }
-
-        .tags-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 15px;
-        }
-
-        .tag {
-            background-color: #e8eaf6;
-            color: #3f51b5;
-            padding: 6px 12px;
-            border-radius: 16px;
-            font-size: 0.9em;
-            display: flex;
-            align-items: center;
-        }
-
-        .tag-remove {
-            margin-left: 8px;
+            background-color: var(--color-button-bg);
+            color: var(--color-button-text);
+            font-size: 1rem;
             cursor: pointer;
-            color: #3f51b5;
-            font-weight: bold;
+            transition: background-color 0.2s, transform 0.1s;
         }
 
-        .action-button {
+        .nav-button:hover {
+            background-color: var(--color-button-hover);
+        }
+
+        .nav-button:active {
+            transform: translateY(1px);
+        }
+
+        .nav-button:disabled {
+            background-color: #f5f5f5;
+            color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .card-display {
+            display: none;
+        }
+
+        .card-display.active {
             display: block;
-            width: 100%;
-            padding: 12px;
-            background-color: #4a69bd;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            margin-top: 15px;
         }
 
-        .action-button:hover {
-            background-color: #354e96;
+        @media (max-width: 768px) {
+            .card-question {
+                font-size: 1.5rem;
+            }
+
+            .card-answer {
+                font-size: 1rem;
+            }
+
+            .card-face {
+                padding: 30px;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="modal-overlay" id="modal-overlay">
-    <div class="fileAdd">
-        <div class="modal-header">
-            <h2>文本与链接添加</h2>
-            <button class="close-button" id="close-modal">&times;</button>
-        </div>
+<div class="container">
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
 
-        <div class="tab-nav">
-            <button class="tab-button active" data-tab="note">添加笔记</button>
-            <button class="tab-button" data-tab="link">添加链接</button>
-            <button class="tab-button" data-tab="tags">添加标签</button>
-        </div>
-
-        <div id="note" class="tab-content active">
-            <div class="section-hint">在这里输入您想要记录的文本或笔记。</div>
-            <div class="section-desc">此区域允许您自由书写，无论是待办事项、灵感闪现还是任何自定义内容，都可在此记录。</div>
-            <textarea id="note-text" placeholder="在此输入您的文本或笔记..."></textarea>
-            <button id="save-note" class="action-button">保存</button>
-        </div>
-
-        <div id="link" class="tab-content">
-            <div class="section-hint">在此输入有效的网址，即可直接添加网络链接。</div>
-            <div class="section-desc">支持常见的网页链接、文章、视频等，输入链接后，点击“添加”即可将其保存。</div>
-            <div class="input-group">
-                <input type="text" id="url-input" placeholder="输入网址，例如：https://example.com">
-                <button id="add-url-button">添加</button>
+    <div id="cardGroup">
+        <div class="card-display active">
+            <div class="card-container">
+                <div class="card">
+                    <div class="card-face card-front">
+                        <div class="card-text">
+                            <p class="card-title">经济学概念</p>
+                            <h2 class="card-question">什么是机会成本？</h2>
+                            <p class="card-answer">请解释机会成本的定义，并举一个日常生活中的例子。</p>
+                        </div>
+                    </div>
+                    <div class="card-face card-back">
+                        <div class="card-text">
+                            <p class="card-title">答案</p>
+                            <p class="card-answer">
+                                <strong>机会成本 (Opportunity Cost)</strong> 指的是在面临多种选择时，为了得到某种东西而放弃的其他东西的最高价值。它是我们做出的每一个决定背后所隐含的“代价”。
+                                <br><br>
+                                <strong>例子：</strong> 你有100元，可以买一本新书或去看一场电影。如果你选择买书，那么去看电影的机会就是你的机会成本。你放弃了看电影带来的快乐，以换取拥有这本书。
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div id="tags" class="tab-content">
-            <div class="section-hint">为您的笔记或链接添加一个或多个标签，以便更好地分类和搜索。</div>
-            <div class="section-desc">输入标签名后，按回车键添加标签，您可以使用逗号分隔多个标签，实现信息的高效分类。</div>
-            <div class="input-group">
-                <input type="text" id="tag-input" placeholder="输入标签，按回车或逗号分隔">
+        <div class="card-display">
+            <div class="card-container">
+                <div class="card">
+                    <div class="card-face card-front">
+                        <div class="card-text">
+                            <p class="card-title">生物学概念</p>
+                            <h2 class="card-question">解释光合作用的关键过程</h2>
+                            <p class="card-answer">请详细描述光合作用中“光反应”和“暗反应”的主要区别和作用。</p>
+                        </div>
+                    </div>
+                    <div class="card-face card-back">
+                        <div class="card-text">
+                            <p class="card-title">答案</p>
+                            <p class="card-answer">光合作用主要分为两个阶段：</p>
+                            <ul>
+                                <li><strong>光反应 (Light-Dependent Reactions)</strong>：这个过程需要光，发生在叶绿体的类囊体膜上。它将光能转化为化学能，并产生两个重要的能量分子——**ATP** 和 **NADPH**，同时释放出氧气。</li>
+                                <li><strong>暗反应 (Light-Independent Reactions)</strong>：这个过程不需要光直接参与，发生在叶绿体的基质中。它利用光反应产生的 ATP 和 NADPH，将二氧化碳（CO₂）转化为葡萄糖（C₆H₁₂O₆），从而为植物提供能量和生长所需的物质。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="tags-container" id="tags-container"></div>
         </div>
+
+        <div class="card-display">
+            <div class="card-container">
+                <div class="card">
+                    <div class="card-face card-front">
+                        <div class="card-text">
+                            <p class="card-title">历史事件</p>
+                            <h2 class="card-question">解释法国大革命的起因</h2>
+                            <p class="card-answer">法国大革命爆发的原因错综复杂，请列举并简要解释至少三个主要因素。</p>
+                        </div>
+                    </div>
+                    <div class="card-face card-back">
+                        <div class="card-text">
+                            <p class="card-title">答案</p>
+                            <p class="card-answer">法国大革命的主要原因包括：</p>
+                            <ul>
+                                <li><strong>社会不平等</strong>：法国社会被划分为三个等级（教士、贵族、平民）。第一和第二等级享有特权且无需纳税，而占人口绝大多数的第三等级（尤其是资产阶级和农民）却承担了所有税收和义务，导致了巨大的不满。</li>
+                                <li><strong>财政危机</strong>：路易十六的政府因为过度参与战争（如美国独立战争）和王室的铺张浪费而债台高筑，国家财政濒临破产，加剧了社会矛盾。</li>
+                                <li><strong>启蒙思想的传播</strong>：卢梭、伏尔泰等启蒙思想家的自由、平等、主权在民等思想深入人心，挑战了旧制度的合法性，为革命提供了思想基础。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-display">
+            <div class="card-container">
+                <div class="card">
+                    <div class="card-face card-front">
+                        <div class="card-text">
+                            <p class="card-title">计算机科学</p>
+                            <h2 class="card-question">什么是二叉树？</h2>
+                            <p class="card-answer">请解释二叉树的定义、基本特点和两种遍历方式。</p>
+                        </div>
+                    </div>
+                    <div class="card-face card-back">
+                        <div class="card-text">
+                            <p class="card-title">答案</p>
+                            <p class="card-answer">
+                                <strong>二叉树 (Binary Tree)</strong> 是一种特殊的树形数据结构，其特点是每个节点最多只有两个子节点，分别称为左子节点和右子节点。
+                            </p>
+                            <p class="card-answer">
+                                <strong>基本特点：</strong>
+                            <ul>
+                                <li>每个节点最多有两个子节点。</li>
+                                <li>没有父节点的节点称为根节点。</li>
+                                <li>没有子节点的节点称为叶子节点。</li>
+                            </ul>
+                            </p>
+                            <p class="card-answer">
+                                <strong>两种常见遍历方式：</strong>
+                            <ul>
+                                <li><strong>深度优先遍历 (DFS)</strong>：如前序、中序、后序遍历。</li>
+                                <li><strong>广度优先遍历 (BFS)</strong>：按层遍历，从上到下，从左到右。</li>
+                            </ul>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-display">
+            <div class="card-container">
+                <div class="card">
+                    <div class="card-face card-front">
+                        <div class="card-text">
+                            <p class="card-title">文学常识</p>
+                            <h2 class="card-question">简述《红楼梦》的主要人物</h2>
+                            <p class="card-answer">请列举《红楼梦》中的主要人物，并简要概括他们的关系和代表性。</p>
+                        </div>
+                    </div>
+                    <div class="card-face card-back">
+                        <div class="card-text">
+                            <p class="card-title">答案</p>
+                            <p class="card-answer">
+                                《红楼梦》主要讲述贾、史、王、薛四大家族的兴衰，以贾宝玉、林黛玉和薛宝钗的爱情悲剧为主线。
+                            </p>
+                            <p class="card-answer">
+                                <strong>主要人物：</strong>
+                            <ul>
+                                <li><strong>贾宝玉：</strong> 贾府的公子，厌恶封建礼教，追求自由和真情。</li>
+                                <li><strong>林黛玉：</strong> 贾宝玉的姑表妹，性格敏感多愁，与宝玉有真挚的爱情。</li>
+                                <li><strong>薛宝钗：</strong> 贾宝玉的姨表姐，性格稳重随和，与黛玉形成鲜明对比。</li>
+                                <li><strong>王熙凤：</strong> 贾府的实际管家，精明强干，善于理财，但心狠手辣。</li>
+                            </ul>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="navigation">
+        <button id="prevBtn" class="nav-button" disabled>上一张</button>
+        <button id="nextBtn" class="nav-button">下一张</button>
     </div>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const tabs = document.querySelectorAll('.tab-button');
-        const contents = document.querySelectorAll('.tab-content');
-        const urlInput = document.getElementById('url-input');
-        const addUrlButton = document.getElementById('add-url-button');
-        const tagInput = document.getElementById('tag-input');
-        const tagsContainer = document.getElementById('tags-container');
-        const closeModal = document.getElementById('close-modal');
-        const modalOverlay = document.getElementById('modal-overlay');
-        const saveNoteButton = document.getElementById('save-note');
-        const noteTextArea = document.getElementById('note-text');
+    const cardGroup = document.getElementById('cardGroup');
+    const cards = cardGroup.querySelectorAll('.card-display');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const progressBar = document.getElementById('progressBar');
 
-        // 选项卡切换逻辑
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                tabs.forEach(t => t.classList.remove('active'));
-                contents.forEach(c => c.classList.remove('active'));
+    let currentCardIndex = 0;
+    const totalCards = cards.length;
 
-                tab.classList.add('active');
-                const targetTab = tab.getAttribute('data-tab');
-                document.getElementById(targetTab).classList.add('active');
-            });
+    // 初始设置
+    updateUI();
+
+    // 绑定事件
+    nextBtn.addEventListener('click', showNextCard);
+    prevBtn.addEventListener('click', showPrevCard);
+
+    cards.forEach(card => {
+        card.querySelector('.card-container').addEventListener('click', () => {
+            card.querySelector('.card').classList.toggle('is-flipped');
         });
-
-        // 文本/笔记保存功能
-        saveNoteButton.addEventListener('click', () => {
-            const noteContent = noteTextArea.value.trim();
-            if (noteContent) {
-                alert("笔记已成功保存！");
-                noteTextArea.value = '';
-            } else {
-                alert("请输入笔记内容！");
-            }
-        });
-
-        // 链接添加功能
-        addUrlButton.addEventListener('click', () => {
-            const url = urlInput.value.trim();
-            if (url) {
-                alert(`已添加链接：${url}`);
-                urlInput.value = '';
-            } else {
-                alert('请输入有效的网址！');
-            }
-        });
-
-        // 标签管理功能
-        const addTag = (tagName) => {
-            if (!tagName || Array.from(tagsContainer.children).some(el => el.textContent.trim().startsWith(tagName.trim()))) {
-                return;
-            }
-            const tagDiv = document.createElement('div');
-            tagDiv.className = 'tag';
-            tagDiv.innerHTML = `${tagName}<span class="tag-remove">&times;</span>`;
-            tagDiv.querySelector('.tag-remove').addEventListener('click', () => {
-                tagsContainer.removeChild(tagDiv);
-            });
-            tagsContainer.appendChild(tagDiv);
-        };
-
-        tagInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === '，' || e.key === ',') {
-                e.preventDefault();
-                const tags = tagInput.value.split(/[,，]/).map(tag => tag.trim()).filter(tag => tag !== '');
-                tags.forEach(addTag);
-                tagInput.value = '';
-            }
-        });
-
-        // 模态框关闭功能
-        closeModal.addEventListener('click', () => {
-            modalOverlay.style.display = 'none';
-        });
-
-        // 可以在这里添加一个按钮来重新显示模态框，方便测试
-        // 例如：
-        // const openModalBtn = document.createElement('button');
-        // openModalBtn.textContent = '打开弹窗';
-        // document.body.appendChild(openModalBtn);
-        // openModalBtn.addEventListener('click', () => {
-        //     modalOverlay.style.display = 'flex';
-        // });
     });
+
+    function showNextCard() {
+        if (currentCardIndex < totalCards - 1) {
+            currentCardIndex++;
+            updateUI();
+        }
+    }
+
+    function showPrevCard() {
+        if (currentCardIndex > 0) {
+            currentCardIndex--;
+            updateUI();
+        }
+    }
+
+    function updateUI() {
+        // 更新卡片显示
+        cards.forEach((card, index) => {
+            card.classList.remove('active');
+            if (index === currentCardIndex) {
+                card.classList.add('active');
+                card.querySelector('.card').classList.remove('is-flipped'); // 切换时自动翻回正面
+            }
+        });
+
+        // 更新按钮状态
+        prevBtn.disabled = currentCardIndex === 0;
+        nextBtn.disabled = currentCardIndex === totalCards - 1;
+
+        // 更新进度条
+        const progress = ((currentCardIndex + 1) / totalCards) * 100;
+        progressBar.style.width = progress + '%';
+    }
+
 </script>
+
 </body>
 </html>

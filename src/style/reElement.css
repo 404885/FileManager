@@ -85,55 +85,79 @@
 
 /* ----------------- el table 组件样式重置------------------ */
 
-/* 拖拽代理条样式 */
-.el-table__column-resize-proxy {
-    background-color: rgba(0, 0, 0, 0.2);
-    width: 4px;
-    border: none;
+.el-table__inner-wrapper:before, .el-table--border:after,
+.el-table--border:before, .el-table__border-left-patch, .el-table__inner-wrapper:after {
+    display: none !important;
 }
 
-/* 表格整体透明背景 */
-.el-table, .el-table tr {
-    background-color: transparent;
-}
-/* 表头单元格重置 */
-.el-table__header-wrapper th.el-table__cell {
-    background-color: transparent;
-}
-/* 表头hover重置 */
-.el-table__header-wrapper th.el-table__cell:hover {
-    background-color: transparent;
-}
-/* 表体row hover重置 */
-.el-table__body-wrapper tr:hover > td.el-table__cell {
+.el-table, .el-table th, .el-table td, .el-table tr {
+    border: none !important;
     background-color: transparent !important;
 }
-/* el-table内部框线去除 */
-.el-table th, .el-table td {
-    border: none !important; /* 使用灰色边框 */
+
+.el-table__column-resize-proxy {
+    background-color: var(--el-color-primary, #409EFF);
+    width: 1px;
+    border: none;
+    box-shadow: 0 0 2px rgba(64, 158, 255, 0.5);
+    z-index: 9999;
+}
+
+.el-table__header th:not(:first-child):not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    width: 2px;
+    top: 5px;
+    bottom: 5px;
+
+    box-shadow: -1px 0 0 0 #ccc inset, 1px 0 0 0 rgba(0,0,0,0.15) inset; /* 内部阴影，让右侧有阴暗感 */
+    /* 添加圆角让效果更柔和 */
+    border-radius: 1px;
 }
 
 
-/* 去除内层伪元素的边框线 */
-.el-table__inner-wrapper::before {
-    display: none ;
+.el-table {
+    background: rgba(255, 255, 255, 0.4) !important;
+    border-radius: 6px !important;
 }
-.el-table__inner-wrapper:after {
+.el-table__body td {
+    padding: 0 !important;
+    height: 42px !important;
+}
+
+/* ----------------- vxe table 组件样式重置------------------ */
+.vxe-table--border-line {
     display: none;
 }
-.el-table--border:before {
+.vxe-table--scroll-x-handle-appearance {
     display: none !important;
 }
-.el-table--border:after{
-    display: none !important;
-}
-.el-table__border-left-patch{
-    display: none !important;
-}
+/*.vxe-table--border-line,*/
+/*.vxe-table--scroll-x-handle-appearance{*/
+/*    display: none; !* 去除外部框线 *!*/
+/*}*/
+
+/*.vxe-body--column, .fixed--width {*/
+/*    background-image: none !important;  !* 去除内部框线 *!*/
+/*}*/
+
+
+/*.vxe-table--header-wrapper,*/
+/*.vxe-table--layout-wrapper,*/
+/*.vxe-table--body-wrapper{*/
+/*    background-color: transparent !important; !* 去除(表头，表体)颜色 *!*/
+/*}*/
+
+
+/*.vxe-cell--col-resizable:before,*/
+/*.vxe-cell--col-resizable:after {*/
+/*    display: none !important;   !* 重置拖拽条 *!*/
+/*}*/
 
 
 
-/* ----------------- el dialog 组件样式重置------------------ */
+    /* ----------------- el dialog 组件样式重置------------------ */
 .el-dialog{
     margin: 0;
     padding: 0;

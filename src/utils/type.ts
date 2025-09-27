@@ -37,6 +37,7 @@ export interface VXETableNode {
     create_time: number,
     last_browse_time?: number,
     tag?:string,
+    tags?: string[],
     description?: string,
 }
 

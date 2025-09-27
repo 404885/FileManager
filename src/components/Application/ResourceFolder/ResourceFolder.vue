@@ -53,7 +53,6 @@ const context = (e: MouseEvent) => {
             </div>
           </div>
 
-
         <ShowTable :id="props.id"></ShowTable>
 
 

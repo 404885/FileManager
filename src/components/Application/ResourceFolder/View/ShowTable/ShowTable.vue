@@ -1,9 +1,11 @@
 <script setup lang="ts">
 
-import Table from "@/components/Application/ResourceFolder/View/ShowTable/Table.vue";
+import TableV2 from "@/components/Application/ResourceFolder/View/ShowTable/TableV2.vue";
 import BreadCrumb from "@/components/Application/ResourceFolder/View/ShowTable/BreadCrumb.vue";
 import {Util} from "@/utils";
 import FileDialog from "@/components/Application/ResourceFolder/Function/FileAdd/FileDialog.vue";
+import TableV3 from "@/components/Application/ResourceFolder/View/ShowTable/TableV3.vue";
+import Table from "@/components/Application/ResourceFolder/View/ShowTable/Table.vue";
 
 
 
@@ -31,7 +33,10 @@ const open = () => {
     </div>
 
     <div class="resource-container-table">
+
+
       <Table :id="props.id"></Table>
+<!--      <TableV2></TableV2>-->
     </div>
 
   </div>

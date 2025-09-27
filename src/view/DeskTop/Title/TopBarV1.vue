@@ -31,8 +31,7 @@ onMounted(() => {
       <img
           src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Apple_logo_white.svg/1010px-Apple_logo_white.svg.png"
           alt="Apple Logo"
-          class="apple-logo"
-      />
+          class="apple-logo"/>
       <span class="menu-item active">Finder</span>
       <span class="menu-item">文件</span>
       <span class="menu-item">编辑</span>
@@ -57,10 +56,10 @@ onMounted(() => {
   align-items: center;
   padding: 0 15px;
 
-  background: rgba(255,255,255, 0.1);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+  /* 增强磨砂玻璃效果 */
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 
   color: #fff;
   font-size: 13px;
@@ -77,15 +76,24 @@ onMounted(() => {
   height: 100%;
   gap: 18px;
 }
+
 .window-topbar-middle {
   flex: 1;
   height: 100%;
   -webkit-app-region: drag;
 }
 
+
+
+
+
+
+
+
 .apple-logo {
   height: 18px;
   filter: invert(1);
+  margin-bottom: 2px;
 }
 
 .menu-item {
