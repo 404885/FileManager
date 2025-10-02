@@ -106,12 +106,10 @@
 .el-table__header th:not(:first-child):not(:last-child)::after {
     content: '';
     position: absolute;
+    border-right:  var(--el-color-primary, #409EFF) solid 2px;
     right: 0;
-    width: 2px;
     top: 5px;
     bottom: 5px;
-
-    box-shadow: -1px 0 0 0 #ccc inset, 1px 0 0 0 rgba(0,0,0,0.15) inset; /* 内部阴影，让右侧有阴暗感 */
     /* 添加圆角让效果更柔和 */
     border-radius: 1px;
 }

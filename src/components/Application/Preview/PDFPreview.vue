@@ -272,7 +272,7 @@ function loadFromInput() {
       <div class="left">
         <input
             v-model="urlInput"
-            class="url-input"
+            class="fileAdd-left-content-online-input"
             type="text"
             placeholder="输入 PDF 本地绝对路径"
             @keyup.enter="loadFromInput"
@@ -371,7 +371,7 @@ function loadFromInput() {
 .toolbar .left { justify-content: flex-start; }
 .toolbar .right { justify-content: flex-end; }
 
-.url-input {
+.fileAdd-left-content-online-input {
   width: 420px;
   max-width: 100%;
   padding: 6px 8px;

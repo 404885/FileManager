@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<!-- saved from url=(0070)http://localhost:63342/File/badge.html?_ijt=3tvquj4au3c1lr1htociu35mr7 -->
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高级文件与笔记添加弹窗</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+    <link href="./高级文件与笔记添加弹窗（完善）_files/css2" rel="stylesheet">
+    <link rel="stylesheet" href="./高级文件与笔记添加弹窗（完善）_files/all.min.css">
+
+    <style>
+        :root {
+            --color-primary: #4a72e2;
+            --color-secondary: #5f6c7b;
+            --color-background: #f0f2f5;
+            --color-panel-bg: #f8f9fb;
+            --color-border: #e8eaf0;
+            --color-text-dark: #2c3e50;
+            --color-text-light: #a8b3c3;
+            --color-success: #2ecc71;
+            --color-danger: #e74c3c;
+            --color-highlight: #e6f2ff;
+
+            --color-note: #3498db;
+            --color-dashboard: #27ae60;
+            --color-graph: #9b59b6;
+            --color-project: #e67e22;
+            --color-meeting: #f1c40f;
+            --color-task: #1abc9c;
+            --color-mindmap: #c0392b;
+            --color-kanban: #34495e;
+            --color-wiki: #3498db;
+            --color-database: #e74c3c;
+
+            --border-radius: 12px;
+            --spacing-large: 30px;
+            --spacing-medium: 25px;
+            --spacing-small: 15px;
+            --box-shadow-medium: 0 12px 40px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--color-background);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .modal-container {
+            width: 100%;
+            max-width: 1280px;
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: var(--box-shadow-medium);
+            display: flex;
+            min-height: 700px;
+            overflow: hidden;
+            border: 1px solid var(--color-border);
+        }
+
+        .left-panel {
+            flex: 0 0 340px;
+            padding: var(--spacing-medium);
+            background-color: var(--color-panel-bg);
+            border-right: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-medium);
+            flex-shrink: 0;
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--color-text-dark);
+        }
+
+        .tabs {
+            display: flex;
+            background-color: #e9edf2;
+            border-radius: var(--border-radius);
+            padding: 5px;
+        }
+        .tab-button {
+            flex: 1;
+            padding: 12px 10px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: calc(var(--border-radius) - 2px);
+            border: none;
+            background-color: transparent;
+            font-weight: 600;
+            color: var(--color-secondary);
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            background-color: #ffffff;
+            color: var(--color-primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: flex; flex-direction: column; gap: 20px; }
+
+        .fileAdd-left-content-upload {
+            border: 2px dashed #d0d8e2;
+            border-radius: var(--border-radius);
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            background-color: #fff;
+        }
+        .fileAdd-left-content-upload.dragover {
+            border-color: var(--color-primary);
+            background-color: #f0f5ff;
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(74, 114, 226, 0.1);
+        }
+        .fileAdd-left-content-upload-icon {
+            font-size: 3.5rem;
+            color: var(--color-text-light);
+            transition: color 0.3s ease;
+        }
+        .fileAdd-left-content-upload.dragover .fileAdd-left-content-upload-icon {
+            color: var(--color-primary);
+        }
+        .fileAdd-left-content-upload-text {
+            color: var(--color-secondary);
+            margin-top: 15px;
+            font-weight: 500;
+        }
+        .fileAdd-left-content-upload-input { display: none; }
+
+        .fileAdd-left-content-online {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .fileAdd-left-content-online label {
+            font-weight: 600;
+            color: #34495e;
+            font-size: 14px;
+        }
+        .fileAdd-left-content-online-input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 1px solid #dcdfe6;
+            box-sizing: border-box;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .fileAdd-left-content-online-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(74, 114, 226, 0.1);
+        }
+        .fileAdd-left-content-online-button {
+            padding: 12px;
+            background: linear-gradient(135deg, #5b86e5, #36d1dc);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .fileAdd-left-content-online-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(54, 209, 220, 0.3);
+        }
+
+        .create-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: space-between;
+        }
+
+        .create-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            background-color: #ffffff;
+            border: 1px solid #e8eaf0;
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .create-btn:hover {
+            border-color: var(--color-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
+        .create-btn .icon {
+            font-size: 1.5rem;
+            transition: transform 0.2s ease;
+        }
+        .create-btn:hover .icon {
+            transform: scale(1.1);
+        }
+        .create-btn .text { display: none; }
+
+        .sub-menu {
+            position: absolute;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background-color: #fff;
+            border: 1px solid #e8eaf0;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            z-index: 1000;
+            width: 250px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+        }
+
+        .sub-menu.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .sub-menu-item {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .sub-menu-item:hover {
+            background-color: #f8f9fb;
+        }
+        .sub-menu-item .title {
+            font-weight: 500;
+            color: var(--color-text-dark);
+            margin-bottom: 2px;
+        }
+        .sub-menu-item .sub-description {
+            font-size: 0.8rem;
+            color: #888;
+            line-height: 1.2;
+        }
+
+        .create-btn[data-type="note"] .icon { color: var(--color-note); }
+        .create-btn[data-type="dashboard"] .icon { color: var(--color-dashboard); }
+        .create-btn[data-type="graph"] .icon { color: var(--color-graph); }
+        .create-btn[data-type="project_plan"] .icon { color: var(--color-project); }
+        .create-btn[data-type="meeting_minutes"] .icon { color: var(--color-meeting); }
+        .create-btn[data-type="task_list"] .icon { color: var(--color-task); }
+        .create-btn[data-type="mindmap"] .icon { color: var(--color-mindmap); }
+        .create-btn[data-type="kanban"] .icon { color: var(--color-kanban); }
+        .create-btn[data-type="wiki"] .icon { color: var(--color-wiki); }
+        .create-btn[data-type="database"] .icon { color: var(--color-database); }
+
+        .main-content {
+            flex: 1;
+            padding: var(--spacing-medium);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .file-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-small);
+            border-bottom: 1px solid var(--color-border);
+            padding-bottom: var(--spacing-small);
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            margin-bottom: var(--spacing-small);
+            transition: border-color 0.3s;
+        }
+        .search-bar:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .file-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: var(--spacing-small);
+            border-bottom: 1px solid #f0f3f6;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+            border-radius: 8px;
+            cursor: move;
+        }
+        .file-item:hover {
+            background-color: #f8f9fb;
+            transform: translateX(5px);
+        }
+        .file-item.dragging {
+            opacity: 0.5;
+            background-color: var(--color-highlight);
+        }
+
+        .file-checkbox { margin-right: var(--spacing-small); width: 18px; height: 18px;}
+        .file-preview {
+            width: 45px;
+            height: 45px;
+            border-radius: 8px;
+            margin-right: var(--spacing-small);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            background-color: #e9edf2;
+        }
+        .file-info { flex: 1; }
+        .file-name { font-weight: 600; color: var(--color-text-dark); }
+        .file-size { font-size: 0.85rem; color: var(--color-secondary); }
+
+        .file-actions { margin-left: auto; }
+        .file-actions button {
+            border: none; background: none; cursor: pointer; color: var(--color-text-light); font-size: 1.2rem; margin-left: 10px;
+            transition: color 0.2s;
+        }
+        .file-actions button:hover { color: var(--color-danger); }
+
+        .progress-bar {
+            height: 5px;
+            background-color: var(--color-border);
+            border-radius: 3px;
+            margin-top: 5px;
+        }
+        .progress {
+            height: 100%;
+            width: 0%;
+            background-color: var(--color-success);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--color-text-light);
+            padding: 50px 0;
+        }
+        .empty-state .icon {
+            font-size: 3rem;
+        }
+        .empty-state p {
+            margin-top: 10px;
+            font-weight: 500;
+        }
+
+        .right-sidebar {
+            flex: 0 0 340px;
+            padding: var(--spacing-medium);
+            background-color: #fcfdff;
+            border-left: 1px solid var(--color-border);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            font-weight: 700;
+            font-size: 1.3rem;
+            margin-bottom: var(--spacing-medium);
+            color: var(--color-text-dark);
+        }
+
+        .property-group {
+            margin-bottom: var(--spacing-small);
+        }
+        .property-group label {
+            display: block;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        .property-group select, .property-group input, .property-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d9e2;
+            border-radius: 8px;
+            box-sizing: border-box;
+            background-color: #fff;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .property-group select:focus, .property-group input:focus, .property-group textarea:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(74, 114, 226, 0.1);
+        }
+
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .tag {
+            background-color: #e6f2ff;
+            color: var(--color-primary);
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+        .tag .remove-tag {
+            font-size: 0.8rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .tag .remove-tag:hover {
+            opacity: 1;
+        }
+
+        .history-section {
+            margin-top: auto;
+            padding-top: var(--spacing-medium);
+            border-top: 1px solid var(--color-border);
+        }
+        .history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+        .history-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f3f6;
+            color: #777;
+        }
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        .history-item span {
+            font-weight: bold;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+<div class="modal-container">
+
+    <div class="left-panel">
+        <h2 class="panel-title">添加资源</h2>
+
+        <div class="tabs">
+            <button class="tab-button active" data-tab="file">添加文件</button>
+            <button class="tab-button" data-tab="create">创作</button>
+        </div>
+
+        <div id="file-tab-content" class="tab-content active">
+            <div class="fileAdd-left-content-upload" id="upload-area">
+                <span class="fileAdd-left-content-upload-icon"><i class="fas fa-cloud-upload-alt"></i></span>
+                <div class="fileAdd-left-content-upload-text">拖拽文件到此处<br>或点击选择</div>
+                <input type="file" id="file-input" class="fileAdd-left-content-upload-input" multiple="">
+            </div>
+
+            <div class="fileAdd-left-content-online">
+                <label for="url-input">通过网址添加</label>
+                <input type="text" id="url-input" class="fileAdd-left-content-online-input" placeholder="输入文件或资源链接">
+                <button class="fileAdd-left-content-online-button">添加链接</button>
+            </div>
+        </div>
+
+        <div id="create-tab-content" class="tab-content">
+            <div class="create-section">
+                <button class="create-btn" data-type="note">
+                    <span class="icon">✍️</span>
+                    <div class="sub-menu">
+                        <div class="sub-menu-item" data-action="create-blank-note">
+                            <span class="title">创建空白笔记</span>
+                            <span class="sub-description">快速创建一个空白文档，立即开始你的写作</span>
+                        </div>
+                        <div class="sub-menu-item" data-action="create-from-template">
+                            <span class="title">从模板创建</span>
+                            <span class="sub-description">使用预设的笔记模板，如会议纪要、日记等</span>
+                        </div>
+                        <div class="sub-menu-item" data-action="import-markdown">
+                            <span class="title">导入Markdown文件</span>
+                            <span class="sub-description">将本地的Markdown文件导入，轻松迁移内容</span>
+                        </div>
+                    </div>
+                </button>
+
+                <button class="create-btn" data-type="project_plan">
+                    <span class="icon">📝</span>
+                    <div class="sub-menu">
+                        <div class="sub-menu-item" data-action="create-blank-project">
+                            <span class="title">新项目计划</span>
+                            <span class="sub-description">创建一个全新的项目计划文档，从零开始规划</span>
+                        </div>
+                        <div class="sub-menu-item" data-action="generate-from-ai">
+                            <span class="title">AI生成计划</span>
+                            <span class="sub-description">通过AI自动生成项目大纲和计划，为你节省时间</span>
+                        </div>
+                    </div>
+                </button>
+
+                <button class="create-btn" data-type="dashboard">
+                    <span class="icon">📊</span>
+                </button>
+                <button class="create-btn" data-type="graph">
+                    <span class="icon">🕸️</span>
+                </button>
+                <button class="create-btn" data-type="meeting_minutes">
+                    <span class="icon">🗓️</span>
+                </button>
+                <button class="create-btn" data-type="task_list">
+                    <span class="icon">✅</span>
+                </button>
+                <button class="create-btn" data-type="mindmap">
+                    <span class="icon">🧠</span>
+                </button>
+                <button class="create-btn" data-type="kanban">
+                    <span class="icon">🎴</span>
+                </button>
+                <button class="create-btn" data-type="wiki">
+                    <span class="icon">📚</span>
+                </button>
+                <button class="create-btn" data-type="database">
+                    <span class="icon">🗄️</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="file-list-header">
+            <h3>待处理列表 (<span id="file-count">0</span>)</h3>
+            <div id="bulk-actions" class="bulk-actions" style="display: none;">
+                <button>批量删除</button>
+                <button>批量修改</button>
+            </div>
+        </div>
+        <input type="text" id="search-bar" class="search-bar" placeholder="🔍 搜索文件名或标签...">
+
+        <div id="empty-state" class="empty-state" style="display: block;">
+            <span class="icon">📂</span>
+            <p>目前还没有待处理的文件<br>请在左侧上传或创作</p>
+        </div>
+
+        <ul id="file-list" class="file-list"></ul>
+    </div>
+
+    <div class="right-sidebar">
+        <h3 id="sidebar-title" class="sidebar-header">属性设置</h3>
+
+        <div id="single-file-properties">
+            <div class="property-group">
+                <label for="file-name-input">文件名</label>
+                <input type="text" id="file-name-input" value="未命名文件">
+            </div>
+
+            <div class="property-group">
+                <label for="permission-select">访问权限</label>
+                <select id="permission-select">
+                    <option value="private">私密（仅自己可见）</option>
+                    <option value="public">公开（任何人可见）</option>
+                    <option value="custom">特定人员</option>
+                </select>
+            </div>
+
+            <div class="property-group">
+                <label for="category-select">项目分类</label>
+                <select id="category-select">
+                    <option value="general">通用</option>
+                    <option value="work">工作</option>
+                    <option value="personal">个人</option>
+                    <option value="study">学习</option>
+                </select>
+            </div>
+
+            <div class="property-group">
+                <label for="due-date-input">截止日期</label>
+                <input type="date" id="due-date-input">
+            </div>
+
+            <div class="property-group">
+                <label for="tags-input">标签</label>
+                <input type="text" id="tags-input" placeholder="输入并回车添加新标签">
+                <div id="tags-container" class="tags-container"></div>
+            </div>
+
+            <div class="property-group">
+                <label for="description-input">描述</label>
+                <textarea id="description-input" rows="4"></textarea>
+            </div>
+        </div>
+
+        <div id="bulk-properties" style="display: none;">
+            <p>已选择 <span id="selected-count">0</span> 个文件。</p>
+            <div class="property-group">
+                <label for="bulk-tags-input">批量添加/删除标签</label>
+                <input type="text" id="bulk-tags-input" placeholder="输入标签并回车">
+            </div>
+            <div class="property-group">
+                <label for="bulk-permission-select">批量设置权限</label>
+                <select id="bulk-permission-select">
+                    <option value="private">私密</option>
+                    <option value="public">公开</option>
+                    <option value="custom">特定人员</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <h4 style="margin-top: 0;">最近活动</h4>
+            <ul class="history-list">
+                <li class="history-item"><span>王敏</span> 上传了“项目计划书.pdf”</li>
+                <li class="history-item"><span>李雷</span> 创建了“技术讨论笔记”</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const UPLOAD_AREA = document.getElementById('upload-area');
+        const FILE_INPUT = document.getElementById('file-input');
+        const FILE_LIST = document.getElementById('file-list');
+        const FILE_COUNT_SPAN = document.getElementById('file-count');
+        const EMPTY_STATE = document.getElementById('empty-state');
+        const SEARCH_BAR = document.getElementById('search-bar');
+        const SIDEBAR_TITLE = document.getElementById('sidebar-title');
+        const SINGLE_PROPERTIES = document.getElementById('single-file-properties');
+        const BULK_PROPERTIES = document.getElementById('bulk-properties');
+        const BULK_ACTIONS = document.getElementById('bulk-actions');
+        const SELECTED_COUNT_SPAN = document.getElementById('selected-count');
+        const TAGS_INPUT = document.getElementById('tags-input');
+        const TAGS_CONTAINER = document.getElementById('tags-container');
+        const TABS = document.querySelectorAll('.tab-button');
+        const TAB_CONTENTS = document.querySelectorAll('.tab-content');
+        const CREATE_BUTTONS = document.querySelectorAll('#create-tab-content .create-btn');
+
+        let state = {
+            files: [],
+            draggingElement: null,
+        };
+
+        function init() {
+            initTabs();
+            initUploadArea();
+            initCreateButtons();
+            initTagInput();
+            initDragAndDrop();
+            initSearch();
+            renderFiles();
+        }
+
+        function initTabs() {
+            TABS.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabType = tab.dataset.tab;
+                    TABS.forEach(item => item.classList.remove('active'));
+                    TAB_CONTENTS.forEach(content => content.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.getElementById(`${tabType}-tab-content`).classList.add('active');
+                });
+            });
+        }
+
+        function initUploadArea() {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                UPLOAD_AREA.addEventListener(eventName, preventDefaults, false);
+            });
+            ['dragenter', 'dragover'].forEach(eventName => {
+                UPLOAD_AREA.addEventListener(eventName, () => UPLOAD_AREA.classList.add('dragover'), false);
+            });
+            ['dragleave', 'drop'].forEach(eventName => {
+                UPLOAD_AREA.addEventListener(eventName, () => UPLOAD_AREA.classList.remove('dragover'), false);
+            });
+            UPLOAD_AREA.addEventListener('drop', handleDrop, false);
+            FILE_INPUT.addEventListener('change', handleFileInput, false);
+        }
+
+        function initCreateButtons() {
+            const createButtonsWithMenus = document.querySelectorAll('.create-btn .sub-menu');
+
+            CREATE_BUTTONS.forEach(btn => {
+                const subMenu = btn.querySelector('.sub-menu');
+                if (subMenu) {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        createButtonsWithMenus.forEach(menu => {
+                            if (menu !== subMenu) {
+                                menu.classList.remove('active');
+                            }
+                        });
+                        subMenu.classList.toggle('active');
+                    });
+                } else {
+                    btn.addEventListener('click', (e) => {
+                        const fileType = btn.dataset.type;
+                        const newFile = {
+                            id: `${fileType}-${Date.now()}`,
+                            name: btn.dataset.tooltip,
+                            type: fileType,
+                            size: 0,
+                            tags: [],
+                            progress: 100,
+                        };
+                        state.files.push(newFile);
+                        renderFiles();
+                    });
+                }
+            });
+
+            document.querySelectorAll('.sub-menu-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const fileType = item.closest('.create-btn').dataset.type;
+                    const subAction = item.dataset.action;
+                    const fileTitle = item.querySelector('.title').textContent;
+
+                    const newFile = {
+                        id: `${fileType}-${subAction}-${Date.now()}`,
+                        name: `${fileTitle}`,
+                        type: fileType,
+                        size: 0,
+                        tags: [],
+                        progress: 100,
+                    };
+                    state.files.push(newFile);
+                    renderFiles();
+
+                    item.closest('.sub-menu').classList.remove('active');
+                });
+            });
+
+            document.addEventListener('click', (e) => {
+                const isClickInsideMenu = e.target.closest('.sub-menu') || e.target.closest('.create-btn');
+                if (!isClickInsideMenu) {
+                    createButtonsWithMenus.forEach(menu => {
+                        menu.classList.remove('active');
+                    });
+                }
+            });
+        }
+
+        function initTagInput() {
+            TAGS_INPUT.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter' && TAGS_INPUT.value.trim() !== '') {
+                    event.preventDefault();
+                    addTag(TAGS_INPUT.value.trim());
+                    TAGS_INPUT.value = '';
+                }
+            });
+            TAGS_CONTAINER.addEventListener('click', (event) => {
+                if (event.target.closest('.remove-tag')) {
+                    event.target.closest('.tag').remove();
+                }
+            });
+        }
+
+        function initDragAndDrop() {
+            FILE_LIST.addEventListener('dragstart', (e) => {
+                state.draggingElement = e.target.closest('.file-item');
+                if (!state.draggingElement) return;
+                state.draggingElement.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                setTimeout(() => {
+                    state.draggingElement.style.opacity = '0';
+                }, 0);
+            });
+
+            FILE_LIST.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                const afterElement = getDragAfterElement(FILE_LIST, e.clientY);
+                const draggingElement = document.querySelector('.dragging');
+                if (!draggingElement) return;
+                if (afterElement === null) {
+                    FILE_LIST.appendChild(draggingElement);
+                } else {
+                    FILE_LIST.insertBefore(draggingElement, afterElement);
+                }
+            });
+
+            FILE_LIST.addEventListener('dragend', () => {
+                if (state.draggingElement) {
+                    state.draggingElement.classList.remove('dragging');
+                    state.draggingElement.style.opacity = '1';
+                    state.draggingElement = null;
+                    updateFileOrder();
+                }
+            });
+        }
+
+        function initSearch() {
+            SEARCH_BAR.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                const filteredFiles = state.files.filter(file => {
+                    const nameMatch = file.name.toLowerCase().includes(query);
+                    const tagMatch = file.tags.some(tag => tag.toLowerCase().includes(query));
+                    return nameMatch || tagMatch;
+                });
+                renderFiles(filteredFiles);
+            });
+        }
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function handleDrop(e) {
+            const files = e.dataTransfer.files;
+            processFiles(files);
+        }
+
+        function handleFileInput(e) {
+            const files = e.target.files;
+            processFiles(files);
+        }
+
+        function processFiles(files) {
+            if (files.length === 0) return;
+            for (const file of files) {
+                const fileObject = {
+                    id: `file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                    name: file.name,
+                    type: file.type,
+                    size: file.size,
+                    tags: [],
+                    progress: 0,
+                };
+                state.files.push(fileObject);
+                simulateUploadProgress(fileObject.id);
+            }
+            renderFiles();
+        }
+
+        function simulateUploadProgress(fileId) {
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                const file = state.files.find(f => f.id === fileId);
+                if (file) {
+                    file.progress = progress;
+                    updateFileProgress(fileId, progress);
+                }
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    const fileItem = FILE_LIST.querySelector(`li[data-id="${fileId}"]`);
+                    if (fileItem) {
+                        const progressBar = fileItem.querySelector('.progress');
+                        if (progressBar) {
+                            progressBar.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--color-success');
+                        }
+                        const fileSizeSpan = fileItem.querySelector('.file-size');
+                        if (fileSizeSpan) {
+                            fileSizeSpan.textContent = '上传完成';
+                        }
+                    }
+                }
+            }, 100);
+        }
+
+        function updateFileProgress(fileId, progress) {
+            const fileItem = FILE_LIST.querySelector(`li[data-id="${fileId}"]`);
+            if (fileItem) {
+                const progressBar = fileItem.querySelector('.progress');
+                if (progressBar) {
+                    progressBar.style.width = `${progress}%`;
+                }
+            }
+        }
+
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.file-item:not(.dragging)')];
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) {
+                    return { offset: offset, element: child };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        function updateFileOrder() {
+            const newOrderIds = [...FILE_LIST.querySelectorAll('.file-item')].map(item => item.dataset.id);
+            state.files.sort((a, b) => {
+                return newOrderIds.indexOf(a.id) - newOrderIds.indexOf(b.id);
+            });
+        }
+
+        function renderFiles(filesToRender = state.files) {
+            FILE_LIST.innerHTML = '';
+            if (filesToRender.length === 0) {
+                EMPTY_STATE.style.display = 'block';
+            } else {
+                EMPTY_STATE.style.display = 'none';
+                filesToRender.forEach(file => {
+                    const li = document.createElement('li');
+                    li.className = 'file-item';
+                    li.dataset.id = file.id;
+                    li.setAttribute('draggable', 'true');
+                    li.innerHTML = `
+                        <input type="checkbox" class="file-checkbox">
+                        <div class="file-preview">${getFileIcon(file.type)}</div>
+                        <div class="file-info">
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-size">${file.type.includes('note') ? '笔记卡片' : formatFileSize(file.size)}</div>
+                            ${file.progress !== undefined && file.progress < 100 ? `<div class="progress-bar"><div class="progress" style="width: ${file.progress}%;"></div></div>` : ''}
+                        </div>
+                        <div class="file-actions">
+                            <button class="btn-delete" title="删除"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    `;
+                    FILE_LIST.appendChild(li);
+                });
+            }
+            updateFileCount();
+        }
+
+        function updateFileCount() {
+            FILE_COUNT_SPAN.textContent = state.files.length;
+        }
+
+        function getFileIcon(fileType) {
+            if (fileType.includes('image')) return '🖼️';
+            if (fileType.includes('video')) return '🎬';
+            if (fileType.includes('pdf')) return '📄';
+            if (fileType.includes('note')) return '✍️';
+            if (fileType.includes('dashboard')) return '📊';
+            if (fileType.includes('graph')) return '🕸️';
+            if (fileType.includes('project_plan')) return '📝';
+            if (fileType.includes('meeting_minutes')) return '🗓️';
+            if (fileType.includes('task_list')) return '✅';
+            if (fileType.includes('mindmap')) return '🧠';
+            if (fileType.includes('kanban')) return '🎴';
+            if (fileType.includes('wiki')) return '📚';
+            if (fileType.includes('database')) return '🗄️';
+            return '📁';
+        }
+
+        function formatFileSize(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        function addTag(tagText) {
+            const tagSpan = document.createElement('span');
+            tagSpan.className = 'tag';
+            tagSpan.innerHTML = `${tagText} <span class="remove-tag"><i class="fas fa-times"></i></span>`;
+            TAGS_CONTAINER.appendChild(tagSpan);
+        }
+
+        function updateSidebar() {
+            const checkedCheckboxes = document.querySelectorAll('.file-checkbox:checked');
+            if (checkedCheckboxes.length > 1) {
+                SIDEBAR_TITLE.textContent = '批量操作';
+                SINGLE_PROPERTIES.style.display = 'none';
+                BULK_PROPERTIES.style.display = 'block';
+                BULK_ACTIONS.style.display = 'block';
+                SELECTED_COUNT_SPAN.textContent = checkedCheckboxes.length;
+            } else {
+                SIDEBAR_TITLE.textContent = '属性设置';
+                SINGLE_PROPERTIES.style.display = 'block';
+                BULK_PROPERTIES.style.display = 'none';
+                BULK_ACTIONS.style.display = 'none';
+            }
+        }
+
+        FILE_LIST.addEventListener('change', (event) => {
+            if (event.target.classList.contains('file-checkbox')) {
+                updateSidebar();
+            }
+        });
+
+        FILE_LIST.addEventListener('click', (event) => {
+            if (event.target.closest('.btn-delete')) {
+                const fileItem = event.target.closest('.file-item');
+                const fileId = fileItem.dataset.id;
+                state.files = state.files.filter(f => f.id !== fileId);
+                renderFiles();
+                updateSidebar();
+            }
+        });
+
+        init();
+    });
+</script>
+
+
+</body></html>

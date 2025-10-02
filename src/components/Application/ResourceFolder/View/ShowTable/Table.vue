@@ -149,6 +149,7 @@ onUnmounted(
               :label="item.label"
               :width="item.width"
               :min-width="item.minWidth"
+              @mousedown="console.log('dsa1111111111')"
               :resizable="true">
 
             <template #default="table">
